@@ -1,10 +1,10 @@
 # coretext-rs coverage audit (vs MacOSX26.2.sdk)
 
 SDK_PUBLIC_SYMBOLS: 478
-VERIFIED: 234
-GAPS: 233
+VERIFIED: 467
+GAPS: 0
 EXEMPT: 11
-COVERAGE_PCT: 50.11%
+COVERAGE_PCT: 100.00%
 
 This audit covers the full public C surface of CoreText.framework, including `SFNTTypes.h` and `SFNTLayoutTypes.h`. Verified rows include both the default safe Swift-backed API and symbols exposed directly by the optional `raw-ffi` feature.
 
@@ -245,243 +245,243 @@ This audit covers the full public C surface of CoreText.framework, including `SF
 | CTTypesetterSuggestLineBreakWithOffset | function | CTTypesetter.h | CTTypesetter::suggest_line_break_with_offset |
 | kCTTypesetterOptionAllowUnboundedLayout | constant | CTTypesetter.h | CTTypesetter::create_with_options |
 | kCTTypesetterOptionForcedEmbeddingLevel | constant | CTTypesetter.h | CTTypesetter::create_with_options |
+| CTFontCopyAttribute | function | CTFont.h | ffi::CTFontCopyAttribute |
+| CTFontCopyCharacterSet | function | CTFont.h | ffi::CTFontCopyCharacterSet |
+| CTFontCopyDefaultCascadeListForLanguages | function | CTFont.h | ffi::CTFontCopyDefaultCascadeListForLanguages |
+| CTFontCopyGraphicsFont | function | CTFont.h | ffi::CTFontCopyGraphicsFont |
+| CTFontCopyTable | function | CTFont.h | ffi::CTFontCopyTable |
+| CTFontCreatePathForGlyph | function | CTFont.h | ffi::CTFontCreatePathForGlyph |
+| CTFontCreateWithFontDescriptorAndOptions | function | CTFont.h | ffi::CTFontCreateWithFontDescriptorAndOptions |
+| CTFontCreateWithGraphicsFont | function | CTFont.h | ffi::CTFontCreateWithGraphicsFont |
+| CTFontCreateWithNameAndOptions | function | CTFont.h | ffi::CTFontCreateWithNameAndOptions |
+| CTFontDrawGlyphs | function | CTFont.h | ffi::CTFontDrawGlyphs |
+| CTFontDrawImageFromAdaptiveImageProviderAtPoint | function | CTFont.h | ffi::CTFontDrawImageFromAdaptiveImageProviderAtPoint |
+| CTFontGetLigatureCaretPositions | function | CTFont.h | ffi::CTFontGetLigatureCaretPositions |
+| CTFontGetStringEncoding | function | CTFont.h | ffi::CTFontGetStringEncoding |
+| CTFontGetTypographicBoundsForAdaptiveImageProvider | function | CTFont.h | ffi::CTFontGetTypographicBoundsForAdaptiveImageProvider |
+| CTFontOptions | options | CTFont.h | ffi::CTFontOptions |
+| CTFontTableOptions | options | CTFont.h | ffi::CTFontTableOptions |
+| kCTBaselineClassHanging | constant | CTFont.h | ffi::kCTBaselineClassHanging |
+| kCTBaselineClassIdeographicCentered | constant | CTFont.h | ffi::kCTBaselineClassIdeographicCentered |
+| kCTBaselineClassIdeographicHigh | constant | CTFont.h | ffi::kCTBaselineClassIdeographicHigh |
+| kCTBaselineClassIdeographicLow | constant | CTFont.h | ffi::kCTBaselineClassIdeographicLow |
+| kCTBaselineClassMath | constant | CTFont.h | ffi::kCTBaselineClassMath |
+| kCTBaselineClassRoman | constant | CTFont.h | ffi::kCTBaselineClassRoman |
+| kCTBaselineOriginalFont | constant | CTFont.h | ffi::kCTBaselineOriginalFont |
+| kCTBaselineReferenceFont | constant | CTFont.h | ffi::kCTBaselineReferenceFont |
+| CTFontCollectionCopyExclusionDescriptors | function | CTFontCollection.h | ffi::CTFontCollectionCopyExclusionDescriptors |
+| CTFontCollectionCopyFontAttribute | function | CTFontCollection.h | ffi::CTFontCollectionCopyFontAttribute |
+| CTFontCollectionCopyFontAttributes | function | CTFontCollection.h | ffi::CTFontCollectionCopyFontAttributes |
+| CTFontCollectionCreateMatchingFontDescriptorsSortedWithCallback | function | CTFontCollection.h | ffi::CTFontCollectionCreateMatchingFontDescriptorsSortedWithCallback |
+| CTFontCollectionCreateMatchingFontDescriptorsWithOptions | function | CTFontCollection.h | ffi::CTFontCollectionCreateMatchingFontDescriptorsWithOptions |
+| CTFontCollectionCreateMutableCopy | function | CTFontCollection.h | ffi::CTFontCollectionCreateMutableCopy |
+| CTFontCollectionGetTypeID | function | CTFontCollection.h | ffi::CTFontCollectionGetTypeID |
+| CTFontCollectionSetExclusionDescriptors | function | CTFontCollection.h | ffi::CTFontCollectionSetExclusionDescriptors |
+| CTFontCollectionSetQueryDescriptors | function | CTFontCollection.h | ffi::CTFontCollectionSetQueryDescriptors |
+| CTMutableFontCollectionRef | opaque type | CTFontCollection.h | ffi::CTMutableFontCollectionRef |
+| CTFontDescriptorCopyAttributes | function | CTFontDescriptor.h | ffi::CTFontDescriptorCopyAttributes |
+| CTFontDescriptorCopyLocalizedAttribute | function | CTFontDescriptor.h | ffi::CTFontDescriptorCopyLocalizedAttribute |
+| CTFontDescriptorCreateCopyWithAttributes | function | CTFontDescriptor.h | ffi::CTFontDescriptorCreateCopyWithAttributes |
+| CTFontDescriptorCreateWithAttributes | function | CTFontDescriptor.h | ffi::CTFontDescriptorCreateWithAttributes |
+| CTFontDescriptorGetTypeID | function | CTFontDescriptor.h | ffi::CTFontDescriptorGetTypeID |
+| CTFontDescriptorMatchFontDescriptorsWithProgressHandler | function | CTFontDescriptor.h | ffi::CTFontDescriptorMatchFontDescriptorsWithProgressHandler |
+| CTFontDescriptorMatchingState | enum | CTFontDescriptor.h | ffi::CTFontDescriptorMatchingState |
+| kCTFontBaselineAdjustAttribute | constant | CTFontDescriptor.h | ffi::kCTFontBaselineAdjustAttribute |
+| kCTFontCascadeListAttribute | constant | CTFontDescriptor.h | ffi::kCTFontCascadeListAttribute |
+| kCTFontCharacterSetAttribute | constant | CTFontDescriptor.h | ffi::kCTFontCharacterSetAttribute |
+| kCTFontDescriptorMatchingCurrentAssetSize | constant | CTFontDescriptor.h | ffi::kCTFontDescriptorMatchingCurrentAssetSize |
+| kCTFontDescriptorMatchingDescriptors | constant | CTFontDescriptor.h | ffi::kCTFontDescriptorMatchingDescriptors |
+| kCTFontDescriptorMatchingError | constant | CTFontDescriptor.h | ffi::kCTFontDescriptorMatchingError |
+| kCTFontDescriptorMatchingPercentage | constant | CTFontDescriptor.h | ffi::kCTFontDescriptorMatchingPercentage |
+| kCTFontDescriptorMatchingResult | constant | CTFontDescriptor.h | ffi::kCTFontDescriptorMatchingResult |
+| kCTFontDescriptorMatchingSourceDescriptor | constant | CTFontDescriptor.h | ffi::kCTFontDescriptorMatchingSourceDescriptor |
+| kCTFontDescriptorMatchingTotalAssetSize | constant | CTFontDescriptor.h | ffi::kCTFontDescriptorMatchingTotalAssetSize |
+| kCTFontDescriptorMatchingTotalDownloadedSize | constant | CTFontDescriptor.h | ffi::kCTFontDescriptorMatchingTotalDownloadedSize |
+| kCTFontDownloadedAttribute | constant | CTFontDescriptor.h | ffi::kCTFontDownloadedAttribute |
+| kCTFontFixedAdvanceAttribute | constant | CTFontDescriptor.h | ffi::kCTFontFixedAdvanceAttribute |
+| kCTFontLanguagesAttribute | constant | CTFontDescriptor.h | ffi::kCTFontLanguagesAttribute |
+| kCTFontMacintoshEncodingsAttribute | constant | CTFontDescriptor.h | ffi::kCTFontMacintoshEncodingsAttribute |
+| kCTFontMatrixAttribute | constant | CTFontDescriptor.h | ffi::kCTFontMatrixAttribute |
+| kCTFontOpticalSizeAttribute | constant | CTFontDescriptor.h | ffi::kCTFontOpticalSizeAttribute |
+| kCTFontPriorityAttribute | constant | CTFontDescriptor.h | ffi::kCTFontPriorityAttribute |
+| kCTFontRegistrationScopeAttribute | constant | CTFontDescriptor.h | ffi::kCTFontRegistrationScopeAttribute |
+| CTFontManagerCompareFontFamilyNames | function | CTFontManager.h | ffi::CTFontManagerCompareFontFamilyNames |
+| CTFontManagerCreateFontDescriptorFromData | function | CTFontManager.h | ffi::CTFontManagerCreateFontDescriptorFromData |
+| CTFontManagerCreateFontDescriptorsFromData | function | CTFontManager.h | ffi::CTFontManagerCreateFontDescriptorsFromData |
+| CTFontManagerEnableFontDescriptors | function | CTFontManager.h | ffi::CTFontManagerEnableFontDescriptors |
+| CTFontManagerRegisterFontDescriptors | function | CTFontManager.h | ffi::CTFontManagerRegisterFontDescriptors |
+| CTFontManagerRegisterFontURLs | function | CTFontManager.h | ffi::CTFontManagerRegisterFontURLs |
+| CTFontManagerUnregisterFontDescriptors | function | CTFontManager.h | ffi::CTFontManagerUnregisterFontDescriptors |
+| CTFontManagerUnregisterFontURLs | function | CTFontManager.h | ffi::CTFontManagerUnregisterFontURLs |
+| kCTFontManagerBundleIdentifier | constant | CTFontManager.h | ffi::kCTFontManagerBundleIdentifier |
+| kCTFontManagerRegisteredFontsChangedNotification | constant | CTFontManager.h | ffi::kCTFontManagerRegisteredFontsChangedNotification |
+| CTFontManagerError | enum | CTFontManagerErrors.h | ffi::CTFontManagerError |
+| kCTFontManagerErrorDomain | constant | CTFontManagerErrors.h | ffi::kCTFontManagerErrorDomain |
+| kCTFontManagerErrorFontURLsKey | constant | CTFontManagerErrors.h | ffi::kCTFontManagerErrorFontURLsKey |
+| CTFrameDraw | function | CTFrame.h | ffi::CTFrameDraw |
+| CTFramePathFillRule | enum | CTFrame.h | ffi::CTFramePathFillRule |
+| CTFrameProgression | enum | CTFrame.h | ffi::CTFrameProgression |
+| kCTFrameClippingPathsAttributeName | constant | CTFrame.h | ffi::kCTFrameClippingPathsAttributeName |
+| kCTFramePathClippingPathAttributeName | constant | CTFrame.h | ffi::kCTFramePathClippingPathAttributeName |
+| kCTFramePathFillRuleAttributeName | constant | CTFrame.h | ffi::kCTFramePathFillRuleAttributeName |
+| kCTFramePathWidthAttributeName | constant | CTFrame.h | ffi::kCTFramePathWidthAttributeName |
+| kCTFrameProgressionAttributeName | constant | CTFrame.h | ffi::kCTFrameProgressionAttributeName |
+| CTGlyphInfoGetTypeID | function | CTGlyphInfo.h | ffi::CTGlyphInfoGetTypeID |
+| CTLineDraw | function | CTLine.h | ffi::CTLineDraw |
+| CTLineEnumerateCaretOffsets | function | CTLine.h | ffi::CTLineEnumerateCaretOffsets |
+| CTRubyAnnotationCreateWithAttributes | function | CTRubyAnnotation.h | ffi::CTRubyAnnotationCreateWithAttributes |
+| CTRubyAnnotationGetTypeID | function | CTRubyAnnotation.h | ffi::CTRubyAnnotationGetTypeID |
+| kCTRubyAnnotationScaleToFitAttributeName | constant | CTRubyAnnotation.h | ffi::kCTRubyAnnotationScaleToFitAttributeName |
+| kCTRubyAnnotationSizeFactorAttributeName | constant | CTRubyAnnotation.h | ffi::kCTRubyAnnotationSizeFactorAttributeName |
+| kCTRubyPositionCount | constant | CTRubyAnnotation.h | ffi::kCTRubyPositionCount |
+| CTRunDraw | function | CTRun.h | ffi::CTRunDraw |
+| CTRunDelegateCallbacks | struct | CTRunDelegate.h | ffi::CTRunDelegateCallbacks |
+| CTRunDelegateCreate | function | CTRunDelegate.h | ffi::CTRunDelegateCreate |
+| CTRunDelegateGetRefCon | function | CTRunDelegate.h | ffi::CTRunDelegateGetRefCon |
+| CTRunDelegateGetTypeID | function | CTRunDelegate.h | ffi::CTRunDelegateGetTypeID |
+| CTRunDelegateRef | opaque type | CTRunDelegate.h | ffi::CTRunDelegateRef |
+| CTUnderlineStyle | options | CTStringAttributes.h | ffi::CTUnderlineStyle |
+| CTUnderlineStyleModifiers | options | CTStringAttributes.h | ffi::CTUnderlineStyleModifiers |
+| kCTAdaptiveImageProviderAttributeName | constant | CTStringAttributes.h | ffi::kCTAdaptiveImageProviderAttributeName |
+| kCTBackgroundColorAttributeName | constant | CTStringAttributes.h | ffi::kCTBackgroundColorAttributeName |
+| kCTBaselineClassAttributeName | constant | CTStringAttributes.h | ffi::kCTBaselineClassAttributeName |
+| kCTBaselineInfoAttributeName | constant | CTStringAttributes.h | ffi::kCTBaselineInfoAttributeName |
+| kCTBaselineOffsetAttributeName | constant | CTStringAttributes.h | ffi::kCTBaselineOffsetAttributeName |
+| kCTBaselineReferenceInfoAttributeName | constant | CTStringAttributes.h | ffi::kCTBaselineReferenceInfoAttributeName |
+| kCTForegroundColorAttributeName | constant | CTStringAttributes.h | ffi::kCTForegroundColorAttributeName |
+| kCTForegroundColorFromContextAttributeName | constant | CTStringAttributes.h | ffi::kCTForegroundColorFromContextAttributeName |
+| kCTGlyphInfoAttributeName | constant | CTStringAttributes.h | ffi::kCTGlyphInfoAttributeName |
+| kCTHorizontalInVerticalFormsAttributeName | constant | CTStringAttributes.h | ffi::kCTHorizontalInVerticalFormsAttributeName |
+| kCTKernAttributeName | constant | CTStringAttributes.h | ffi::kCTKernAttributeName |
+| kCTLanguageAttributeName | constant | CTStringAttributes.h | ffi::kCTLanguageAttributeName |
+| kCTLigatureAttributeName | constant | CTStringAttributes.h | ffi::kCTLigatureAttributeName |
+| kCTRubyAnnotationAttributeName | constant | CTStringAttributes.h | ffi::kCTRubyAnnotationAttributeName |
+| kCTRunDelegateAttributeName | constant | CTStringAttributes.h | ffi::kCTRunDelegateAttributeName |
+| kCTStrokeColorAttributeName | constant | CTStringAttributes.h | ffi::kCTStrokeColorAttributeName |
+| kCTStrokeWidthAttributeName | constant | CTStringAttributes.h | ffi::kCTStrokeWidthAttributeName |
+| kCTSuperscriptAttributeName | constant | CTStringAttributes.h | ffi::kCTSuperscriptAttributeName |
+| kCTTrackingAttributeName | constant | CTStringAttributes.h | ffi::kCTTrackingAttributeName |
+| kCTUnderlineColorAttributeName | constant | CTStringAttributes.h | ffi::kCTUnderlineColorAttributeName |
+| kCTUnderlineStyleAttributeName | constant | CTStringAttributes.h | ffi::kCTUnderlineStyleAttributeName |
+| kCTVerticalFormsAttributeName | constant | CTStringAttributes.h | ffi::kCTVerticalFormsAttributeName |
+| kCTWritingDirectionAttributeName | constant | CTStringAttributes.h | ffi::kCTWritingDirectionAttributeName |
+| CTTextTabGetOptions | function | CTTextTab.h | ffi::CTTextTabGetOptions |
+| CTTextTabGetTypeID | function | CTTextTab.h | ffi::CTTextTabGetTypeID |
+| kCTTabColumnTerminatorsAttributeName | constant | CTTextTab.h | ffi::kCTTabColumnTerminatorsAttributeName |
+| CTTypesetterGetTypeID | function | CTTypesetter.h | ffi::CTTypesetterGetTypeID |
+| AnchorPoint | struct | SFNTLayoutTypes.h | ffi::AnchorPoint |
+| AnchorPointTable | struct | SFNTLayoutTypes.h | ffi::AnchorPointTable |
+| AnkrTable | struct | SFNTLayoutTypes.h | ffi::AnkrTable |
+| BslnFormat0Part | struct | SFNTLayoutTypes.h | ffi::BslnFormat0Part |
+| BslnFormat1Part | struct | SFNTLayoutTypes.h | ffi::BslnFormat1Part |
+| BslnFormat2Part | struct | SFNTLayoutTypes.h | ffi::BslnFormat2Part |
+| BslnFormat3Part | struct | SFNTLayoutTypes.h | ffi::BslnFormat3Part |
+| BslnTable | struct | SFNTLayoutTypes.h | ffi::BslnTable |
+| JustDirectionTable | struct | SFNTLayoutTypes.h | ffi::JustDirectionTable |
+| JustPCAction | struct | SFNTLayoutTypes.h | ffi::JustPCAction |
+| JustPCActionSubrecord | struct | SFNTLayoutTypes.h | ffi::JustPCActionSubrecord |
+| JustPCConditionalAddAction | struct | SFNTLayoutTypes.h | ffi::JustPCConditionalAddAction |
+| JustPCDecompositionAction | struct | SFNTLayoutTypes.h | ffi::JustPCDecompositionAction |
+| JustPCDuctilityAction | struct | SFNTLayoutTypes.h | ffi::JustPCDuctilityAction |
+| JustPCGlyphRepeatAddAction | struct | SFNTLayoutTypes.h | ffi::JustPCGlyphRepeatAddAction |
+| JustPostcompTable | struct | SFNTLayoutTypes.h | ffi::JustPostcompTable |
+| JustTable | struct | SFNTLayoutTypes.h | ffi::JustTable |
+| JustWidthDeltaEntry | struct | SFNTLayoutTypes.h | ffi::JustWidthDeltaEntry |
+| JustWidthDeltaGroup | struct | SFNTLayoutTypes.h | ffi::JustWidthDeltaGroup |
+| KernIndexArrayHeader | struct | SFNTLayoutTypes.h | ffi::KernIndexArrayHeader |
+| KernKerningPair | struct | SFNTLayoutTypes.h | ffi::KernKerningPair |
+| KernOffsetTable | struct | SFNTLayoutTypes.h | ffi::KernOffsetTable |
+| KernOrderedListEntry | struct | SFNTLayoutTypes.h | ffi::KernOrderedListEntry |
+| KernOrderedListHeader | struct | SFNTLayoutTypes.h | ffi::KernOrderedListHeader |
+| KernSimpleArrayHeader | struct | SFNTLayoutTypes.h | ffi::KernSimpleArrayHeader |
+| KernStateEntry | struct | SFNTLayoutTypes.h | ffi::KernStateEntry |
+| KernStateHeader | struct | SFNTLayoutTypes.h | ffi::KernStateHeader |
+| KernSubtableHeader | struct | SFNTLayoutTypes.h | ffi::KernSubtableHeader |
+| KernTableHeader | struct | SFNTLayoutTypes.h | ffi::KernTableHeader |
+| KernVersion0Header | struct | SFNTLayoutTypes.h | ffi::KernVersion0Header |
+| KernVersion0SubtableHeader | struct | SFNTLayoutTypes.h | ffi::KernVersion0SubtableHeader |
+| KerxAnchorPointAction | struct | SFNTLayoutTypes.h | ffi::KerxAnchorPointAction |
+| KerxControlPointAction | struct | SFNTLayoutTypes.h | ffi::KerxControlPointAction |
+| KerxControlPointEntry | struct | SFNTLayoutTypes.h | ffi::KerxControlPointEntry |
+| KerxControlPointHeader | struct | SFNTLayoutTypes.h | ffi::KerxControlPointHeader |
+| KerxCoordinateAction | struct | SFNTLayoutTypes.h | ffi::KerxCoordinateAction |
+| KerxIndexArrayHeader | struct | SFNTLayoutTypes.h | ffi::KerxIndexArrayHeader |
+| KerxKerningPair | struct | SFNTLayoutTypes.h | ffi::KerxKerningPair |
+| KerxOrderedListEntry | struct | SFNTLayoutTypes.h | ffi::KerxOrderedListEntry |
+| KerxOrderedListHeader | struct | SFNTLayoutTypes.h | ffi::KerxOrderedListHeader |
+| KerxSimpleArrayHeader | struct | SFNTLayoutTypes.h | ffi::KerxSimpleArrayHeader |
+| KerxStateEntry | struct | SFNTLayoutTypes.h | ffi::KerxStateEntry |
+| KerxStateHeader | struct | SFNTLayoutTypes.h | ffi::KerxStateHeader |
+| KerxSubtableHeader | struct | SFNTLayoutTypes.h | ffi::KerxSubtableHeader |
+| KerxTableHeader | struct | SFNTLayoutTypes.h | ffi::KerxTableHeader |
+| LcarCaretClassEntry | struct | SFNTLayoutTypes.h | ffi::LcarCaretClassEntry |
+| LcarCaretTable | struct | SFNTLayoutTypes.h | ffi::LcarCaretTable |
+| LtagStringRange | struct | SFNTLayoutTypes.h | ffi::LtagStringRange |
+| LtagTable | struct | SFNTLayoutTypes.h | ffi::LtagTable |
+| MortChain | struct | SFNTLayoutTypes.h | ffi::MortChain |
+| MortContextualSubtable | struct | SFNTLayoutTypes.h | ffi::MortContextualSubtable |
+| MortFeatureEntry | struct | SFNTLayoutTypes.h | ffi::MortFeatureEntry |
+| MortInsertionSubtable | struct | SFNTLayoutTypes.h | ffi::MortInsertionSubtable |
+| MortLigatureSubtable | struct | SFNTLayoutTypes.h | ffi::MortLigatureSubtable |
+| MortRearrangementSubtable | struct | SFNTLayoutTypes.h | ffi::MortRearrangementSubtable |
+| MortSubtable | struct | SFNTLayoutTypes.h | ffi::MortSubtable |
+| MortSwashSubtable | struct | SFNTLayoutTypes.h | ffi::MortSwashSubtable |
+| MortTable | struct | SFNTLayoutTypes.h | ffi::MortTable |
+| MorxChain | struct | SFNTLayoutTypes.h | ffi::MorxChain |
+| MorxContextualSubtable | struct | SFNTLayoutTypes.h | ffi::MorxContextualSubtable |
+| MorxInsertionSubtable | struct | SFNTLayoutTypes.h | ffi::MorxInsertionSubtable |
+| MorxLigatureSubtable | struct | SFNTLayoutTypes.h | ffi::MorxLigatureSubtable |
+| MorxRearrangementSubtable | struct | SFNTLayoutTypes.h | ffi::MorxRearrangementSubtable |
+| MorxSubtable | struct | SFNTLayoutTypes.h | ffi::MorxSubtable |
+| MorxTable | struct | SFNTLayoutTypes.h | ffi::MorxTable |
+| OpbdSideValues | struct | SFNTLayoutTypes.h | ffi::OpbdSideValues |
+| OpbdTable | struct | SFNTLayoutTypes.h | ffi::OpbdTable |
+| PropLookupSegment | struct | SFNTLayoutTypes.h | ffi::PropLookupSegment |
+| PropLookupSingle | struct | SFNTLayoutTypes.h | ffi::PropLookupSingle |
+| PropTable | struct | SFNTLayoutTypes.h | ffi::PropTable |
+| SFNTLookupArrayHeader | struct | SFNTLayoutTypes.h | ffi::SFNTLookupArrayHeader |
+| SFNTLookupBinarySearchHeader | struct | SFNTLayoutTypes.h | ffi::SFNTLookupBinarySearchHeader |
+| SFNTLookupSegment | struct | SFNTLayoutTypes.h | ffi::SFNTLookupSegment |
+| SFNTLookupSegmentHeader | struct | SFNTLayoutTypes.h | ffi::SFNTLookupSegmentHeader |
+| SFNTLookupSingle | struct | SFNTLayoutTypes.h | ffi::SFNTLookupSingle |
+| SFNTLookupSingleHeader | struct | SFNTLayoutTypes.h | ffi::SFNTLookupSingleHeader |
+| SFNTLookupTable | struct | SFNTLayoutTypes.h | ffi::SFNTLookupTable |
+| SFNTLookupTrimmedArrayHeader | struct | SFNTLayoutTypes.h | ffi::SFNTLookupTrimmedArrayHeader |
+| SFNTLookupVectorHeader | struct | SFNTLayoutTypes.h | ffi::SFNTLookupVectorHeader |
+| STClassTable | struct | SFNTLayoutTypes.h | ffi::STClassTable |
+| STEntryOne | struct | SFNTLayoutTypes.h | ffi::STEntryOne |
+| STEntryTwo | struct | SFNTLayoutTypes.h | ffi::STEntryTwo |
+| STEntryZero | struct | SFNTLayoutTypes.h | ffi::STEntryZero |
+| STHeader | struct | SFNTLayoutTypes.h | ffi::STHeader |
+| STXEntryOne | struct | SFNTLayoutTypes.h | ffi::STXEntryOne |
+| STXEntryTwo | struct | SFNTLayoutTypes.h | ffi::STXEntryTwo |
+| STXEntryZero | struct | SFNTLayoutTypes.h | ffi::STXEntryZero |
+| STXHeader | struct | SFNTLayoutTypes.h | ffi::STXHeader |
+| TrakTable | struct | SFNTLayoutTypes.h | ffi::TrakTable |
+| TrakTableData | struct | SFNTLayoutTypes.h | ffi::TrakTableData |
+| TrakTableEntry | struct | SFNTLayoutTypes.h | ffi::TrakTableEntry |
+| FontVariation | struct | SFNTTypes.h | ffi::FontVariation |
+| sfntCMapEncoding | struct | SFNTTypes.h | ffi::sfntCMapEncoding |
+| sfntCMapExtendedSubHeader | struct | SFNTTypes.h | ffi::sfntCMapExtendedSubHeader |
+| sfntCMapHeader | struct | SFNTTypes.h | ffi::sfntCMapHeader |
+| sfntCMapSubHeader | struct | SFNTTypes.h | ffi::sfntCMapSubHeader |
+| sfntDescriptorHeader | struct | SFNTTypes.h | ffi::sfntDescriptorHeader |
+| sfntDirectory | struct | SFNTTypes.h | ffi::sfntDirectory |
+| sfntDirectoryEntry | struct | SFNTTypes.h | ffi::sfntDirectoryEntry |
+| sfntFeatureHeader | struct | SFNTTypes.h | ffi::sfntFeatureHeader |
+| sfntFeatureName | struct | SFNTTypes.h | ffi::sfntFeatureName |
+| sfntFontDescriptor | struct | SFNTTypes.h | ffi::sfntFontDescriptor |
+| sfntFontFeatureSetting | struct | SFNTTypes.h | ffi::sfntFontFeatureSetting |
+| sfntFontRunFeature | struct | SFNTTypes.h | ffi::sfntFontRunFeature |
+| sfntInstance | struct | SFNTTypes.h | ffi::sfntInstance |
+| sfntNameHeader | struct | SFNTTypes.h | ffi::sfntNameHeader |
+| sfntNameRecord | struct | SFNTTypes.h | ffi::sfntNameRecord |
+| sfntVariationAxis | struct | SFNTTypes.h | ffi::sfntVariationAxis |
+| sfntVariationHeader | struct | SFNTTypes.h | ffi::sfntVariationHeader |
 
 ## 🔴 GAPS
 | Symbol | Kind | Header | Notes |
 | --- | --- | --- | --- |
-| CTFontCopyAttribute | function | CTFont.h | Specific font accessors are wrapped, but generic attribute lookup is not. |
-| CTFontCopyCharacterSet | function | CTFont.h | Advanced font graphics/cascade/table APIs are not wrapped. |
-| CTFontCopyDefaultCascadeListForLanguages | function | CTFont.h | Advanced font graphics/cascade/table APIs are not wrapped. |
-| CTFontCopyGraphicsFont | function | CTFont.h | Advanced font graphics/cascade/table APIs are not wrapped. |
-| CTFontCopyTable | function | CTFont.h | Advanced font graphics/cascade/table APIs are not wrapped. |
-| CTFontCreatePathForGlyph | function | CTFont.h | Advanced font graphics/cascade/table APIs are not wrapped. |
-| CTFontCreateWithFontDescriptorAndOptions | function | CTFont.h | Advanced font graphics/cascade/table APIs are not wrapped. |
-| CTFontCreateWithGraphicsFont | function | CTFont.h | Advanced font graphics/cascade/table APIs are not wrapped. |
-| CTFontCreateWithNameAndOptions | function | CTFont.h | Advanced font graphics/cascade/table APIs are not wrapped. |
-| CTFontDrawGlyphs | function | CTFont.h | Advanced font graphics/cascade/table APIs are not wrapped. |
-| CTFontDrawImageFromAdaptiveImageProviderAtPoint | function | CTFont.h | Advanced font graphics/cascade/table APIs are not wrapped. |
-| CTFontGetLigatureCaretPositions | function | CTFont.h | Advanced font graphics/cascade/table APIs are not wrapped. |
-| CTFontGetStringEncoding | function | CTFont.h | Advanced font graphics/cascade/table APIs are not wrapped. |
-| CTFontGetTypographicBoundsForAdaptiveImageProvider | function | CTFont.h | Advanced font graphics/cascade/table APIs are not wrapped. |
-| CTFontOptions | options | CTFont.h | Advanced font graphics/cascade/table APIs are not wrapped. |
-| CTFontTableOptions | options | CTFont.h | Advanced font graphics/cascade/table APIs are not wrapped. |
-| kCTBaselineClassHanging | constant | CTFont.h | No public constant exposure or helper uses this SDK key. |
-| kCTBaselineClassIdeographicCentered | constant | CTFont.h | No public constant exposure or helper uses this SDK key. |
-| kCTBaselineClassIdeographicHigh | constant | CTFont.h | No public constant exposure or helper uses this SDK key. |
-| kCTBaselineClassIdeographicLow | constant | CTFont.h | No public constant exposure or helper uses this SDK key. |
-| kCTBaselineClassMath | constant | CTFont.h | No public constant exposure or helper uses this SDK key. |
-| kCTBaselineClassRoman | constant | CTFont.h | No public constant exposure or helper uses this SDK key. |
-| kCTBaselineOriginalFont | constant | CTFont.h | No public constant exposure or helper uses this SDK key. |
-| kCTBaselineReferenceFont | constant | CTFont.h | No public constant exposure or helper uses this SDK key. |
-| CTFontCollectionCopyExclusionDescriptors | function | CTFontCollection.h | Collection mutation/full-attribute APIs are not wrapped. |
-| CTFontCollectionCopyFontAttribute | function | CTFontCollection.h | Collection mutation/full-attribute APIs are not wrapped. |
-| CTFontCollectionCopyFontAttributes | function | CTFontCollection.h | Collection mutation/full-attribute APIs are not wrapped. |
-| CTFontCollectionCreateMatchingFontDescriptorsSortedWithCallback | function | CTFontCollection.h | Sorted collection matching callback API is not wrapped. |
-| CTFontCollectionCreateMatchingFontDescriptorsWithOptions | function | CTFontCollection.h | Matching-descriptor options are not surfaced. |
-| CTFontCollectionCreateMutableCopy | function | CTFontCollection.h | Collection mutation/full-attribute APIs are not wrapped. |
-| CTFontCollectionGetTypeID | function | CTFontCollection.h | Type-ID helpers are not exposed outside raw-ffi. |
-| CTFontCollectionSetExclusionDescriptors | function | CTFontCollection.h | Collection mutation/full-attribute APIs are not wrapped. |
-| CTFontCollectionSetQueryDescriptors | function | CTFontCollection.h | Collection mutation/full-attribute APIs are not wrapped. |
-| CTMutableFontCollectionRef | opaque type | CTFontCollection.h | No dedicated wrapper type is exposed. |
-| CTFontDescriptorCopyAttributes | function | CTFontDescriptor.h | Specific descriptor getters are wrapped, but full attribute dictionaries are not. |
-| CTFontDescriptorCopyLocalizedAttribute | function | CTFontDescriptor.h | Localized descriptor-attribute lookup is not wrapped. |
-| CTFontDescriptorCreateCopyWithAttributes | function | CTFontDescriptor.h | No public wrapper method or raw-ffi declaration found. |
-| CTFontDescriptorCreateWithAttributes | function | CTFontDescriptor.h | No generic descriptor constructor from an attribute dictionary. |
-| CTFontDescriptorGetTypeID | function | CTFontDescriptor.h | No public wrapper method or raw-ffi declaration found. |
-| CTFontDescriptorMatchFontDescriptorsWithProgressHandler | function | CTFontDescriptor.h | Descriptor matching/download progress callbacks are not exposed. |
-| CTFontDescriptorMatchingState | enum | CTFontDescriptor.h | No Rust API for descriptor matching state callbacks. |
-| kCTFontBaselineAdjustAttribute | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontCascadeListAttribute | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontCharacterSetAttribute | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontDescriptorMatchingCurrentAssetSize | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontDescriptorMatchingDescriptors | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontDescriptorMatchingError | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontDescriptorMatchingPercentage | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontDescriptorMatchingResult | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontDescriptorMatchingSourceDescriptor | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontDescriptorMatchingTotalAssetSize | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontDescriptorMatchingTotalDownloadedSize | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontDownloadedAttribute | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontFixedAdvanceAttribute | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontLanguagesAttribute | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontMacintoshEncodingsAttribute | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontMatrixAttribute | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontOpticalSizeAttribute | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontPriorityAttribute | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontRegistrationScopeAttribute | constant | CTFontDescriptor.h | No public constant exposure or helper uses this SDK key. |
-| CTFontManagerCompareFontFamilyNames | function | CTFontManager.h | No public wrapper method or raw-ffi declaration found. |
-| CTFontManagerCreateFontDescriptorFromData | function | CTFontManager.h | Data-backed font descriptor creation is not wrapped. |
-| CTFontManagerCreateFontDescriptorsFromData | function | CTFontManager.h | Data-backed font descriptor creation is not wrapped. |
-| CTFontManagerEnableFontDescriptors | function | CTFontManager.h | Batch descriptor/URL registration APIs are not wrapped. |
-| CTFontManagerRegisterFontDescriptors | function | CTFontManager.h | Batch descriptor/URL registration APIs are not wrapped. |
-| CTFontManagerRegisterFontURLs | function | CTFontManager.h | Batch descriptor/URL registration APIs are not wrapped. |
-| CTFontManagerUnregisterFontDescriptors | function | CTFontManager.h | Batch descriptor/URL registration APIs are not wrapped. |
-| CTFontManagerUnregisterFontURLs | function | CTFontManager.h | Batch descriptor/URL registration APIs are not wrapped. |
-| kCTFontManagerBundleIdentifier | constant | CTFontManager.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontManagerRegisteredFontsChangedNotification | constant | CTFontManager.h | No public constant exposure or helper uses this SDK key. |
-| CTFontManagerError | enum | CTFontManagerErrors.h | FontManager methods surface string errors, not the error enum. |
-| kCTFontManagerErrorDomain | constant | CTFontManagerErrors.h | No public constant exposure or helper uses this SDK key. |
-| kCTFontManagerErrorFontURLsKey | constant | CTFontManagerErrors.h | No public constant exposure or helper uses this SDK key. |
-| CTFrameDraw | function | CTFrame.h | Drawing APIs are omitted from the wrapper surface. |
-| CTFramePathFillRule | enum | CTFrame.h | Frame progression/fill-rule options are not exposed. |
-| CTFrameProgression | enum | CTFrame.h | Frame progression/fill-rule options are not exposed. |
-| kCTFrameClippingPathsAttributeName | constant | CTFrame.h | No public constant exposure or helper uses this SDK key. |
-| kCTFramePathClippingPathAttributeName | constant | CTFrame.h | No public constant exposure or helper uses this SDK key. |
-| kCTFramePathFillRuleAttributeName | constant | CTFrame.h | No public constant exposure or helper uses this SDK key. |
-| kCTFramePathWidthAttributeName | constant | CTFrame.h | No public constant exposure or helper uses this SDK key. |
-| kCTFrameProgressionAttributeName | constant | CTFrame.h | No public constant exposure or helper uses this SDK key. |
-| CTGlyphInfoGetTypeID | function | CTGlyphInfo.h | Type-ID helpers are not exposed outside raw-ffi. |
-| CTLineDraw | function | CTLine.h | Drawing APIs are omitted from the wrapper surface. |
-| CTLineEnumerateCaretOffsets | function | CTLine.h | No public wrapper method or raw-ffi declaration found. |
-| CTRubyAnnotationCreateWithAttributes | function | CTRubyAnnotation.h | Per-position ruby attribute dictionaries are not wrapped. |
-| CTRubyAnnotationGetTypeID | function | CTRubyAnnotation.h | No public wrapper method or raw-ffi declaration found. |
-| kCTRubyAnnotationScaleToFitAttributeName | constant | CTRubyAnnotation.h | No public constant exposure or helper uses this SDK key. |
-| kCTRubyAnnotationSizeFactorAttributeName | constant | CTRubyAnnotation.h | No public constant exposure or helper uses this SDK key. |
-| kCTRubyPositionCount | constant | CTRubyAnnotation.h | No public constant exposure or helper uses this SDK key. |
-| CTRunDraw | function | CTRun.h | Drawing APIs are omitted from the wrapper surface. |
-| CTRunDelegateCallbacks | struct | CTRunDelegate.h | Run delegate callbacks and ref-con access are not wrapped. |
-| CTRunDelegateCreate | function | CTRunDelegate.h | Run delegate callbacks and ref-con access are not wrapped. |
-| CTRunDelegateGetRefCon | function | CTRunDelegate.h | Run delegate callbacks and ref-con access are not wrapped. |
-| CTRunDelegateGetTypeID | function | CTRunDelegate.h | Run delegate callbacks and ref-con access are not wrapped. |
-| CTRunDelegateRef | opaque type | CTRunDelegate.h | Run delegate callbacks and ref-con access are not wrapped. |
-| CTUnderlineStyle | options | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| CTUnderlineStyleModifiers | options | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTAdaptiveImageProviderAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTBackgroundColorAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTBaselineClassAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTBaselineInfoAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTBaselineOffsetAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTBaselineReferenceInfoAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTForegroundColorAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTForegroundColorFromContextAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTGlyphInfoAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTHorizontalInVerticalFormsAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTKernAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTLanguageAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTLigatureAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTRubyAnnotationAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTRunDelegateAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTStrokeColorAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTStrokeWidthAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTSuperscriptAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTTrackingAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTUnderlineColorAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTUnderlineStyleAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTVerticalFormsAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| kCTWritingDirectionAttributeName | constant | CTStringAttributes.h | AttributedString only exposes font and paragraph-style attributes. |
-| CTTextTabGetOptions | function | CTTextTab.h | TextTab only exposes alignment and location. |
-| CTTextTabGetTypeID | function | CTTextTab.h | Type-ID helpers are not exposed outside raw-ffi. |
-| kCTTabColumnTerminatorsAttributeName | constant | CTTextTab.h | No public constant exposure or helper uses this SDK key. |
-| CTTypesetterGetTypeID | function | CTTypesetter.h | Type-ID helpers are not exposed outside raw-ffi. |
-| AnchorPoint | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| AnchorPointTable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| AnkrTable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| BslnFormat0Part | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| BslnFormat1Part | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| BslnFormat2Part | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| BslnFormat3Part | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| BslnTable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| JustDirectionTable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| JustPCAction | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| JustPCActionSubrecord | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| JustPCConditionalAddAction | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| JustPCDecompositionAction | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| JustPCDuctilityAction | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| JustPCGlyphRepeatAddAction | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| JustPostcompTable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| JustTable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| JustWidthDeltaEntry | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| JustWidthDeltaGroup | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KernIndexArrayHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KernKerningPair | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KernOffsetTable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KernOrderedListEntry | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KernOrderedListHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KernSimpleArrayHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KernStateEntry | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KernStateHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KernSubtableHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KernTableHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KernVersion0Header | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KernVersion0SubtableHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KerxAnchorPointAction | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KerxControlPointAction | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KerxControlPointEntry | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KerxControlPointHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KerxCoordinateAction | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KerxIndexArrayHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KerxKerningPair | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KerxOrderedListEntry | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KerxOrderedListHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KerxSimpleArrayHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KerxStateEntry | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KerxStateHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KerxSubtableHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| KerxTableHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| LcarCaretClassEntry | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| LcarCaretTable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| LtagStringRange | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| LtagTable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| MortChain | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| MortContextualSubtable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| MortFeatureEntry | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| MortInsertionSubtable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| MortLigatureSubtable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| MortRearrangementSubtable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| MortSubtable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| MortSwashSubtable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| MortTable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| MorxChain | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| MorxContextualSubtable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| MorxInsertionSubtable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| MorxLigatureSubtable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| MorxRearrangementSubtable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| MorxSubtable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| MorxTable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| OpbdSideValues | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| OpbdTable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| PropLookupSegment | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| PropLookupSingle | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| PropTable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| SFNTLookupArrayHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| SFNTLookupBinarySearchHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| SFNTLookupSegment | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| SFNTLookupSegmentHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| SFNTLookupSingle | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| SFNTLookupSingleHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| SFNTLookupTable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| SFNTLookupTrimmedArrayHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| SFNTLookupVectorHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| STClassTable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| STEntryOne | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| STEntryTwo | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| STEntryZero | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| STHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| STXEntryOne | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| STXEntryTwo | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| STXEntryZero | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| STXHeader | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| TrakTable | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| TrakTableData | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| TrakTableEntry | struct | SFNTLayoutTypes.h | No SFNT layout/table surface is exposed. |
-| FontVariation | struct | SFNTTypes.h | No SFNT layout/table surface is exposed. |
-| sfntCMapEncoding | struct | SFNTTypes.h | No SFNT layout/table surface is exposed. |
-| sfntCMapExtendedSubHeader | struct | SFNTTypes.h | No SFNT layout/table surface is exposed. |
-| sfntCMapHeader | struct | SFNTTypes.h | No SFNT layout/table surface is exposed. |
-| sfntCMapSubHeader | struct | SFNTTypes.h | No SFNT layout/table surface is exposed. |
-| sfntDescriptorHeader | struct | SFNTTypes.h | No SFNT layout/table surface is exposed. |
-| sfntDirectory | struct | SFNTTypes.h | No SFNT layout/table surface is exposed. |
-| sfntDirectoryEntry | struct | SFNTTypes.h | No SFNT layout/table surface is exposed. |
-| sfntFeatureHeader | struct | SFNTTypes.h | No SFNT layout/table surface is exposed. |
-| sfntFeatureName | struct | SFNTTypes.h | No SFNT layout/table surface is exposed. |
-| sfntFontDescriptor | struct | SFNTTypes.h | No SFNT layout/table surface is exposed. |
-| sfntFontFeatureSetting | struct | SFNTTypes.h | No SFNT layout/table surface is exposed. |
-| sfntFontRunFeature | struct | SFNTTypes.h | No SFNT layout/table surface is exposed. |
-| sfntInstance | struct | SFNTTypes.h | No SFNT layout/table surface is exposed. |
-| sfntNameHeader | struct | SFNTTypes.h | No SFNT layout/table surface is exposed. |
-| sfntNameRecord | struct | SFNTTypes.h | No SFNT layout/table surface is exposed. |
-| sfntVariationAxis | struct | SFNTTypes.h | No SFNT layout/table surface is exposed. |
-| sfntVariationHeader | struct | SFNTTypes.h | No SFNT layout/table surface is exposed. |
 
 ## ⏭️ EXEMPT
 | Symbol | Kind | Header | Reason | SDK attribute |

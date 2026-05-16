@@ -285,3 +285,5 @@ extern "C" {
     pub fn CTFrameGetLines(frame: CTFrameRef) -> CFArrayRef;
     pub fn CTFrameGetLineOrigins(frame: CTFrameRef, range: CFRange, origins: *mut CGPoint);
 }
+
+include!("ffi_gap.rs");

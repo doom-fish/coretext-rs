@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.1] - 2026-05-16
+
+### Added
+
+- Expanded the optional `raw-ffi` surface to cover the remaining CoreText audit gaps, including advanced `CTFont` graphics/table APIs, generic `CTFontDescriptor` matching and attribute access, batch `CTFontManager` entry points, CT string/frame/text-tab constants, and the SFNT layout/table structs from `SFNTTypes.h` and `SFNTLayoutTypes.h`.
+- Added `tests/raw_ffi.rs` and `examples/06_raw_ffi_smoke.rs` to smoke-test the newly exposed raw CoreText declarations.
+
+### Changed
+
+- Updated the packaging include list to exclude `swift-bridge/.build` contents while still shipping the Swift sources needed to build the bridge.
+- Refreshed `COVERAGE_AUDIT.md` after closing the remaining audited gaps.
+
 ## [0.2.0] - 2026-05-16
 
 ### Added
