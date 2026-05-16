@@ -1,88 +1,73 @@
-//! Smoke test: lay out "Hello, CoreText!" and verify key measurements.
+//! Layout pipeline example covering paragraph styles, text tabs, lines, runs,
+//! typesetters, framesetters, and frames.
 use coretext::{
-    AttributedString, CGRect, CGSize, CTFont, CTFramesetter, CTLine, ParagraphStyle, TextAlignment,
+    bounds_options, AttributedString, CGRect, CGSize, CTFramesetter, CTTypesetter, LineBreakMode,
+    ParagraphStyle, ParagraphStyleOptions, TextAlignment, TextRange, TextTab, TypesetterOptions,
+    WritingDirection,
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // ── Font ──────────────────────────────────────────────────────────────────
-    let font = CTFont::new("Helvetica", 24.0)?;
-    println!(
-        "✅ CTFont(\"{}\", size={}) postscript=\"{}\" family=\"{}\"",
-        font.full_name()?,
-        font.size(),
-        font.postscript_name()?,
-        font.family_name()?,
-    );
-    println!(
-        "   ascent={:.4}  descent={:.4}  leading={:.4}  glyphs={}",
-        font.ascent(),
-        font.descent(),
-        font.leading(),
-        font.glyph_count(),
-    );
+    let font = coretext::CTFont::new("Helvetica", 20.0)?;
+    let tab = TextTab::new(TextAlignment::Left, 32.0)?;
 
-    // ── Paragraph style ───────────────────────────────────────────────────────
-    let para = ParagraphStyle::with_alignment(TextAlignment::Center)?;
-    assert_eq!(para.alignment(), TextAlignment::Center);
-    println!("✅ ParagraphStyle alignment={:?}", para.alignment());
+    let paragraph_style = ParagraphStyle::new(&ParagraphStyleOptions {
+        alignment: Some(TextAlignment::Center),
+        text_tabs: vec![tab],
+        default_tab_interval: Some(32.0),
+        line_break_mode: Some(LineBreakMode::TruncatingTail),
+        base_writing_direction: Some(WritingDirection::LeftToRight),
+        ..ParagraphStyleOptions::default()
+    })?;
 
-    // ── Attributed string ─────────────────────────────────────────────────────
-    let text = "Hello, CoreText!";
-    let attr = AttributedString::new(text, &font, Some(&para))?;
-    println!("✅ AttributedString created ({} chars)", text.len());
+    let text = "Tabs\tmake CoreText layout easier to inspect.";
+    let attributed = AttributedString::new(text, &font, Some(&paragraph_style))?;
 
-    // ── Line ──────────────────────────────────────────────────────────────────
-    let line = CTLine::create_with_attributed_string(&attr)?;
-    let bounds = line.typographic_bounds();
+    let typesetter = CTTypesetter::create_with_options(
+        &attributed,
+        TypesetterOptions {
+            allow_unbounded_layout: true,
+            forced_embedding_level: Some(0),
+        },
+    )?;
+    let break_index = typesetter.suggest_line_break(0, 260.0);
+    let line = typesetter.create_line(TextRange::new(0, break_index))?;
+    let line_bounds = line.typographic_bounds();
     println!(
-        "✅ CTLine  glyphs={}  range={:?}  width={:.4}  ascent={:.4}  descent={:.4}",
+        "line glyphs={} width={:.2} truncated={}",
         line.glyph_count(),
-        line.string_range(),
-        bounds.width,
-        bounds.ascent,
-        bounds.descent,
+        line_bounds.width,
+        line.truncated(
+            line_bounds.width / 2.0,
+            coretext::LineTruncationType::End,
+            None
+        )
+        .is_some()
     );
 
-    let runs = line.runs();
-    println!("   runs={}", runs.len());
-    for (i, run) in runs.iter().enumerate() {
-        let rb = run.typographic_bounds();
+    for (index, run) in line.runs().iter().enumerate() {
         println!(
-            "   run[{i}] glyphs={}  status={}  range={:?}  width={:.4}",
+            "run[{index}] glyphs={} width={:.2} attrs={}",
             run.glyph_count(),
-            run.status(),
-            run.string_range(),
-            rb.width,
-        );
-        println!(
-            "   run[{i}] positions[0]={:?}  advances[0]={:?}  indices[0]={:?}",
-            run.positions().first(),
-            run.advances().first(),
-            run.string_indices().first(),
+            run.typographic_bounds().width,
+            run.attributes_json()?.is_object()
         );
     }
 
-    // ── Framesetter ───────────────────────────────────────────────────────────
-    let setter = CTFramesetter::create_with_attributed_string(&attr)?;
+    let framesetter = CTFramesetter::create_with_typesetter(&typesetter)?;
     let (suggested, fit_range) =
-        setter.suggest_frame_size_with_constraints(CGSize::new(f64::INFINITY, f64::INFINITY));
-    println!("✅ CTFramesetter  suggested={suggested:?}  fit_range={fit_range:?}");
-
-    // ── Frame ─────────────────────────────────────────────────────────────────
-    let rect = CGRect::new(0.0, 0.0, suggested.width + 40.0, 200.0);
-    let frame = setter.create_frame_in_rect(rect, fit_range)?;
-    let frame_lines = frame.lines();
-    let origins = frame.line_origins();
+        framesetter.suggest_frame_size_with_constraints(CGSize::new(260.0, f64::INFINITY));
+    let frame = framesetter.create_frame_in_rect(
+        CGRect::new(0.0, 0.0, suggested.width + 24.0, 120.0),
+        fit_range,
+    )?;
     println!(
-        "✅ CTFrame  string_range={:?}  visible={:?}  lines={}",
-        frame.string_range(),
+        "frame lines={} visible={:?} optical-width={:.2}",
+        frame.lines().len(),
         frame.visible_string_range(),
-        frame_lines.len(),
+        line.bounds_with_options(bounds_options::USE_OPTICAL_BOUNDS)
+            .size
+            .width,
     );
-    for (i, origin) in origins.iter().enumerate() {
-        println!("   line_origin[{i}] = ({:.4}, {:.4})", origin.x, origin.y);
-    }
-
-    println!("\n✅ coretext layout OK");
+    println!("tab stop count={}", paragraph_style.tab_stops().len());
     Ok(())
 }

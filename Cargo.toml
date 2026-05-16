@@ -1,11 +1,11 @@
 [package]
 name = "coretext-rs"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/doom-fish/coretext-rs"
 repository = "https://github.com/doom-fish/coretext-rs"
-description = "Safe Rust bindings for Apple's CoreText framework — fonts, lines, runs, frames, and attributed strings on macOS"
+description = "Safe Rust bindings for Apple's CoreText framework via a Swift bridge on macOS"
 authors = ["Per Johansson <per@doom.fish>"]
 keywords = ["coretext", "macos", "apple", "text", "font"]
 categories = ["api-bindings", "graphics", "os::macos-apis"]
@@ -14,14 +14,20 @@ readme = "README.md"
 build = "build.rs"
 include = [
     "src/**/*",
+    "swift-bridge/**/*",
     "examples/**/*",
     "tests/**/*",
     "build.rs",
     "Cargo.toml",
     "README.md",
-    "LICENSE-*",
     "CHANGELOG.md",
+    "COVERAGE.md",
+    "LICENSE-*",
 ]
+
+[features]
+default = []
+raw-ffi = []
 
 [lints.rust]
 
@@ -36,6 +42,8 @@ crate-type = ["lib"]
 
 [dependencies]
 libc = "0.2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 
 [dev-dependencies]
 
@@ -47,9 +55,6 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [badges]
 maintenance = { status = "actively-developed" }
-
-[[example]]
-name = "01_layout_smoke"
 
 [profile.release]
 debug = "full"

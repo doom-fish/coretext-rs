@@ -1,143 +1,102 @@
-use crate::ffi;
-use crate::types::{CGPoint, CGSize, TextRange, TypographicBounds};
+use serde_json::Value;
+
+use crate::bridge;
+use crate::common::{impl_handle, json_from_owned};
+use crate::types::{CGAffineTransform, CGPoint, CGRect, CGSize, TextRange, TypographicBounds};
 
 /// Status flags returned by `CTRun::status()`.
 pub mod run_status {
-    use crate::ffi;
-    pub const NO_STATUS: u32 = ffi::kCTRunStatusNoStatus;
-    pub const RIGHT_TO_LEFT: u32 = ffi::kCTRunStatusRightToLeft;
-    pub const NON_MONOTONIC: u32 = ffi::kCTRunStatusNonMonotonic;
-    pub const HAS_NON_IDENTITY_MATRIX: u32 = ffi::kCTRunStatusHasNonIdentityMatrix;
+    pub const NO_STATUS: u32 = 0;
+    pub const RIGHT_TO_LEFT: u32 = 1 << 0;
+    pub const NON_MONOTONIC: u32 = 1 << 1;
+    pub const HAS_NON_IDENTITY_MATRIX: u32 = 1 << 2;
 }
 
-/// A retained `CTRunRef` wrapper.
+/// An immutable `CTRun` wrapper.
 pub struct CTRun {
-    pub(crate) raw: ffi::CTRunRef,
+    raw: bridge::Handle,
 }
 
-unsafe impl Send for CTRun {}
-unsafe impl Sync for CTRun {}
+impl_handle!(CTRun);
 
 impl CTRun {
-    /// Number of glyphs in this run.
+    #[must_use]
     pub fn glyph_count(&self) -> isize {
-        unsafe { ffi::CTRunGetGlyphCount(self.raw) }
+        unsafe { bridge::ct_run_get_glyph_count(self.raw) }
     }
 
-    /// Status flags for this run (see [`run_status`] constants).
+    pub fn attributes_json(&self) -> CoreTextResult<Value> {
+        unsafe { json_from_owned(bridge::ct_run_copy_attributes_json(self.raw)) }
+    }
+
+    #[must_use]
     pub fn status(&self) -> u32 {
-        unsafe { ffi::CTRunGetStatus(self.raw) }
+        unsafe { bridge::ct_run_get_status(self.raw) }
     }
 
-    /// Glyph IDs for every glyph in the run.
+    #[must_use]
     pub fn glyphs(&self) -> Vec<u16> {
-        let count = usize::try_from(unsafe { ffi::CTRunGetGlyphCount(self.raw) }).unwrap_or(0);
-        if count == 0 {
+        let count = self.glyph_count();
+        if count <= 0 {
             return Vec::new();
         }
-        let ptr = unsafe { ffi::CTRunGetGlyphsPtr(self.raw) };
-        if !ptr.is_null() {
-            return unsafe { core::slice::from_raw_parts(ptr, count).to_vec() };
-        }
-        let mut buf = vec![0_u16; count];
-        unsafe {
-            ffi::CTRunGetGlyphs(
-                self.raw,
-                ffi::CFRange::new(0, count as isize),
-                buf.as_mut_ptr(),
-            );
-        }
-        buf
+        let mut glyphs = vec![0_u16; usize::try_from(count).unwrap_or(0)];
+        let written = unsafe { bridge::ct_run_copy_glyphs(self.raw, glyphs.as_mut_ptr(), count) };
+        glyphs.truncate(usize::try_from(written).unwrap_or(0));
+        glyphs
     }
 
-    /// Glyph origin positions (in text space).
+    #[must_use]
     pub fn positions(&self) -> Vec<CGPoint> {
-        let count = usize::try_from(unsafe { ffi::CTRunGetGlyphCount(self.raw) }).unwrap_or(0);
-        if count == 0 {
+        let count = self.glyph_count();
+        if count <= 0 {
             return Vec::new();
         }
-        let ptr = unsafe { ffi::CTRunGetPositionsPtr(self.raw) };
-        if !ptr.is_null() {
-            return unsafe { core::slice::from_raw_parts(ptr, count).to_vec() };
-        }
-        let mut buf = vec![ffi::CGPoint { x: 0.0, y: 0.0 }; count];
-        unsafe {
-            ffi::CTRunGetPositions(
-                self.raw,
-                ffi::CFRange::new(0, count as isize),
-                buf.as_mut_ptr(),
-            );
-        }
-        buf
+        let mut positions = vec![CGPoint::default(); usize::try_from(count).unwrap_or(0)];
+        let written =
+            unsafe { bridge::ct_run_copy_positions(self.raw, positions.as_mut_ptr(), count) };
+        positions.truncate(usize::try_from(written).unwrap_or(0));
+        positions
     }
 
-    /// Advance widths for each glyph.
+    #[must_use]
     pub fn advances(&self) -> Vec<CGSize> {
-        let count = usize::try_from(unsafe { ffi::CTRunGetGlyphCount(self.raw) }).unwrap_or(0);
-        if count == 0 {
+        let count = self.glyph_count();
+        if count <= 0 {
             return Vec::new();
         }
-        let ptr = unsafe { ffi::CTRunGetAdvancesPtr(self.raw) };
-        if !ptr.is_null() {
-            return unsafe { core::slice::from_raw_parts(ptr, count).to_vec() };
-        }
-        let mut buf = vec![
-            ffi::CGSize {
-                width: 0.0,
-                height: 0.0
-            };
-            count
-        ];
-        unsafe {
-            ffi::CTRunGetAdvances(
-                self.raw,
-                ffi::CFRange::new(0, count as isize),
-                buf.as_mut_ptr(),
-            );
-        }
-        buf
+        let mut advances = vec![CGSize::default(); usize::try_from(count).unwrap_or(0)];
+        let written =
+            unsafe { bridge::ct_run_copy_advances(self.raw, advances.as_mut_ptr(), count) };
+        advances.truncate(usize::try_from(written).unwrap_or(0));
+        advances
     }
 
-    /// String character indices corresponding to each glyph.
+    #[must_use]
     pub fn string_indices(&self) -> Vec<isize> {
-        let count = usize::try_from(unsafe { ffi::CTRunGetGlyphCount(self.raw) }).unwrap_or(0);
-        if count == 0 {
+        let count = self.glyph_count();
+        if count <= 0 {
             return Vec::new();
         }
-        let ptr = unsafe { ffi::CTRunGetStringIndicesPtr(self.raw) };
-        if !ptr.is_null() {
-            return unsafe { core::slice::from_raw_parts(ptr, count).to_vec() };
-        }
-        let mut buf = vec![0_isize; count];
-        unsafe {
-            ffi::CTRunGetStringIndices(
-                self.raw,
-                ffi::CFRange::new(0, count as isize),
-                buf.as_mut_ptr(),
-            );
-        }
-        buf
+        let mut indices = vec![0_isize; usize::try_from(count).unwrap_or(0)];
+        let written =
+            unsafe { bridge::ct_run_copy_string_indices(self.raw, indices.as_mut_ptr(), count) };
+        indices.truncate(usize::try_from(written).unwrap_or(0));
+        indices
     }
 
-    /// String range covered by this run.
+    #[must_use]
     pub fn string_range(&self) -> TextRange {
-        TextRange::from(unsafe { ffi::CTRunGetStringRange(self.raw) })
+        unsafe { bridge::ct_run_get_string_range(self.raw) }.into()
     }
 
-    /// Typographic bounds of the entire run.
+    #[must_use]
     pub fn typographic_bounds(&self) -> TypographicBounds {
-        let mut ascent: f64 = 0.0;
-        let mut descent: f64 = 0.0;
-        let mut leading: f64 = 0.0;
-        let count = unsafe { ffi::CTRunGetGlyphCount(self.raw) };
+        let mut ascent = 0.0;
+        let mut descent = 0.0;
+        let mut leading = 0.0;
         let width = unsafe {
-            ffi::CTRunGetTypographicBounds(
-                self.raw,
-                ffi::CFRange::new(0, count),
-                &mut ascent,
-                &mut descent,
-                &mut leading,
-            )
+            bridge::ct_run_get_typographic_bounds(self.raw, &mut ascent, &mut descent, &mut leading)
         };
         TypographicBounds {
             width,
@@ -146,19 +105,39 @@ impl CTRun {
             leading,
         }
     }
-}
 
-impl Clone for CTRun {
-    fn clone(&self) -> Self {
-        unsafe { ffi::CFRetain(self.raw) };
-        Self { raw: self.raw }
+    #[must_use]
+    pub fn image_bounds(&self) -> CGRect {
+        unsafe { bridge::ct_run_get_image_bounds(self.raw) }
     }
-}
 
-impl Drop for CTRun {
-    fn drop(&mut self) {
-        if !self.raw.is_null() {
-            unsafe { ffi::CFRelease(self.raw) };
+    #[must_use]
+    pub fn text_matrix(&self) -> CGAffineTransform {
+        unsafe { bridge::ct_run_get_text_matrix(self.raw) }
+    }
+
+    #[must_use]
+    pub fn base_advances_and_origins(&self) -> (Vec<CGSize>, Vec<CGPoint>) {
+        let count = self.glyph_count();
+        if count <= 0 {
+            return (Vec::new(), Vec::new());
         }
+        let len = usize::try_from(count).unwrap_or(0);
+        let mut advances = vec![CGSize::default(); len];
+        let mut origins = vec![CGPoint::default(); len];
+        let written = unsafe {
+            bridge::ct_run_copy_base_advances_and_origins(
+                self.raw,
+                advances.as_mut_ptr(),
+                origins.as_mut_ptr(),
+                count,
+            )
+        };
+        let written = usize::try_from(written).unwrap_or(0);
+        advances.truncate(written);
+        origins.truncate(written);
+        (advances, origins)
     }
 }
+
+use crate::error::CoreTextResult;

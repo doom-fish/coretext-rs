@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.2.0] - 2026-05-16
+
+### Added
+
+- Swift bridge build pipeline that statically links a bundled `CoreTextBridge` library into the Rust crate.
+- Safe wrappers for `FontDescriptor`, `FontCollection`, `FontManager`, `CTTypesetter`, `TextTab`, `GlyphInfo`, and `RubyAnnotation`.
+- Font metadata helpers for traits, features, feature settings, variation axes, variation coordinates, and available table tags.
+- New integration tests for fonts, descriptors, collections, font manager, layout/typesetter/frame flows, glyph info, and ruby annotations.
+- New numbered examples covering layout, font metadata, descriptor/collection/manager workflows, glyph info, and ruby annotations.
+- `COVERAGE.md` documenting the requested CoreText coverage pass and the audited exclusions.
+
+### Changed
+
+- Migrated the safe API surface from direct C FFI wrappers to Swift-backed bridge functions while keeping the legacy raw declarations behind the opt-in `raw-ffi` feature.
+- Expanded paragraph style coverage to include text tabs, tab intervals, line break modes, and writing direction.
+- Expanded line, run, frame, and framesetter helpers around truncation, justification, bounds, offsets, image bounds, JSON attributes, and typesetter reuse.
+- Updated crate documentation for the v0.2.0 surface and examples.
+
+### Fixed
+
+- Added Swift runtime search paths required for tests and examples to link reliably from Cargo.
+- Added Swift 6 CoreText compatibility aliases in the bridge layer.
+- Corrected CFArray-backed CoreText handling for available font tables, paragraph tab stops, and ruby annotation text.
+
 ## [0.1.0] - 2026-05-16
 
 ### Added

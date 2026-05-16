@@ -1,79 +1,58 @@
-use crate::ffi;
+use crate::bridge;
+use crate::common::impl_handle;
 use crate::line::CTLine;
-use crate::types::{CGPoint, TextRange};
+use crate::types::{CGPoint, CGRect, TextRange};
 
-/// A retained `CTFrameRef` wrapper.
+/// An immutable `CTFrame` wrapper.
 pub struct CTFrame {
-    pub(crate) raw: ffi::CTFrameRef,
+    raw: bridge::Handle,
 }
 
-unsafe impl Send for CTFrame {}
-unsafe impl Sync for CTFrame {}
+impl_handle!(CTFrame);
 
 impl CTFrame {
-    /// String range requested when creating this frame.
+    #[must_use]
     pub fn string_range(&self) -> TextRange {
-        TextRange::from(unsafe { ffi::CTFrameGetStringRange(self.raw) })
+        unsafe { bridge::ct_frame_get_string_range(self.raw) }.into()
     }
 
-    /// The subset of the string range that actually fits in the frame.
+    #[must_use]
     pub fn visible_string_range(&self) -> TextRange {
-        TextRange::from(unsafe { ffi::CTFrameGetVisibleStringRange(self.raw) })
+        unsafe { bridge::ct_frame_get_visible_string_range(self.raw) }.into()
     }
 
-    /// Lines laid out within this frame.
-    ///
-    /// Each returned `CTLine` is retained for the lifetime of the `Vec`.
+    #[must_use]
+    pub fn path_bounding_box(&self) -> CGRect {
+        unsafe { bridge::ct_frame_copy_path_bounding_box(self.raw) }
+    }
+
+    #[must_use]
+    pub fn has_frame_attributes(&self) -> bool {
+        unsafe { bridge::ct_frame_has_frame_attributes(self.raw) }
+    }
+
+    #[must_use]
     pub fn lines(&self) -> Vec<CTLine> {
-        unsafe {
-            let array = ffi::CTFrameGetLines(self.raw);
-            if array.is_null() {
-                return Vec::new();
-            }
-            let count = ffi::CFArrayGetCount(array);
-            (0..count)
-                .filter_map(|i| {
-                    let r = ffi::CFArrayGetValueAtIndex(array, i) as ffi::CTLineRef;
-                    if r.is_null() {
-                        return None;
-                    }
-                    ffi::CFRetain(r);
-                    Some(CTLine { raw: r })
-                })
-                .collect()
+        let count = unsafe { bridge::ct_frame_get_line_count(self.raw) };
+        if count <= 0 {
+            return Vec::new();
         }
+        let mut handles = vec![std::ptr::null_mut(); usize::try_from(count).unwrap_or(0)];
+        let written = unsafe { bridge::ct_frame_copy_lines(self.raw, handles.as_mut_ptr(), count) };
+        handles.truncate(usize::try_from(written).unwrap_or(0));
+        handles.into_iter().map(CTLine::from_raw).collect()
     }
 
-    /// Origins (in frame coordinates) for each line.
+    #[must_use]
     pub fn line_origins(&self) -> Vec<CGPoint> {
-        unsafe {
-            let array = ffi::CTFrameGetLines(self.raw);
-            if array.is_null() {
-                return Vec::new();
-            }
-            let count = ffi::CFArrayGetCount(array);
-            if count <= 0 {
-                return Vec::new();
-            }
-            let n = usize::try_from(count).unwrap_or(0);
-            let mut origins = vec![ffi::CGPoint { x: 0.0, y: 0.0 }; n];
-            ffi::CTFrameGetLineOrigins(self.raw, ffi::CFRange::new(0, count), origins.as_mut_ptr());
-            origins
+        let count = unsafe { bridge::ct_frame_get_line_count(self.raw) };
+        if count <= 0 {
+            return Vec::new();
         }
-    }
-}
-
-impl Clone for CTFrame {
-    fn clone(&self) -> Self {
-        unsafe { ffi::CFRetain(self.raw) };
-        Self { raw: self.raw }
-    }
-}
-
-impl Drop for CTFrame {
-    fn drop(&mut self) {
-        if !self.raw.is_null() {
-            unsafe { ffi::CFRelease(self.raw) };
-        }
+        let mut origins = vec![CGPoint::default(); usize::try_from(count).unwrap_or(0)];
+        let written =
+            unsafe { bridge::ct_frame_copy_line_origins(self.raw, origins.as_mut_ptr(), count) };
+        origins.truncate(usize::try_from(written).unwrap_or(0));
+        origins
     }
 }
