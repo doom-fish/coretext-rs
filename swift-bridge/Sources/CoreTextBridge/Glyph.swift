@@ -93,3 +93,8 @@ func ct_glyph_info_get_character_collection(_ glyphInfoPtr: UnsafeMutableRawPoin
     let glyphInfo: CTGlyphInfo = unbox(glyphInfoPtr, as: CTGlyphInfo.self)
     return CTGlyphInfoGetCharacterCollection(glyphInfo).rawValue
 }
+
+@_cdecl("ct_glyph_info_get_type_id")
+func ct_glyph_info_get_type_id() -> UInt64 {
+    UInt64(CTGlyphInfoGetTypeID())
+}

@@ -128,3 +128,8 @@ func ct_run_copy_base_advances_and_origins(
     CTRunGetBaseAdvancesAndOrigins(run, CFRange(location: 0, length: capacity), advances, origins)
     return min(capacity, CTRunGetGlyphCount(run))
 }
+
+@_cdecl("ct_run_get_type_id")
+func ct_run_get_type_id() -> UInt64 {
+    UInt64(CTRunGetTypeID())
+}

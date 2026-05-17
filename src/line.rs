@@ -159,3 +159,8 @@ impl CTLine {
         handles.into_iter().map(CTRun::from_raw).collect()
     }
 }
+
+#[must_use]
+pub fn line_type_id() -> u64 {
+    unsafe { bridge::ct_line_get_type_id() }
+}

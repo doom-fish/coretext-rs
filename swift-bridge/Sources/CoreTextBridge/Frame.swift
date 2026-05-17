@@ -62,3 +62,17 @@ func ct_frame_copy_line_origins(
     CTFrameGetLineOrigins(frame, CFRange(location: 0, length: capacity), buffer)
     return min(capacity, lines.count)
 }
+
+@_cdecl("ct_frame_copy_frame_attributes_json")
+func ct_frame_copy_frame_attributes_json(_ framePtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+    guard let framePtr else {
+        return duplicateCString("null")
+    }
+    let frame: CTFrame = unbox(framePtr, as: CTFrame.self)
+    return cfToJSONCString(CTFrameGetFrameAttributes(frame))
+}
+
+@_cdecl("ct_frame_get_type_id")
+func ct_frame_get_type_id() -> UInt64 {
+    UInt64(CTFrameGetTypeID())
+}

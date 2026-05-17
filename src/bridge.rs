@@ -393,3 +393,168 @@ unsafe extern "C" {
         position: u8,
     ) -> *mut c_char;
 }
+
+unsafe extern "C" {
+    pub fn ct_font_collection_get_exclusion_descriptor_count(collection: Handle) -> isize;
+    pub fn ct_font_collection_copy_exclusion_descriptors(
+        collection: Handle,
+        buffer: *mut Handle,
+        capacity: isize,
+    ) -> isize;
+    pub fn ct_font_collection_copy_font_attribute_json(
+        collection: Handle,
+        attribute_name: *const c_char,
+    ) -> *mut c_char;
+    pub fn ct_font_collection_copy_font_attributes_json(
+        collection: Handle,
+        attribute_names_json: *const c_char,
+    ) -> *mut c_char;
+    pub fn ct_font_collection_matching_with_options_count(
+        collection: Handle,
+        options_json: *const c_char,
+    ) -> isize;
+    pub fn ct_font_collection_copy_matching_with_options(
+        collection: Handle,
+        options_json: *const c_char,
+        buffer: *mut Handle,
+        capacity: isize,
+    ) -> isize;
+    pub fn ct_font_collection_create_mutable_copy(collection: Handle) -> Handle;
+    pub fn ct_font_collection_get_type_id() -> u64;
+    pub fn ct_font_collection_set_exclusion_descriptors(
+        collection: Handle,
+        descriptors: *const Handle,
+        count: isize,
+    );
+    pub fn ct_font_collection_set_query_descriptors(
+        collection: Handle,
+        descriptors: *const Handle,
+        count: isize,
+    );
+
+    pub fn ct_font_copy_attribute_json(font: Handle, attribute_name: *const c_char) -> *mut c_char;
+    pub fn ct_font_copy_default_cascade_list_count(
+        font: Handle,
+        languages_json: *const c_char,
+    ) -> isize;
+    pub fn ct_font_copy_default_cascade_list(
+        font: Handle,
+        languages_json: *const c_char,
+        buffer: *mut Handle,
+        capacity: isize,
+    ) -> isize;
+    pub fn ct_font_copy_table_bytes(font: Handle, tag: u32, out_len: *mut isize) -> *mut u8;
+    pub fn ct_font_create_with_descriptor_and_options(
+        descriptor: Handle,
+        size: f64,
+        options: u32,
+    ) -> Handle;
+    pub fn ct_font_create_with_name_and_options(
+        name: *const c_char,
+        size: f64,
+        options: u32,
+    ) -> Handle;
+    pub fn ct_font_get_ligature_caret_positions(
+        font: Handle,
+        glyph: u16,
+        buffer: *mut f64,
+        max_positions: isize,
+    ) -> isize;
+    pub fn ct_font_get_string_encoding(font: Handle) -> u32;
+    pub fn ct_font_get_type_id() -> u64;
+
+    pub fn ct_font_descriptor_copy_attribute_json(
+        descriptor: Handle,
+        attribute_name: *const c_char,
+    ) -> *mut c_char;
+    pub fn ct_font_descriptor_copy_localized_attribute_json(
+        descriptor: Handle,
+        attribute_name: *const c_char,
+    ) -> *mut c_char;
+    pub fn ct_font_descriptor_create_copy_with_attributes_json(
+        descriptor: Handle,
+        attrs_json: *const c_char,
+    ) -> Handle;
+    pub fn ct_font_descriptor_create_with_attributes_json(attrs_json: *const c_char) -> Handle;
+    pub fn ct_font_descriptor_get_type_id() -> u64;
+
+    pub fn ct_font_manager_copy_registered_descriptor_count(scope: u32, enabled: bool) -> isize;
+    pub fn ct_font_manager_copy_registered_descriptors(
+        scope: u32,
+        enabled: bool,
+        buffer: *mut Handle,
+        capacity: isize,
+    ) -> isize;
+    pub fn ct_font_manager_create_descriptor_from_data(
+        bytes: *const u8,
+        length: isize,
+    ) -> Handle;
+    pub fn ct_font_manager_create_descriptors_from_data_count(
+        bytes: *const u8,
+        length: isize,
+    ) -> isize;
+    pub fn ct_font_manager_create_descriptors_from_data(
+        bytes: *const u8,
+        length: isize,
+        buffer: *mut Handle,
+        capacity: isize,
+    ) -> isize;
+    pub fn ct_font_manager_enable_font_descriptors(
+        descriptors: *const Handle,
+        count: isize,
+        enable: bool,
+    );
+    pub fn ct_font_manager_register_font_descriptors(
+        descriptors: *const Handle,
+        count: isize,
+        scope: u32,
+        enabled: bool,
+    ) -> *mut c_char;
+    pub fn ct_font_manager_register_font_urls(
+        url_paths_json: *const c_char,
+        scope: u32,
+        enabled: bool,
+    ) -> *mut c_char;
+    pub fn ct_font_manager_register_fonts_for_urls(
+        url_paths_json: *const c_char,
+        scope: u32,
+        error_out: *mut *mut c_char,
+    ) -> bool;
+    pub fn ct_font_manager_register_fonts_with_asset_names(
+        asset_names_json: *const c_char,
+        scope: u32,
+        enabled: bool,
+    ) -> bool;
+    pub fn ct_font_manager_unregister_font_descriptors(
+        descriptors: *const Handle,
+        count: isize,
+        scope: u32,
+    ) -> *mut c_char;
+    pub fn ct_font_manager_unregister_font_urls(
+        url_paths_json: *const c_char,
+        scope: u32,
+    ) -> *mut c_char;
+    pub fn ct_font_manager_unregister_fonts_for_urls(
+        url_paths_json: *const c_char,
+        scope: u32,
+        error_out: *mut *mut c_char,
+    ) -> bool;
+
+    pub fn ct_frame_copy_frame_attributes_json(frame: Handle) -> *mut c_char;
+    pub fn ct_frame_get_type_id() -> u64;
+
+    pub fn ct_framesetter_get_type_id() -> u64;
+    pub fn ct_glyph_info_get_type_id() -> u64;
+    pub fn ct_line_get_type_id() -> u64;
+    pub fn ct_paragraph_style_get_type_id() -> u64;
+    pub fn ct_paragraph_style_get_value_for_specifier_json(
+        paragraph_style: Handle,
+        specifier: u32,
+    ) -> *mut c_char;
+    pub fn ct_ruby_annotation_create_with_attributes_json(attrs_json: *const c_char) -> Handle;
+    pub fn ct_ruby_annotation_get_type_id() -> u64;
+    pub fn ct_run_get_type_id() -> u64;
+    pub fn ct_text_tab_get_options_json(text_tab: Handle) -> *mut c_char;
+    pub fn ct_text_tab_get_type_id() -> u64;
+    pub fn ct_typesetter_get_type_id() -> u64;
+}

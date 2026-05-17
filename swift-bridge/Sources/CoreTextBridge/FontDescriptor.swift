@@ -248,3 +248,58 @@ func ct_font_descriptor_copy_attributes_json(_ descriptorPtr: UnsafeMutableRawPo
     let descriptor: CTFontDescriptor = unbox(descriptorPtr, as: CTFontDescriptor.self)
     return jsonCString(descriptorAttributesPayload(descriptor))
 }
+
+@_cdecl("ct_font_descriptor_copy_attribute_json")
+func ct_font_descriptor_copy_attribute_json(
+    _ descriptorPtr: UnsafeMutableRawPointer?,
+    _ attributeName: UnsafePointer<CChar>?
+) -> UnsafeMutablePointer<CChar>? {
+    guard let descriptorPtr, let attributeName = stringFromCString(attributeName) else {
+        return duplicateCString("null")
+    }
+    let descriptor: CTFontDescriptor = unbox(descriptorPtr, as: CTFontDescriptor.self)
+    return cfToJSONCString(CTFontDescriptorCopyAttribute(descriptor, fontAttributeName(attributeName)))
+}
+
+@_cdecl("ct_font_descriptor_copy_localized_attribute_json")
+func ct_font_descriptor_copy_localized_attribute_json(
+    _ descriptorPtr: UnsafeMutableRawPointer?,
+    _ attributeName: UnsafePointer<CChar>?
+) -> UnsafeMutablePointer<CChar>? {
+    guard let descriptorPtr, let attributeName = stringFromCString(attributeName) else {
+        return duplicateCString("null")
+    }
+    let descriptor: CTFontDescriptor = unbox(descriptorPtr, as: CTFontDescriptor.self)
+    return cfToJSONCString(
+        CTFontDescriptorCopyLocalizedAttribute(descriptor, fontAttributeName(attributeName), nil)
+    )
+}
+
+@_cdecl("ct_font_descriptor_create_copy_with_attributes_json")
+func ct_font_descriptor_create_copy_with_attributes_json(
+    _ descriptorPtr: UnsafeMutableRawPointer?,
+    _ attrsJSON: UnsafePointer<CChar>?
+) -> UnsafeMutableRawPointer? {
+    guard let descriptorPtr,
+          let attributes = dictionaryFromJSON(attrsJSON, keyTransform: fontAttributeName)
+    else {
+        return nil
+    }
+    let descriptor: CTFontDescriptor = unbox(descriptorPtr, as: CTFontDescriptor.self)
+    return retainBox(CTFontDescriptorCreateCopyWithAttributes(descriptor, attributes))
+}
+
+@_cdecl("ct_font_descriptor_create_with_attributes_json")
+func ct_font_descriptor_create_with_attributes_json(
+    _ attrsJSON: UnsafePointer<CChar>?
+) -> UnsafeMutableRawPointer? {
+    guard let attributes = dictionaryFromJSON(attrsJSON, keyTransform: fontAttributeName) else {
+        return nil
+    }
+    return retainBox(CTFontDescriptorCreateWithAttributes(attributes))
+}
+
+@_cdecl("ct_font_descriptor_get_type_id")
+func ct_font_descriptor_get_type_id() -> UInt64 {
+    UInt64(CTFontDescriptorGetTypeID())
+}

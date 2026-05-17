@@ -118,3 +118,8 @@ impl CTTypesetter {
         }
     }
 }
+
+#[must_use]
+pub fn typesetter_type_id() -> u64 {
+    unsafe { bridge::ct_typesetter_get_type_id() }
+}

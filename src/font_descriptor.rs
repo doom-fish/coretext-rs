@@ -237,4 +237,44 @@ impl FontDescriptor {
     pub fn attributes_json(&self) -> CoreTextResult<Value> {
         unsafe { json_from_owned(bridge::ct_font_descriptor_copy_attributes_json(self.raw)) }
     }
+
+    pub fn attribute_json(&self, attr: &str) -> CoreTextResult<Value> {
+        let attr = cstring(attr)?;
+        unsafe { json_from_owned(bridge::ct_font_descriptor_copy_attribute_json(self.raw, attr.as_ptr())) }
+    }
+
+    pub fn localized_attribute_json(&self, attr: &str) -> CoreTextResult<Value> {
+        let attr = cstring(attr)?;
+        unsafe {
+            json_from_owned(bridge::ct_font_descriptor_copy_localized_attribute_json(
+                self.raw,
+                attr.as_ptr(),
+            ))
+        }
+    }
+
+    pub fn copy_with_attributes_json(&self, attrs_json: &str) -> CoreTextResult<Self> {
+        let attrs_json = cstring(attrs_json)?;
+        let raw = unsafe {
+            bridge::ct_font_descriptor_create_copy_with_attributes_json(self.raw, attrs_json.as_ptr())
+        };
+        Ok(Self::from_raw(expect_handle(
+            raw,
+            "ct_font_descriptor_create_copy_with_attributes_json returned NULL",
+        )?))
+    }
+
+    pub fn with_attributes_json(attrs_json: &str) -> CoreTextResult<Self> {
+        let attrs_json = cstring(attrs_json)?;
+        let raw = unsafe { bridge::ct_font_descriptor_create_with_attributes_json(attrs_json.as_ptr()) };
+        Ok(Self::from_raw(expect_handle(
+            raw,
+            "ct_font_descriptor_create_with_attributes_json returned NULL",
+        )?))
+    }
+}
+
+#[must_use]
+pub fn font_descriptor_type_id() -> u64 {
+    unsafe { bridge::ct_font_descriptor_get_type_id() }
 }

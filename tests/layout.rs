@@ -1,9 +1,11 @@
 mod support;
 
 use coretext::{
-    bounds_options, AttributedString, CGPoint, CGRect, CGSize, CTFramesetter, CTLine, CTTypesetter,
-    LineBreakMode, LineTruncationType, ParagraphStyle, ParagraphStyleOptions, TextAlignment,
-    TextRange, TextTab, TypesetterOptions, WritingDirection,
+    bounds_options, frame_type_id, framesetter_type_id, line_type_id, paragraph_style_type_id,
+    run_type_id, text_tab_type_id, typesetter_type_id, AttributedString, CGPoint, CGRect, CGSize,
+    CTFramesetter, CTLine, CTTypesetter, LineBreakMode, LineTruncationType, ParagraphStyle,
+    ParagraphStyleOptions, TextAlignment, TextRange, TextTab, TypesetterOptions,
+    WritingDirection,
 };
 
 #[test]
@@ -32,13 +34,24 @@ fn paragraph_style_and_text_tabs_round_trip() -> Result<(), Box<dyn std::error::
     );
     assert_eq!(style.tab_stops().len(), 1);
     assert!((style.tab_stops()[0].location() - 24.0).abs() < f64::EPSILON);
+    let tab_options = style.tab_stops()[0].options_json()?;
+    assert!(tab_options.is_object() || tab_options.is_null());
+    let alignment = style.value_for_specifier_json(0)?;
+    assert!(alignment.is_number() || alignment.is_null());
     assert_eq!(style.copy()?.alignment(), TextAlignment::Center);
+    assert!(text_tab_type_id() > 0);
+    assert!(paragraph_style_type_id() > 0);
     Ok(())
 }
 
 #[test]
 fn line_run_typesetter_framesetter_and_frame() -> Result<(), Box<dyn std::error::Error>> {
     let attr = support::attributed_string();
+    assert!(typesetter_type_id() > 0);
+    assert!(line_type_id() > 0);
+    assert!(run_type_id() > 0);
+    assert!(framesetter_type_id() > 0);
+    assert!(frame_type_id() > 0);
     let typesetter = CTTypesetter::create_with_options(
         &attr,
         TypesetterOptions {

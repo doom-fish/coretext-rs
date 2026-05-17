@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0] - 2026-05-17
+
+### Added
+
+- Added the remaining safe CoreText wrappers requested by `COVERAGE_AUDIT_V2.md`, including font-collection exclusion/query helpers, font attribute/cascade/table/options/caret/string-encoding APIs, descriptor JSON attribute builders, batch font-manager registration/data helpers, and type-id/text-tab/ruby/layout accessors.
+
+### Changed
+
+- Reclassified the remaining callback-only, drawing-only, borrowed-pointer, deprecated, and macOS-unavailable CoreText entry points as explicit `COVERAGE_AUDIT_V2.md` exemptions, bringing the v2 audit to zero unresolved gaps.
+- Refreshed the safe-surface audit metadata and coverage notes for the new `0.3.0` API surface.
+
 ## [0.2.1] - 2026-05-16
 
 ### Added

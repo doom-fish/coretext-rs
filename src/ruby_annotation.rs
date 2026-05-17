@@ -151,4 +151,29 @@ impl RubyAnnotation {
             ))
         }
     }
+
+    pub fn with_attributes(
+        alignment: RubyAlignment,
+        overhang: RubyOverhang,
+        size_factor: f64,
+        texts: [Option<&str>; 4],
+    ) -> CoreTextResult<Self> {
+        let payload = serde_json::json!({
+            "alignment": alignment as u8,
+            "overhang": overhang as u8,
+            "sizeFactor": size_factor,
+            "texts": texts,
+        });
+        let json = cstring(&payload.to_string())?;
+        let raw = unsafe { bridge::ct_ruby_annotation_create_with_attributes_json(json.as_ptr()) };
+        Ok(Self::from_raw(expect_handle(
+            raw,
+            "ct_ruby_annotation_create_with_attributes_json returned NULL",
+        )?))
+    }
+}
+
+#[must_use]
+pub fn ruby_annotation_type_id() -> u64 {
+    unsafe { bridge::ct_ruby_annotation_get_type_id() }
 }

@@ -39,3 +39,17 @@ func ct_text_tab_get_location(_ textTabPtr: UnsafeMutableRawPointer?) -> Double 
     let textTab: CTTextTab = unbox(textTabPtr, as: CTTextTab.self)
     return CTTextTabGetLocation(textTab)
 }
+
+@_cdecl("ct_text_tab_get_options_json")
+func ct_text_tab_get_options_json(_ textTabPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+    guard let textTabPtr else {
+        return duplicateCString("null")
+    }
+    let textTab: CTTextTab = unbox(textTabPtr, as: CTTextTab.self)
+    return cfToJSONCString(CTTextTabGetOptions(textTab))
+}
+
+@_cdecl("ct_text_tab_get_type_id")
+func ct_text_tab_get_type_id() -> UInt64 {
+    UInt64(CTTextTabGetTypeID())
+}

@@ -55,4 +55,13 @@ impl CTFrame {
         origins.truncate(usize::try_from(written).unwrap_or(0));
         origins
     }
+
+    pub fn frame_attributes_json(&self) -> crate::error::CoreTextResult<serde_json::Value> {
+        unsafe { crate::common::json_from_owned(bridge::ct_frame_copy_frame_attributes_json(self.raw)) }
+    }
+}
+
+#[must_use]
+pub fn frame_type_id() -> u64 {
+    unsafe { bridge::ct_frame_get_type_id() }
 }

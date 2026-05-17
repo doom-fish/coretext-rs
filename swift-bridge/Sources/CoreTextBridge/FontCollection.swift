@@ -132,3 +132,117 @@ func ct_font_collection_copy_matching_descriptors_for_family(
     )
     return fillBoxedArray(descriptors, buffer: buffer, capacity: capacity)
 }
+
+@_cdecl("ct_font_collection_get_exclusion_descriptor_count")
+func ct_font_collection_get_exclusion_descriptor_count(_ collectionPtr: UnsafeMutableRawPointer?) -> Int {
+    guard let collectionPtr else { return 0 }
+    let collection: CTFontCollection = unbox(collectionPtr, as: CTFontCollection.self)
+    let descriptors: [CTFontDescriptor] = typedArray(CTFontCollectionCopyExclusionDescriptors(collection))
+    return descriptors.count
+}
+
+@_cdecl("ct_font_collection_copy_exclusion_descriptors")
+func ct_font_collection_copy_exclusion_descriptors(
+    _ collectionPtr: UnsafeMutableRawPointer?,
+    _ buffer: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ capacity: Int
+) -> Int {
+    guard let collectionPtr else { return 0 }
+    let collection: CTFontCollection = unbox(collectionPtr, as: CTFontCollection.self)
+    let descriptors: [CTFontDescriptor] = typedArray(CTFontCollectionCopyExclusionDescriptors(collection))
+    return fillBoxedArray(descriptors, buffer: buffer, capacity: capacity)
+}
+
+@_cdecl("ct_font_collection_copy_font_attribute_json")
+func ct_font_collection_copy_font_attribute_json(
+    _ collectionPtr: UnsafeMutableRawPointer?,
+    _ attributeName: UnsafePointer<CChar>?
+) -> UnsafeMutablePointer<CChar>? {
+    guard let collectionPtr, let attributeName = stringFromCString(attributeName) else {
+        return duplicateCString("null")
+    }
+    let collection: CTFontCollection = unbox(collectionPtr, as: CTFontCollection.self)
+    return cfToJSONCString(
+        CTFontCollectionCopyFontAttribute(collection, fontAttributeName(attributeName), [])
+    )
+}
+
+@_cdecl("ct_font_collection_copy_font_attributes_json")
+func ct_font_collection_copy_font_attributes_json(
+    _ collectionPtr: UnsafeMutableRawPointer?,
+    _ attributeNamesJSON: UnsafePointer<CChar>?
+) -> UnsafeMutablePointer<CChar>? {
+    guard let collectionPtr else {
+        return duplicateCString("[]")
+    }
+    let collection: CTFontCollection = unbox(collectionPtr, as: CTFontCollection.self)
+    let attributeNames = stringArrayFromJSON(attributeNamesJSON).map(fontAttributeName)
+    return cfToJSONCString(
+        CTFontCollectionCopyFontAttributes(collection, NSSet(array: attributeNames), [])
+    )
+}
+
+@_cdecl("ct_font_collection_matching_with_options_count")
+func ct_font_collection_matching_with_options_count(
+    _ collectionPtr: UnsafeMutableRawPointer?,
+    _ optionsJSON: UnsafePointer<CChar>?
+) -> Int {
+    guard let collectionPtr else { return 0 }
+    let collection: CTFontCollection = unbox(collectionPtr, as: CTFontCollection.self)
+    let descriptors: [CTFontDescriptor] = typedArray(
+        CTFontCollectionCreateMatchingFontDescriptorsWithOptions(collection, fontCollectionOptions(optionsJSON))
+    )
+    return descriptors.count
+}
+
+@_cdecl("ct_font_collection_copy_matching_with_options")
+func ct_font_collection_copy_matching_with_options(
+    _ collectionPtr: UnsafeMutableRawPointer?,
+    _ optionsJSON: UnsafePointer<CChar>?,
+    _ buffer: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ capacity: Int
+) -> Int {
+    guard let collectionPtr else { return 0 }
+    let collection: CTFontCollection = unbox(collectionPtr, as: CTFontCollection.self)
+    let descriptors: [CTFontDescriptor] = typedArray(
+        CTFontCollectionCreateMatchingFontDescriptorsWithOptions(collection, fontCollectionOptions(optionsJSON))
+    )
+    return fillBoxedArray(descriptors, buffer: buffer, capacity: capacity)
+}
+
+@_cdecl("ct_font_collection_create_mutable_copy")
+func ct_font_collection_create_mutable_copy(_ collectionPtr: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
+    guard let collectionPtr else { return nil }
+    let collection: CTFontCollection = unbox(collectionPtr, as: CTFontCollection.self)
+    let copy: CTMutableFontCollection = CTFontCollectionCreateMutableCopy(collection)
+    return retainBox(copy)
+}
+
+@_cdecl("ct_font_collection_get_type_id")
+func ct_font_collection_get_type_id() -> UInt64 {
+    UInt64(CTFontCollectionGetTypeID())
+}
+
+@_cdecl("ct_font_collection_set_exclusion_descriptors")
+func ct_font_collection_set_exclusion_descriptors(
+    _ collectionPtr: UnsafeMutableRawPointer?,
+    _ descriptorHandles: UnsafePointer<UnsafeMutableRawPointer?>?,
+    _ descriptorCount: Int
+) {
+    guard let collectionPtr else { return }
+    let collection: CTMutableFontCollection = unbox(collectionPtr, as: CTMutableFontCollection.self)
+    let descriptors: [CTFontDescriptor] = handlesToValues(descriptorHandles, count: descriptorCount)
+    CTFontCollectionSetExclusionDescriptors(collection, descriptors.isEmpty ? nil : descriptors as CFArray)
+}
+
+@_cdecl("ct_font_collection_set_query_descriptors")
+func ct_font_collection_set_query_descriptors(
+    _ collectionPtr: UnsafeMutableRawPointer?,
+    _ descriptorHandles: UnsafePointer<UnsafeMutableRawPointer?>?,
+    _ descriptorCount: Int
+) {
+    guard let collectionPtr else { return }
+    let collection: CTMutableFontCollection = unbox(collectionPtr, as: CTMutableFontCollection.self)
+    let descriptors: [CTFontDescriptor] = handlesToValues(descriptorHandles, count: descriptorCount)
+    CTFontCollectionSetQueryDescriptors(collection, descriptors.isEmpty ? nil : descriptors as CFArray)
+}

@@ -126,3 +126,64 @@ func ct_ruby_annotation_copy_text_for_position(
     let rubyAnnotation: CTRubyAnnotation = unbox(rubyAnnotationPtr, as: CTRubyAnnotation.self)
     return duplicateCString(CTRubyAnnotationGetTextForPosition(rubyAnnotation, rubyPosition(position)) as String?)
 }
+
+private struct RubyAnnotationAttributesPayload: Decodable {
+    let alignment: UInt8
+    let overhang: UInt8
+    let sizeFactor: Double
+    let texts: [String?]
+}
+
+@_cdecl("ct_ruby_annotation_create_with_attributes_json")
+func ct_ruby_annotation_create_with_attributes_json(
+    _ attrsJSON: UnsafePointer<CChar>?
+) -> UnsafeMutableRawPointer? {
+    guard let payload = decodeJSON(attrsJSON, as: RubyAnnotationAttributesPayload.self) else {
+        return nil
+    }
+
+    var texts = Array(payload.texts.prefix(4))
+    while texts.count < 4 {
+        texts.append(nil)
+    }
+
+    let populated = texts.enumerated().compactMap { index, text in
+        text.map { (index, $0) }
+    }
+    if populated.count == 1, let (index, text) = populated.first {
+        let attributes: [CFString: Any] = [
+            kCTRubyAnnotationSizeFactorAttributeName: NSNumber(value: payload.sizeFactor)
+        ]
+        let annotation = CTRubyAnnotationCreateWithAttributes(
+            rubyAlignment(payload.alignment),
+            rubyOverhang(payload.overhang),
+            rubyPosition(UInt8(index)),
+            text as CFString,
+            attributes as CFDictionary
+        )
+        return retainBox(annotation)
+    }
+
+    var rubyTexts: [Unmanaged<CFString>?] = texts.map { text in
+        text.map { Unmanaged.passRetained($0 as CFString) }
+    }
+    defer {
+        for case let value? in rubyTexts {
+            value.release()
+        }
+    }
+    let annotation = rubyTexts.withUnsafeMutableBufferPointer { buffer in
+        CTRubyAnnotationCreate(
+            rubyAlignment(payload.alignment),
+            rubyOverhang(payload.overhang),
+            CGFloat(payload.sizeFactor),
+            buffer.baseAddress!
+        )
+    }
+    return retainBox(annotation)
+}
+
+@_cdecl("ct_ruby_annotation_get_type_id")
+func ct_ruby_annotation_get_type_id() -> UInt64 {
+    UInt64(CTRubyAnnotationGetTypeID())
+}

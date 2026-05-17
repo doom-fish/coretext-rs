@@ -1,6 +1,8 @@
 mod support;
 
-use coretext::{symbolic_traits, CTFont, FontNameKey, FontOrientation, TextRange, UIFontType};
+use coretext::{
+    font_type_id, symbolic_traits, CTFont, FontNameKey, FontOrientation, TextRange, UIFontType,
+};
 
 #[test]
 fn font_surface_smoke() -> Result<(), Box<dyn std::error::Error>> {
@@ -24,6 +26,13 @@ fn font_surface_smoke() -> Result<(), Box<dyn std::error::Error>> {
     assert!(font.cap_height() > 0.0);
     assert!(font.x_height() >= 0.0);
     assert!(!font.supported_languages()?.is_empty());
+    assert_eq!(
+        font.attribute_json("familyName")?.as_str(),
+        Some(font.family_name()?.as_str())
+    );
+    let _ = font.string_encoding();
+    let _ = font.default_cascade_list(&[])?;
+    assert!(font_type_id() > 0);
     Ok(())
 }
 
@@ -71,7 +80,10 @@ fn font_traits_features_and_variations() -> Result<(), Box<dyn std::error::Error
     let tables = font.available_tables()?;
     if let Some(tag) = tables.first() {
         assert!(font.has_table(*tag));
+        assert!(!font.table_data(*tag)?.is_empty());
     }
+
+    let _ = font.ligature_caret_positions(support::first_glyph_for("fi"));
 
     Ok(())
 }
@@ -101,5 +113,11 @@ fn font_creation_helpers() -> Result<(), Box<dyn std::error::Error>> {
 
     let attributed_copy = font.copy_with_attributes(14.0, Some(&descriptor))?;
     assert!((attributed_copy.size() - 14.0).abs() < f64::EPSILON);
+
+    let with_options = CTFont::with_name_and_options("Helvetica", 15.0, 0)?;
+    assert!((with_options.size() - 15.0).abs() < f64::EPSILON);
+
+    let descriptor_options = CTFont::from_descriptor_with_options(&descriptor, 12.0, 0)?;
+    assert!((descriptor_options.size() - 12.0).abs() < f64::EPSILON);
     Ok(())
 }

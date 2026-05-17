@@ -111,3 +111,8 @@ impl GlyphInfo {
         })
     }
 }
+
+#[must_use]
+pub fn glyph_info_type_id() -> u64 {
+    unsafe { bridge::ct_glyph_info_get_type_id() }
+}

@@ -146,3 +146,8 @@ func ct_line_copy_runs(
     let runs: [CTRun] = typedArray(CTLineGetGlyphRuns(line))
     return fillBoxedArray(runs, buffer: buffer, capacity: capacity)
 }
+
+@_cdecl("ct_line_get_type_id")
+func ct_line_get_type_id() -> UInt64 {
+    UInt64(CTLineGetTypeID())
+}

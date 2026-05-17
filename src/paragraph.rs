@@ -282,4 +282,18 @@ impl ParagraphStyle {
         handles.truncate(usize::try_from(written).unwrap_or(0));
         handles.into_iter().map(TextTab::from_raw).collect()
     }
+
+    pub fn value_for_specifier_json(&self, specifier: u32) -> CoreTextResult<serde_json::Value> {
+        unsafe {
+            crate::common::json_from_owned(bridge::ct_paragraph_style_get_value_for_specifier_json(
+                self.raw,
+                specifier,
+            ))
+        }
+    }
+}
+
+#[must_use]
+pub fn paragraph_style_type_id() -> u64 {
+    unsafe { bridge::ct_paragraph_style_get_type_id() }
 }

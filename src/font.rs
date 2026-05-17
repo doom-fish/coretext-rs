@@ -412,4 +412,105 @@ impl CTFont {
     pub fn has_table(&self, tag: u32) -> bool {
         unsafe { bridge::ct_font_has_table(self.raw, tag) }
     }
+
+    pub fn attribute_json(&self, attr: &str) -> CoreTextResult<serde_json::Value> {
+        let attr = cstring(attr)?;
+        unsafe { crate::common::json_from_owned(bridge::ct_font_copy_attribute_json(self.raw, attr.as_ptr())) }
+    }
+
+    pub fn default_cascade_list(&self, languages: &[&str]) -> CoreTextResult<Vec<FontDescriptor>> {
+        let json = cstring(&serde_json::to_string(languages)?)?;
+        let count = unsafe {
+            bridge::ct_font_copy_default_cascade_list_count(self.raw, json.as_ptr())
+        };
+        if count <= 0 {
+            return Ok(Vec::new());
+        }
+        let mut handles = vec![std::ptr::null_mut(); usize::try_from(count).unwrap_or(0)];
+        let written = unsafe {
+            bridge::ct_font_copy_default_cascade_list(
+                self.raw,
+                json.as_ptr(),
+                handles.as_mut_ptr(),
+                count,
+            )
+        };
+        handles.truncate(usize::try_from(written).unwrap_or(0));
+        Ok(handles.into_iter().map(FontDescriptor::from_raw).collect())
+    }
+
+    pub fn table_data(&self, tag: u32) -> CoreTextResult<Vec<u8>> {
+        if !self.has_table(tag) {
+            return Err(CoreTextError::Bridge("font table not present".to_string()));
+        }
+        let mut len = 0_isize;
+        let bytes = unsafe { bridge::ct_font_copy_table_bytes(self.raw, tag, &mut len) };
+        if bytes.is_null() {
+            return if len == 0 {
+                Ok(Vec::new())
+            } else {
+                Err(CoreTextError::Bridge(
+                    "ct_font_copy_table_bytes returned NULL".to_string(),
+                ))
+            };
+        }
+        let len = usize::try_from(len).unwrap_or(0);
+        let data = unsafe { std::slice::from_raw_parts(bytes, len) }.to_vec();
+        unsafe { libc::free(bytes.cast()) };
+        Ok(data)
+    }
+
+    pub fn from_descriptor_with_options(
+        descriptor: &FontDescriptor,
+        size: f64,
+        options: u32,
+    ) -> CoreTextResult<Self> {
+        let raw = unsafe {
+            bridge::ct_font_create_with_descriptor_and_options(descriptor.as_raw(), size, options)
+        };
+        Ok(Self::from_raw(expect_handle(
+            raw,
+            "ct_font_create_with_descriptor_and_options returned NULL",
+        )?))
+    }
+
+    pub fn with_name_and_options(name: &str, size: f64, options: u32) -> CoreTextResult<Self> {
+        let name = cstring(name)?;
+        let raw = unsafe { bridge::ct_font_create_with_name_and_options(name.as_ptr(), size, options) };
+        Ok(Self::from_raw(expect_handle(
+            raw,
+            "ct_font_create_with_name_and_options returned NULL",
+        )?))
+    }
+
+    #[must_use]
+    pub fn ligature_caret_positions(&self, glyph: u16) -> Vec<f64> {
+        let count = unsafe {
+            bridge::ct_font_get_ligature_caret_positions(self.raw, glyph, std::ptr::null_mut(), 0)
+        };
+        if count <= 0 {
+            return Vec::new();
+        }
+        let mut positions = vec![0.0_f64; usize::try_from(count).unwrap_or(0)];
+        let written = unsafe {
+            bridge::ct_font_get_ligature_caret_positions(
+                self.raw,
+                glyph,
+                positions.as_mut_ptr(),
+                count,
+            )
+        };
+        positions.truncate(usize::try_from(written).unwrap_or(0));
+        positions
+    }
+
+    #[must_use]
+    pub fn string_encoding(&self) -> u32 {
+        unsafe { bridge::ct_font_get_string_encoding(self.raw) }
+    }
+}
+
+#[must_use]
+pub fn font_type_id() -> u64 {
+    unsafe { bridge::ct_font_get_type_id() }
 }

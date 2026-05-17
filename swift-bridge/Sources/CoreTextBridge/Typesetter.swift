@@ -102,3 +102,8 @@ func ct_typesetter_suggest_cluster_break_with_offset(
     let typesetter: CTTypesetter = unbox(typesetterPtr, as: CTTypesetter.self)
     return CTTypesetterSuggestClusterBreakWithOffset(typesetter, startIndex, width, offset)
 }
+
+@_cdecl("ct_typesetter_get_type_id")
+func ct_typesetter_get_type_id() -> UInt64 {
+    UInt64(CTTypesetterGetTypeID())
+}

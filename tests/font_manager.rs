@@ -1,5 +1,7 @@
 mod support;
 
+use std::fs;
+
 use coretext::{AutoActivationSetting, FontManager, FontManagerScope};
 
 #[test]
@@ -25,5 +27,11 @@ fn font_manager_listing_and_lookup() -> Result<(), Box<dyn std::error::Error>> {
             | AutoActivationSetting::Enabled
             | AutoActivationSetting::PromptUser
     ));
+
+    let data = fs::read(&font_url)?;
+    assert!(FontManager::font_descriptor_from_data(&data)?.family_name().is_some());
+    let descriptors = FontManager::font_descriptors_from_data(&data);
+    assert!(!descriptors.is_empty());
+    FontManager::enable_font_descriptors(&descriptors[..1], true);
     Ok(())
 }

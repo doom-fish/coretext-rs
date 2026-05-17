@@ -140,4 +140,9 @@ impl CTRun {
     }
 }
 
+#[must_use]
+pub fn run_type_id() -> u64 {
+    unsafe { bridge::ct_run_get_type_id() }
+}
+
 use crate::error::CoreTextResult;

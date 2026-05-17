@@ -1,4 +1,4 @@
-use coretext::{RubyAlignment, RubyAnnotation, RubyOverhang, RubyPosition};
+use coretext::{ruby_annotation_type_id, RubyAlignment, RubyAnnotation, RubyOverhang, RubyPosition};
 
 #[test]
 fn ruby_annotation_round_trip() -> Result<(), Box<dyn std::error::Error>> {
@@ -29,5 +29,18 @@ fn ruby_annotation_round_trip() -> Result<(), Box<dyn std::error::Error>> {
             .as_deref(),
         Some("inline")
     );
+
+    let attributed = RubyAnnotation::with_attributes(
+        RubyAlignment::Center,
+        RubyOverhang::Auto,
+        0.5,
+        [Some("ふ"), Some("ご"), None, Some("inline")],
+    )?;
+    assert_eq!(attributed.alignment(), RubyAlignment::Center);
+    assert_eq!(
+        attributed.text_for_position(RubyPosition::Before).as_deref(),
+        Some("ふ")
+    );
+    assert!(ruby_annotation_type_id() > 0);
     Ok(())
 }

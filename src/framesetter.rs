@@ -74,3 +74,8 @@ impl CTFramesetter {
         )?))
     }
 }
+
+#[must_use]
+pub fn framesetter_type_id() -> u64 {
+    unsafe { bridge::ct_framesetter_get_type_id() }
+}

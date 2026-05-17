@@ -29,4 +29,13 @@ impl TextTab {
     pub fn location(&self) -> f64 {
         unsafe { bridge::ct_text_tab_get_location(self.raw) }
     }
+
+    pub fn options_json(&self) -> crate::error::CoreTextResult<serde_json::Value> {
+        unsafe { crate::common::json_from_owned(bridge::ct_text_tab_get_options_json(self.raw)) }
+    }
+}
+
+#[must_use]
+pub fn text_tab_type_id() -> u64 {
+    unsafe { bridge::ct_text_tab_get_type_id() }
 }

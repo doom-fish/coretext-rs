@@ -40,22 +40,23 @@ pub mod typesetter;
 
 pub use attributed_string::AttributedString;
 pub use error::{CoreTextError, CoreTextResult};
-pub use font::{CTFont, FontNameKey, UIFontType};
-pub use font_collection::{FontCollection, FontCollectionOptions};
-pub use font_descriptor::{FontDescriptor, FontFormat, FontOrientation};
+pub use font::{font_type_id, CTFont, FontNameKey, UIFontType};
+pub use font_collection::{font_collection_type_id, FontCollection, FontCollectionOptions, MutableFontCollection};
+pub use font_descriptor::{font_descriptor_type_id, FontDescriptor, FontFormat, FontOrientation};
 pub use font_feature::{FontFeature, FontFeatureSelector, FontFeatureSetting};
 pub use font_manager::{AutoActivationSetting, FontManager, FontManagerScope};
 pub use font_traits::{symbolic_traits, FontTraits};
 pub use font_variation::{FontVariationAxis, FontVariationCoordinate};
-pub use frame::CTFrame;
-pub use framesetter::CTFramesetter;
-pub use glyph::{CharacterCollection, GlyphId, GlyphInfo};
-pub use line::{bounds_options, CTLine, LineTruncationType};
+pub use frame::{frame_type_id, CTFrame};
+pub use framesetter::{framesetter_type_id, CTFramesetter};
+pub use glyph::{glyph_info_type_id, CharacterCollection, GlyphId, GlyphInfo};
+pub use line::{bounds_options, line_type_id, CTLine, LineTruncationType};
 pub use paragraph::{
-    LineBreakMode, ParagraphStyle, ParagraphStyleOptions, TextAlignment, WritingDirection,
+    paragraph_style_type_id, LineBreakMode, ParagraphStyle, ParagraphStyleOptions,
+    TextAlignment, WritingDirection,
 };
-pub use ruby_annotation::{RubyAlignment, RubyAnnotation, RubyOverhang, RubyPosition};
-pub use run::{run_status, CTRun};
-pub use text_tab::TextTab;
+pub use ruby_annotation::{ruby_annotation_type_id, RubyAlignment, RubyAnnotation, RubyOverhang, RubyPosition};
+pub use run::{run_status, run_type_id, CTRun};
+pub use text_tab::{text_tab_type_id, TextTab};
 pub use types::{CGAffineTransform, CGPoint, CGRect, CGSize, TextRange, TypographicBounds};
-pub use typesetter::{CTTypesetter, TypesetterOptions};
+pub use typesetter::{typesetter_type_id, CTTypesetter, TypesetterOptions};

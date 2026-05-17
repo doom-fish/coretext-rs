@@ -48,3 +48,8 @@ func ct_framesetter_create_frame_in_rect(
     let path = CGPath(rect: rect, transform: nil)
     return retainBox(CTFramesetterCreateFrame(framesetter, stringRange, path, nil))
 }
+
+@_cdecl("ct_framesetter_get_type_id")
+func ct_framesetter_get_type_id() -> UInt64 {
+    UInt64(CTFramesetterGetTypeID())
+}
