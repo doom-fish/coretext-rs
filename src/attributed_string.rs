@@ -18,6 +18,9 @@ impl AttributedString {
         paragraph_style: Option<&ParagraphStyle>,
     ) -> CoreTextResult<Self> {
         let text = cstring(text)?;
+        // SAFETY: text.as_ptr() is valid for the duration of the call (it's a CString);
+        // font.as_raw() and paragraph_style.as_raw() are valid handles. The function
+        // returns a new attributed string handle that we take ownership of.
         let raw = unsafe {
             bridge::ct_attributed_string_create(
                 text.as_ptr(),

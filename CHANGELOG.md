@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.1] - 2026-05-18
+
+### Fixed
+
+- Added comprehensive `SAFETY:` comments to all unsafe blocks in core FFI modules (`cf.rs`, `common.rs`, `attributed_string.rs`). These comments document the preconditions and invariants that ensure memory safety for CoreFoundation and bridge-layer operations.
+
 ## [0.3.0] - 2026-05-17
 
 ### Added

@@ -25,6 +25,8 @@ pub unsafe fn string_from_owned(ptr: *mut libc::c_char) -> CoreTextResult<String
     if ptr.is_null() {
         return Err(CoreTextError::StringConversion);
     }
+    // SAFETY: ptr is non-null and points to a valid null-terminated UTF-8 string
+    // allocated by the bridge. We take ownership and release it via ct_string_release.
     let value = CStr::from_ptr(ptr)
         .to_str()
         .map_err(|_| CoreTextError::StringConversion)?
@@ -37,6 +39,8 @@ pub unsafe fn option_string_from_owned(ptr: *mut libc::c_char) -> Option<String>
     if ptr.is_null() {
         return None;
     }
+    // SAFETY: ptr is non-null and points to a valid null-terminated UTF-8 string
+    // allocated by the bridge. We take ownership and release it via ct_string_release.
     let value = CStr::from_ptr(ptr).to_string_lossy().into_owned();
     bridge::ct_string_release(ptr);
     Some(value)
@@ -52,6 +56,9 @@ where
 
 macro_rules! impl_handle {
     ($name:ident) => {
+        // SAFETY: All $name types wrap opaque Apple framework handles (raw pointers)
+        // that are thread-safe and can be sent across threads. The underlying Objective-C
+        // objects are managed via reference counting (retain/release), which is atomic.
         unsafe impl Send for $name {}
         unsafe impl Sync for $name {}
 
@@ -74,6 +81,9 @@ macro_rules! impl_handle {
                     Self { raw: self.raw }
                 } else {
                     Self {
+                        // SAFETY: self.raw is non-null (checked above) and is a valid
+                        // handle that we own. ct_retain increments the retain count and
+                        // returns the same handle.
                         raw: unsafe { crate::bridge::ct_retain(self.raw) },
                     }
                 }
@@ -83,6 +93,8 @@ macro_rules! impl_handle {
         impl Drop for $name {
             fn drop(&mut self) {
                 if !self.raw.is_null() {
+                    // SAFETY: self.raw is either NULL (checked above) or a valid handle
+                    // that we own and are releasing exactly once.
                     unsafe { crate::bridge::ct_release(self.raw) };
                 }
             }
