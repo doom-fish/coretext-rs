@@ -12,16 +12,16 @@
 
 use core::ffi::{c_char, c_void};
 
+pub use apple_cf::raw::{
+    CFAllocatorRef, CFArrayRef, CFAttributedStringRef, CFCharacterSetRef, CFDataRef,
+    CFDictionaryRef, CFErrorRef, CFLocaleRef, CFNumberRef, CFSetRef, CFStringRef,
+    CFTypeRef, CFURLRef,
+};
+
 // ── CoreFoundation primitives ──────────────────────────────────────────────
 
-pub type CFTypeRef = *const c_void;
 /// NULL-based default allocator sentinel — identical to passing NULL.
 pub const kCFAllocatorDefault: CFAllocatorRef = core::ptr::null();
-pub type CFAllocatorRef = *const c_void;
-pub type CFStringRef = *const c_void;
-pub type CFDictionaryRef = *const c_void;
-pub type CFArrayRef = *const c_void;
-pub type CFAttributedStringRef = *const c_void;
 pub type CFIndex = isize;
 pub type CFTypeID = usize;
 pub type Boolean = u8;

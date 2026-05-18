@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0] - 2026-05-18
+
+### Changed
+
+- Re-exported the raw CoreFoundation `CF*Ref` typedefs from `apple-cf` 0.8 instead of duplicating 13 local aliases across `ffi.rs` and `ffi_gap.rs`.
+- Bumped `coretext-rs` to `0.5.0` for the nominal raw CoreFoundation reference type change.
+
 ## [0.4.0] - 2026-05-18
 
 ### Changed
