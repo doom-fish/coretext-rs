@@ -1,10 +1,6 @@
 // Additional raw FFI declarations covering the remaining CoreText audit surface.
 
-pub type CFOptionFlags = usize;
-pub type CFComparisonResult = CFIndex;
-pub type CFStringEncoding = u32;
 pub type CGColorRef = *const c_void;
-pub type CGContextRef = *const c_void;
 pub type CGFontRef = *const c_void;
 pub type CTFontCollectionRef = *const c_void;
 pub type CTMutableFontCollectionRef = *const c_void;

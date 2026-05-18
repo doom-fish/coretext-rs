@@ -13,39 +13,22 @@
 use core::ffi::{c_char, c_void};
 
 pub use apple_cf::raw::{
-    CFAllocatorRef, CFArrayRef, CFAttributedStringRef, CFCharacterSetRef, CFDataRef,
-    CFDictionaryRef, CFErrorRef, CFLocaleRef, CFNumberRef, CFSetRef, CFStringRef,
-    CFTypeRef, CFURLRef,
+    CFAllocatorRef, CFArrayRef, CFAttributedStringRef, CFCharacterSetRef, CFComparisonResult,
+    CFDataRef, CFDictionaryRef, CFErrorRef, CFIndex, CFLocaleRef, CFNumberRef,
+    CFOptionFlags, CFRange, CFSetRef, CFStringEncoding, CFStringRef, CFTypeID, CFTypeRef,
+    CFURLRef, CGContextRef, CGFloat,
 };
 
 // ── CoreFoundation primitives ──────────────────────────────────────────────
 
 /// NULL-based default allocator sentinel — identical to passing NULL.
 pub const kCFAllocatorDefault: CFAllocatorRef = core::ptr::null();
-pub type CFIndex = isize;
-pub type CFTypeID = usize;
 pub type Boolean = u8;
 
-pub const kCFStringEncodingUTF8: u32 = 0x0800_0100;
-
-/// `CFRange` — index/length pair used throughout CoreFoundation.
-#[repr(C)]
-#[derive(Debug, Clone, Copy, Default)]
-pub struct CFRange {
-    pub location: CFIndex,
-    pub length: CFIndex,
-}
-
-impl CFRange {
-    #[inline]
-    pub const fn new(location: CFIndex, length: CFIndex) -> Self {
-        Self { location, length }
-    }
-}
+pub const kCFStringEncodingUTF8: CFStringEncoding = 0x0800_0100;
 
 // ── CoreGraphics geometry ──────────────────────────────────────────────────
 
-pub type CGFloat = f64;
 pub type CGGlyph = u16;
 pub type CGPathRef = *const c_void;
 
@@ -121,15 +104,18 @@ extern "C" {
     pub fn CFStringCreateWithCString(
         alloc: CFAllocatorRef,
         cStr: *const c_char,
-        encoding: u32,
+        encoding: CFStringEncoding,
     ) -> CFStringRef;
     pub fn CFStringGetLength(theString: CFStringRef) -> CFIndex;
-    pub fn CFStringGetMaximumSizeForEncoding(length: CFIndex, encoding: u32) -> CFIndex;
+    pub fn CFStringGetMaximumSizeForEncoding(
+        length: CFIndex,
+        encoding: CFStringEncoding,
+    ) -> CFIndex;
     pub fn CFStringGetCString(
         theString: CFStringRef,
         buffer: *mut c_char,
         bufferSize: CFIndex,
-        encoding: u32,
+        encoding: CFStringEncoding,
     ) -> Boolean;
     pub fn CFDictionaryCreate(
         allocator: CFAllocatorRef,

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0] - 2026-05-18
+
+### Changed
+
+- Re-exported `CFIndex`, `CFTypeID`, `CFOptionFlags`, `CFRange`, `CFComparisonResult`, `CFStringEncoding`, `CGFloat`, and `CGContextRef` from `apple-cf` 0.9 instead of maintaining duplicate local raw type definitions.
+- Bumped `coretext-rs` to `0.6.0` for the nominal raw CoreFoundation/CoreGraphics type re-export change.
+
 ## [0.5.0] - 2026-05-18
 
 ### Changed
