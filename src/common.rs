@@ -1,3 +1,5 @@
+//! Internal bridge helpers for string conversion, handle validation, and retained-handle wrappers.
+
 use std::ffi::{CStr, CString};
 
 use serde::de::DeserializeOwned;
@@ -5,14 +7,17 @@ use serde::de::DeserializeOwned;
 use crate::bridge::{self, Handle};
 use crate::error::{CoreTextError, CoreTextResult};
 
+/// Converts Rust text into a bridge-safe `CString`.
 pub fn cstring(value: &str) -> CoreTextResult<CString> {
     CString::new(value).map_err(|_| CoreTextError::NulByte)
 }
 
+/// Converts optional Rust text into an optional bridge-safe `CString`.
 pub fn optional_cstring(value: Option<&str>) -> CoreTextResult<Option<CString>> {
     value.map(cstring).transpose()
 }
 
+/// Validates that a bridge call returned a non-null opaque handle.
 pub fn expect_handle(raw: Handle, context: &'static str) -> CoreTextResult<Handle> {
     if raw.is_null() {
         Err(CoreTextError::Null(context))
@@ -21,6 +26,7 @@ pub fn expect_handle(raw: Handle, context: &'static str) -> CoreTextResult<Handl
     }
 }
 
+/// Converts an owned bridge string into a Rust `String` and releases the original buffer.
 pub unsafe fn string_from_owned(ptr: *mut libc::c_char) -> CoreTextResult<String> {
     if ptr.is_null() {
         return Err(CoreTextError::StringConversion);
@@ -35,6 +41,7 @@ pub unsafe fn string_from_owned(ptr: *mut libc::c_char) -> CoreTextResult<String
     Ok(value)
 }
 
+/// Converts an owned nullable bridge string into an optional Rust `String`.
 pub unsafe fn option_string_from_owned(ptr: *mut libc::c_char) -> Option<String> {
     if ptr.is_null() {
         return None;
@@ -46,6 +53,7 @@ pub unsafe fn option_string_from_owned(ptr: *mut libc::c_char) -> Option<String>
     Some(value)
 }
 
+/// Deserializes owned bridge JSON into the requested Rust type.
 pub unsafe fn json_from_owned<T>(ptr: *mut libc::c_char) -> CoreTextResult<T>
 where
     T: DeserializeOwned,
@@ -59,22 +67,27 @@ macro_rules! impl_handle {
         // SAFETY: All $name types wrap opaque Apple framework handles (raw pointers)
         // that are thread-safe and can be sent across threads. The underlying Objective-C
         // objects are managed via reference counting (retain/release), which is atomic.
+        /// Marks this retained wrapper as safe to move across threads.
         unsafe impl Send for $name {}
+        /// Marks this retained wrapper as safe to share across threads.
         unsafe impl Sync for $name {}
 
         impl $name {
+            /// Wraps an owned bridge handle without changing its retain count.
             #[allow(dead_code)]
             #[inline]
             pub const fn from_raw(raw: crate::bridge::Handle) -> Self {
                 Self { raw }
             }
 
+            /// Returns the underlying opaque bridge handle.
             #[inline]
             pub fn as_raw(&self) -> crate::bridge::Handle {
                 self.raw
             }
         }
 
+        /// Clones the wrapper by retaining the underlying bridge handle.
         impl Clone for $name {
             fn clone(&self) -> Self {
                 if self.raw.is_null() {

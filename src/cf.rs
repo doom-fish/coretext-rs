@@ -10,6 +10,7 @@ use crate::ffi;
 pub(crate) struct OwnedCFString(ffi::CFStringRef);
 
 impl OwnedCFString {
+    /// Creates an owned Core Foundation string from Rust UTF-8 text.
     pub(crate) fn from_str(s: &str) -> CoreTextResult<Self> {
         let cs = CString::new(s).map_err(|_| CoreTextError::NulByte)?;
         // SAFETY: cs.as_ptr() is valid for the duration of the call; the result
@@ -30,6 +31,7 @@ impl OwnedCFString {
         }
     }
 
+    /// Returns the wrapped raw `CFStringRef`.
     #[inline]
     pub(crate) const fn as_raw(&self) -> ffi::CFStringRef {
         self.0

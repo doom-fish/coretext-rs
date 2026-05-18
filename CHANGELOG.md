@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.3] - 2026-05-18
+
+### Changed
+
+- Completed the remaining doc pass across the non-generated CoreText wrappers and helper modules, including retained-handle boilerplate and Core Foundation helpers, bringing nightly `rustdoc --show-coverage` item coverage to 100.0%.
+
 ## [0.6.2] - 2026-05-18
 
 ### Changed

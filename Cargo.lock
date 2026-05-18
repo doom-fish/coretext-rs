@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "coretext-rs"
-version = "0.6.2"
+version = "0.6.3"
 dependencies = [
  "apple-cf",
  "libc",

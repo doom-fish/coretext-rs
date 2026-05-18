@@ -1,11 +1,14 @@
+//! Internal Swift bridge declarations used by the safe CoreText wrappers.
 #![allow(non_snake_case)]
 
 use core::ffi::{c_char, c_void};
 
 use crate::types::{CFRange, CGAffineTransform, CGPoint, CGRect, CGSize};
 
+/// Opaque retained handle type returned by the bundled Swift bridge.
 pub type Handle = *mut c_void;
 
+// Raw Swift bridge entry points consumed by the safe wrapper modules.
 unsafe extern "C" {
     pub fn ct_retain(handle: Handle) -> Handle;
     pub fn ct_release(handle: Handle);
