@@ -11,26 +11,31 @@ pub struct CTFrame {
 impl_handle!(CTFrame);
 
 impl CTFrame {
+    /// Wraps `CTFrameGetStringRange`.
     #[must_use]
     pub fn string_range(&self) -> TextRange {
         unsafe { bridge::ct_frame_get_string_range(self.raw) }.into()
     }
 
+    /// Wraps `CTFrameGetVisibleStringRange`.
     #[must_use]
     pub fn visible_string_range(&self) -> TextRange {
         unsafe { bridge::ct_frame_get_visible_string_range(self.raw) }.into()
     }
 
+    /// Returns the path bounds derived from `CTFrameGetPath`.
     #[must_use]
     pub fn path_bounding_box(&self) -> CGRect {
         unsafe { bridge::ct_frame_copy_path_bounding_box(self.raw) }
     }
 
+    /// Wraps `CTFrameHasFrameAttributes`.
     #[must_use]
     pub fn has_frame_attributes(&self) -> bool {
         unsafe { bridge::ct_frame_has_frame_attributes(self.raw) }
     }
 
+    /// Wraps `CTFrameGetLines`.
     #[must_use]
     pub fn lines(&self) -> Vec<CTLine> {
         let count = unsafe { bridge::ct_frame_get_line_count(self.raw) };
@@ -43,6 +48,7 @@ impl CTFrame {
         handles.into_iter().map(CTLine::from_raw).collect()
     }
 
+    /// Wraps `CTFrameGetLineOrigins`.
     #[must_use]
     pub fn line_origins(&self) -> Vec<CGPoint> {
         let count = unsafe { bridge::ct_frame_get_line_count(self.raw) };
@@ -56,11 +62,15 @@ impl CTFrame {
         origins
     }
 
+    /// Wraps `CTFrameGetFrameAttributes`.
     pub fn frame_attributes_json(&self) -> crate::error::CoreTextResult<serde_json::Value> {
-        unsafe { crate::common::json_from_owned(bridge::ct_frame_copy_frame_attributes_json(self.raw)) }
+        unsafe {
+            crate::common::json_from_owned(bridge::ct_frame_copy_frame_attributes_json(self.raw))
+        }
     }
 }
 
+/// Wraps `CTFrameGetTypeID`.
 #[must_use]
 pub fn frame_type_id() -> u64 {
     unsafe { bridge::ct_frame_get_type_id() }

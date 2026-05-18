@@ -35,4 +35,5 @@ impl From<serde_json::Error> for CoreTextError {
     }
 }
 
+/// Result type returned by CoreText wrapper calls.
 pub type CoreTextResult<T> = Result<T, CoreTextError>;

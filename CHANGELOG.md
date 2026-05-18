@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.2] - 2026-05-18
+
+### Changed
+
+- Added one-line Rustdoc coverage across the safe CoreText wrapper surface, bringing nightly `rustdoc --show-coverage` output to 94.4% documented items.
+
 ## [0.6.1] - 2026-05-18
 
 ### Changed

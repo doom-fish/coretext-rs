@@ -7,11 +7,17 @@ use crate::types::{CGPoint, CGRect, TextRange, TypographicBounds};
 
 /// Option flags for `CTLine::bounds_with_options`.
 pub mod bounds_options {
+    /// Wraps the `kCTLineBoundsExcludeTypographicLeading` flag.
     pub const EXCLUDE_TYPOGRAPHIC_LEADING: u64 = 1 << 0;
+    /// Wraps the `kCTLineBoundsExcludeTypographicShifts` flag.
     pub const EXCLUDE_TYPOGRAPHIC_SHIFTS: u64 = 1 << 1;
+    /// Wraps the `kCTLineBoundsUseHangingPunctuation` flag.
     pub const USE_HANGING_PUNCTUATION: u64 = 1 << 2;
+    /// Wraps the `kCTLineBoundsUseGlyphPathBounds` flag.
     pub const USE_GLYPH_PATH_BOUNDS: u64 = 1 << 3;
+    /// Wraps the `kCTLineBoundsUseOpticalBounds` flag.
     pub const USE_OPTICAL_BOUNDS: u64 = 1 << 4;
+    /// Wraps the `kCTLineBoundsIncludeLanguageExtents` flag.
     pub const INCLUDE_LANGUAGE_EXTENTS: u64 = 1 << 5;
 }
 
@@ -19,9 +25,12 @@ pub mod bounds_options {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[repr(u32)]
 pub enum LineTruncationType {
+    /// Selects the start case of `CTLineTruncationType`.
     #[default]
     Start = 0,
+    /// Selects the end case of `CTLineTruncationType`.
     End = 1,
+    /// Selects the middle case of `CTLineTruncationType`.
     Middle = 2,
 }
 
@@ -33,6 +42,7 @@ pub struct CTLine {
 impl_handle!(CTLine);
 
 impl CTLine {
+    /// Wraps `CTLineCreateWithAttributedString`.
     pub fn create_with_attributed_string(
         attributed_string: &AttributedString,
     ) -> CoreTextResult<Self> {
@@ -44,6 +54,7 @@ impl CTLine {
         )?))
     }
 
+    /// Wraps `CTLineCreateTruncatedLine`.
     #[must_use]
     pub fn truncated(
         &self,
@@ -66,6 +77,7 @@ impl CTLine {
         }
     }
 
+    /// Wraps `CTLineCreateJustifiedLine`.
     #[must_use]
     pub fn justified(&self, justification_factor: f64, justification_width: f64) -> Option<Self> {
         let raw = unsafe {
@@ -82,21 +94,25 @@ impl CTLine {
         }
     }
 
+    /// Wraps `CTLineGetGlyphCount`.
     #[must_use]
     pub fn glyph_count(&self) -> isize {
         unsafe { bridge::ct_line_get_glyph_count(self.raw) }
     }
 
+    /// Wraps `CTLineGetStringRange`.
     #[must_use]
     pub fn string_range(&self) -> TextRange {
         unsafe { bridge::ct_line_get_string_range(self.raw) }.into()
     }
 
+    /// Wraps `CTLineGetPenOffsetForFlush`.
     #[must_use]
     pub fn pen_offset_for_flush(&self, flush_factor: f64, flush_width: f64) -> f64 {
         unsafe { bridge::ct_line_get_pen_offset_for_flush(self.raw, flush_factor, flush_width) }
     }
 
+    /// Wraps `CTLineGetTypographicBounds`.
     #[must_use]
     pub fn typographic_bounds(&self) -> TypographicBounds {
         let mut ascent = 0.0;
@@ -118,26 +134,31 @@ impl CTLine {
         }
     }
 
+    /// Wraps `CTLineGetBoundsWithOptions`.
     #[must_use]
     pub fn bounds_with_options(&self, options: u64) -> CGRect {
         unsafe { bridge::ct_line_get_bounds_with_options(self.raw, options) }
     }
 
+    /// Wraps `CTLineGetTrailingWhitespaceWidth`.
     #[must_use]
     pub fn trailing_whitespace_width(&self) -> f64 {
         unsafe { bridge::ct_line_get_trailing_whitespace_width(self.raw) }
     }
 
+    /// Wraps `CTLineGetImageBounds`.
     #[must_use]
     pub fn image_bounds(&self) -> CGRect {
         unsafe { bridge::ct_line_get_image_bounds(self.raw) }
     }
 
+    /// Wraps `CTLineGetStringIndexForPosition`.
     #[must_use]
     pub fn string_index_for_position(&self, position: CGPoint) -> isize {
         unsafe { bridge::ct_line_get_string_index_for_position(self.raw, position) }
     }
 
+    /// Wraps `CTLineGetOffsetForStringIndex`.
     #[must_use]
     pub fn offset_for_string_index(&self, char_index: isize) -> (f64, f64) {
         let mut secondary = 0.0;
@@ -147,6 +168,7 @@ impl CTLine {
         (primary, secondary)
     }
 
+    /// Wraps `CTLineGetGlyphRuns`.
     #[must_use]
     pub fn runs(&self) -> Vec<CTRun> {
         let count = unsafe { bridge::ct_line_get_run_count(self.raw) };
@@ -160,6 +182,7 @@ impl CTLine {
     }
 }
 
+/// Wraps `CTLineGetTypeID`.
 #[must_use]
 pub fn line_type_id() -> u64 {
     unsafe { bridge::ct_line_get_type_id() }

@@ -1,15 +1,19 @@
 /// Core Graphics geometry types re-exported from `apple-cf`.
 pub use apple_cf::cg::{CGAffineTransform, CGPoint, CGRect, CGSize};
+/// Re-exports `CFRange` for CoreText range parameters.
 pub use apple_cf::raw::CFRange;
 
 /// A character range — location and length within a string.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct TextRange {
+    /// Matches the `location` field of `CFRange`.
     pub location: isize,
+    /// Matches the `length` field of `CFRange`.
     pub length: isize,
 }
 
 impl TextRange {
+    /// Creates a `CFRange`-style span for CoreText string APIs.
     #[inline]
     pub const fn new(location: isize, length: isize) -> Self {
         Self { location, length }
@@ -41,8 +45,12 @@ impl From<TextRange> for CFRange {
 /// Width, ascent, descent, and leading for a line or run.
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
 pub struct TypographicBounds {
+    /// Wraps the `width` value returned by `CTLineGetTypographicBounds` and `CTRunGetTypographicBounds`.
     pub width: f64,
+    /// Wraps the `ascent` value returned by `CTLineGetTypographicBounds` and `CTRunGetTypographicBounds`.
     pub ascent: f64,
+    /// Wraps the `descent` value returned by `CTLineGetTypographicBounds` and `CTRunGetTypographicBounds`.
     pub descent: f64,
+    /// Wraps the `leading` value returned by `CTLineGetTypographicBounds` and `CTRunGetTypographicBounds`.
     pub leading: f64,
 }

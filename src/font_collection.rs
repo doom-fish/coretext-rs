@@ -9,8 +9,11 @@ use crate::font_descriptor::FontDescriptor;
 #[derive(Debug, Clone, Copy, Default, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FontCollectionOptions {
+    /// Configures the `remove_duplicates` option used by `CTFontCollection` matching APIs.
     pub remove_duplicates: bool,
+    /// Configures the `include_disabled_fonts` option used by `CTFontCollection` matching APIs.
     pub include_disabled_fonts: bool,
+    /// Configures the `disallow_auto_activation` option used by `CTFontCollection` matching APIs.
     pub disallow_auto_activation: bool,
 }
 
@@ -28,10 +31,12 @@ pub struct FontCollection {
 impl_handle!(FontCollection);
 
 impl FontCollection {
+    /// Wraps `CTFontCollectionCreateFromAvailableFonts`.
     pub fn available() -> CoreTextResult<Self> {
         Self::available_with_options(FontCollectionOptions::default())
     }
 
+    /// Wraps `CTFontCollectionCreateFromAvailableFonts`.
     pub fn available_with_options(options: FontCollectionOptions) -> CoreTextResult<Self> {
         let json = cstring(&options.json()?)?;
         let raw = unsafe { bridge::ct_font_collection_create_available(json.as_ptr()) };
@@ -41,6 +46,7 @@ impl FontCollection {
         )?))
     }
 
+    /// Wraps `CTFontCollectionCreateWithFontDescriptors`.
     pub fn with_descriptors(
         descriptors: &[FontDescriptor],
         options: FontCollectionOptions,
@@ -60,6 +66,7 @@ impl FontCollection {
         )?))
     }
 
+    /// Wraps `CTFontCollectionCreateCopyWithFontDescriptors`.
     pub fn copy_with_descriptors(
         &self,
         descriptors: &[FontDescriptor],
@@ -81,6 +88,7 @@ impl FontCollection {
         )?))
     }
 
+    /// Wraps the query-descriptor surface of `CTFontCollection` builders.
     #[must_use]
     pub fn query_descriptors(&self) -> Vec<FontDescriptor> {
         let count = unsafe { bridge::ct_font_collection_get_query_descriptor_count(self.raw) };
@@ -95,6 +103,7 @@ impl FontCollection {
         handles.into_iter().map(FontDescriptor::from_raw).collect()
     }
 
+    /// Wraps `CTFontCollectionCreateMatchingFontDescriptors`.
     #[must_use]
     pub fn matching_descriptors(&self) -> Vec<FontDescriptor> {
         let count = unsafe { bridge::ct_font_collection_get_matching_descriptor_count(self.raw) };
@@ -113,6 +122,7 @@ impl FontCollection {
         handles.into_iter().map(FontDescriptor::from_raw).collect()
     }
 
+    /// Wraps `CTFontCollectionCreateMatchingFontDescriptorsForFamily`.
     pub fn matching_descriptors_for_family(
         &self,
         family_name: &str,
@@ -140,6 +150,7 @@ impl FontCollection {
         Ok(handles.into_iter().map(FontDescriptor::from_raw).collect())
     }
 
+    /// Wraps the exclusion-descriptor surface of `CTFontCollection` builders.
     #[must_use]
     pub fn exclusion_descriptors(&self) -> Vec<FontDescriptor> {
         let count = unsafe { bridge::ct_font_collection_get_exclusion_descriptor_count(self.raw) };
@@ -148,24 +159,44 @@ impl FontCollection {
         }
         let mut handles = vec![std::ptr::null_mut(); usize::try_from(count).unwrap_or(0)];
         let written = unsafe {
-            bridge::ct_font_collection_copy_exclusion_descriptors(self.raw, handles.as_mut_ptr(), count)
+            bridge::ct_font_collection_copy_exclusion_descriptors(
+                self.raw,
+                handles.as_mut_ptr(),
+                count,
+            )
         };
         handles.truncate(usize::try_from(written).unwrap_or(0));
         handles.into_iter().map(FontDescriptor::from_raw).collect()
     }
 
+    /// Wraps `CTFontCollectionCopyFontAttribute`.
     pub fn font_attribute_json(&self, attr: &str) -> CoreTextResult<serde_json::Value> {
         let attr = cstring(attr)?;
-        unsafe { crate::common::json_from_owned(bridge::ct_font_collection_copy_font_attribute_json(self.raw, attr.as_ptr())) }
+        unsafe {
+            crate::common::json_from_owned(bridge::ct_font_collection_copy_font_attribute_json(
+                self.raw,
+                attr.as_ptr(),
+            ))
+        }
     }
 
+    /// Wraps `CTFontCollectionCopyFontAttributes`.
     pub fn font_attributes_json(&self, attrs: &[&str]) -> CoreTextResult<serde_json::Value> {
         let json = cstring(&serde_json::to_string(attrs)?)?;
-        unsafe { crate::common::json_from_owned(bridge::ct_font_collection_copy_font_attributes_json(self.raw, json.as_ptr())) }
+        unsafe {
+            crate::common::json_from_owned(bridge::ct_font_collection_copy_font_attributes_json(
+                self.raw,
+                json.as_ptr(),
+            ))
+        }
     }
 
+    /// Wraps `CTFontCollectionCreateMatchingFontDescriptorsWithOptions`.
     #[must_use]
-    pub fn matching_descriptors_with_options(&self, options: FontCollectionOptions) -> Vec<FontDescriptor> {
+    pub fn matching_descriptors_with_options(
+        &self,
+        options: FontCollectionOptions,
+    ) -> Vec<FontDescriptor> {
         let Ok(json_value) = options.json() else {
             return Vec::new();
         };
@@ -191,6 +222,7 @@ impl FontCollection {
         handles.into_iter().map(FontDescriptor::from_raw).collect()
     }
 
+    /// Wraps `CTFontCollectionCreateMutableCopy`.
     pub fn mutable_copy(&self) -> CoreTextResult<MutableFontCollection> {
         let raw = unsafe { bridge::ct_font_collection_create_mutable_copy(self.raw) };
         Ok(MutableFontCollection::from_raw(expect_handle(
@@ -200,6 +232,7 @@ impl FontCollection {
     }
 }
 
+/// A mutable `CTFontCollection` wrapper.
 pub struct MutableFontCollection {
     raw: bridge::Handle,
 }
@@ -207,6 +240,7 @@ pub struct MutableFontCollection {
 impl_handle!(MutableFontCollection);
 
 impl MutableFontCollection {
+    /// Wraps `CTFontCollectionSetExclusionDescriptors`.
     pub fn set_exclusion_descriptors(&self, descriptors: &[FontDescriptor]) {
         let handles: Vec<_> = descriptors.iter().map(FontDescriptor::as_raw).collect();
         unsafe {
@@ -218,6 +252,7 @@ impl MutableFontCollection {
         }
     }
 
+    /// Wraps `CTFontCollectionSetQueryDescriptors`.
     pub fn set_query_descriptors(&self, descriptors: &[FontDescriptor]) {
         let handles: Vec<_> = descriptors.iter().map(FontDescriptor::as_raw).collect();
         unsafe {
@@ -229,12 +264,14 @@ impl MutableFontCollection {
         }
     }
 
+    /// Retains the mutable wrapper as a `CTFontCollection` handle.
     #[must_use]
     pub fn as_font_collection(&self) -> FontCollection {
         FontCollection::from_raw(unsafe { bridge::ct_retain(self.raw) })
     }
 }
 
+/// Wraps `CTFontCollectionGetTypeID`.
 #[must_use]
 pub fn font_collection_type_id() -> u64 {
     unsafe { bridge::ct_font_collection_get_type_id() }

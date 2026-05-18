@@ -9,10 +9,14 @@ use crate::font_descriptor::FontDescriptor;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[repr(u32)]
 pub enum FontManagerScope {
+    /// Selects the none case of `CTFontManagerScope`.
     #[default]
     None = 0,
+    /// Selects the process case of `CTFontManagerScope`.
     Process = 1,
+    /// Selects the persistent case of `CTFontManagerScope`.
     Persistent = 2,
+    /// Selects the session case of `CTFontManagerScope`.
     Session = 3,
 }
 
@@ -31,10 +35,14 @@ impl FontManagerScope {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[repr(u32)]
 pub enum AutoActivationSetting {
+    /// Selects the default case of `CTFontManagerAutoActivationSetting`.
     #[default]
     Default = 0,
+    /// Selects the disabled case of `CTFontManagerAutoActivationSetting`.
     Disabled = 1,
+    /// Selects the enabled case of `CTFontManagerAutoActivationSetting`.
     Enabled = 2,
+    /// Selects the prompt user case of `CTFontManagerAutoActivationSetting`.
     PromptUser = 3,
 }
 
@@ -53,18 +61,22 @@ impl AutoActivationSetting {
 pub struct FontManager;
 
 impl FontManager {
+    /// Wraps `CTFontManagerCopyAvailablePostScriptNames`.
     pub fn available_postscript_names() -> CoreTextResult<Vec<String>> {
         unsafe { json_from_owned(bridge::ct_font_manager_copy_available_postscript_names_json()) }
     }
 
+    /// Wraps `CTFontManagerCopyAvailableFontFamilyNames`.
     pub fn available_font_family_names() -> CoreTextResult<Vec<String>> {
         unsafe { json_from_owned(bridge::ct_font_manager_copy_available_font_family_names_json()) }
     }
 
+    /// Wraps `CTFontManagerCopyAvailableFontURLs`.
     pub fn available_font_urls() -> CoreTextResult<Vec<String>> {
         unsafe { json_from_owned(bridge::ct_font_manager_copy_available_font_urls_json()) }
     }
 
+    /// Wraps `CTFontManagerCreateFontDescriptorsFromURL`.
     pub fn font_descriptors_from_url(
         path: impl AsRef<Path>,
     ) -> CoreTextResult<Vec<FontDescriptor>> {
@@ -85,11 +97,13 @@ impl FontManager {
         Ok(handles.into_iter().map(FontDescriptor::from_raw).collect())
     }
 
+    /// Wraps `CTFontManagerIsSupportedFont`.
     pub fn is_supported_font(path: impl AsRef<Path>) -> CoreTextResult<bool> {
         let path = cstring(&path.as_ref().to_string_lossy())?;
         Ok(unsafe { bridge::ct_font_manager_is_supported_font(path.as_ptr()) })
     }
 
+    /// Wraps `CTFontManagerRegisterFontsForURL`.
     pub fn register_fonts_for_url(
         path: impl AsRef<Path>,
         scope: FontManagerScope,
@@ -109,6 +123,7 @@ impl FontManager {
         }
     }
 
+    /// Wraps `CTFontManagerUnregisterFontsForURL`.
     pub fn unregister_fonts_for_url(
         path: impl AsRef<Path>,
         scope: FontManagerScope,
@@ -132,6 +147,7 @@ impl FontManager {
         }
     }
 
+    /// Wraps `CTFontManagerGetScopeForURL`.
     pub fn scope_for_url(path: impl AsRef<Path>) -> CoreTextResult<FontManagerScope> {
         let path = cstring(&path.as_ref().to_string_lossy())?;
         Ok(FontManagerScope::from_raw(unsafe {
@@ -139,6 +155,7 @@ impl FontManager {
         }))
     }
 
+    /// Wraps `CTFontManagerGetAutoActivationSetting`.
     #[must_use]
     pub fn auto_activation_setting(bundle_identifier: Option<&str>) -> AutoActivationSetting {
         let bundle_identifier = bundle_identifier.and_then(|value| cstring(value).ok());
@@ -151,6 +168,7 @@ impl FontManager {
         })
     }
 
+    /// Wraps `CTFontManagerSetAutoActivationSetting`.
     pub fn set_auto_activation_setting(
         bundle_identifier: Option<&str>,
         setting: AutoActivationSetting,
@@ -166,9 +184,15 @@ impl FontManager {
         }
     }
 
+    /// Wraps the registered-descriptor query surface in `CTFontManager`.
     #[must_use]
-    pub fn registered_font_descriptors(scope: FontManagerScope, enabled: bool) -> Vec<FontDescriptor> {
-        let count = unsafe { bridge::ct_font_manager_copy_registered_descriptor_count(scope as u32, enabled) };
+    pub fn registered_font_descriptors(
+        scope: FontManagerScope,
+        enabled: bool,
+    ) -> Vec<FontDescriptor> {
+        let count = unsafe {
+            bridge::ct_font_manager_copy_registered_descriptor_count(scope as u32, enabled)
+        };
         if count <= 0 {
             return Vec::new();
         }
@@ -185,6 +209,7 @@ impl FontManager {
         handles.into_iter().map(FontDescriptor::from_raw).collect()
     }
 
+    /// Wraps `CTFontManagerCreateDescriptorFromData`.
     pub fn font_descriptor_from_data(data: &[u8]) -> CoreTextResult<FontDescriptor> {
         if data.is_empty() {
             return Err(CoreTextError::Bridge("font data is empty".to_string()));
@@ -204,6 +229,7 @@ impl FontManager {
         }
     }
 
+    /// Wraps `CTFontManagerCreateFontDescriptorsFromData`.
     #[must_use]
     pub fn font_descriptors_from_data(data: &[u8]) -> Vec<FontDescriptor> {
         if data.is_empty() {
@@ -231,6 +257,7 @@ impl FontManager {
         handles.into_iter().map(FontDescriptor::from_raw).collect()
     }
 
+    /// Wraps `CTFontManagerEnableFontDescriptors`.
     pub fn enable_font_descriptors(descriptors: &[FontDescriptor], enable: bool) {
         let handles: Vec<_> = descriptors.iter().map(FontDescriptor::as_raw).collect();
         unsafe {
@@ -242,6 +269,7 @@ impl FontManager {
         }
     }
 
+    /// Wraps `CTFontManagerRegisterFontDescriptors`.
     pub fn register_font_descriptors(
         descriptors: &[FontDescriptor],
         scope: FontManagerScope,
@@ -262,6 +290,7 @@ impl FontManager {
         messages_to_result(&errors, "font descriptor registration failed")
     }
 
+    /// Wraps `CTFontManagerRegisterFontURLs`.
     pub fn register_font_urls<P: AsRef<Path>>(
         paths: &[P],
         scope: FontManagerScope,
@@ -281,6 +310,7 @@ impl FontManager {
         messages_to_result(&errors, "font URL registration failed")
     }
 
+    /// Wraps `CTFontManagerRegisterFontsForURLs`.
     pub fn register_fonts_for_urls<P: AsRef<Path>>(
         paths: &[P],
         scope: FontManagerScope,
@@ -291,7 +321,11 @@ impl FontManager {
         let paths = paths_json(paths)?;
         let mut error = std::ptr::null_mut();
         let ok = unsafe {
-            bridge::ct_font_manager_register_fonts_for_urls(paths.as_ptr(), scope as u32, &mut error)
+            bridge::ct_font_manager_register_fonts_for_urls(
+                paths.as_ptr(),
+                scope as u32,
+                &mut error,
+            )
         };
         if ok {
             Ok(())
@@ -300,6 +334,7 @@ impl FontManager {
         }
     }
 
+    /// Wraps `CTFontManagerRegisterFontsWithAssetNames`.
     pub fn register_fonts_with_asset_names(
         names: &[&str],
         scope: FontManagerScope,
@@ -325,6 +360,7 @@ impl FontManager {
         }
     }
 
+    /// Wraps `CTFontManagerUnregisterFontDescriptors`.
     pub fn unregister_font_descriptors(
         descriptors: &[FontDescriptor],
         scope: FontManagerScope,
@@ -343,6 +379,7 @@ impl FontManager {
         messages_to_result(&errors, "font descriptor unregistration failed")
     }
 
+    /// Wraps `CTFontManagerUnregisterFontURLs`.
     pub fn unregister_font_urls<P: AsRef<Path>>(
         paths: &[P],
         scope: FontManagerScope,
@@ -360,6 +397,7 @@ impl FontManager {
         messages_to_result(&errors, "font URL unregistration failed")
     }
 
+    /// Wraps `CTFontManagerUnregisterFontsForURLs`.
     pub fn unregister_fonts_for_urls<P: AsRef<Path>>(
         paths: &[P],
         scope: FontManagerScope,

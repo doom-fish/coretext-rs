@@ -12,6 +12,7 @@ pub struct AttributedString {
 impl_handle!(AttributedString);
 
 impl AttributedString {
+    /// Creates a CoreText-ready attributed string using `CFAttributedStringCreate`.
     pub fn new(
         text: &str,
         font: &CTFont,

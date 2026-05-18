@@ -14,6 +14,7 @@ pub struct CTFramesetter {
 impl_handle!(CTFramesetter);
 
 impl CTFramesetter {
+    /// Wraps `CTFramesetterCreateWithAttributedString`.
     pub fn create_with_attributed_string(
         attributed_string: &AttributedString,
     ) -> CoreTextResult<Self> {
@@ -26,6 +27,7 @@ impl CTFramesetter {
         )?))
     }
 
+    /// Wraps `CTFramesetterCreateWithTypesetter`.
     pub fn create_with_typesetter(typesetter: &CTTypesetter) -> CoreTextResult<Self> {
         let raw = unsafe { bridge::ct_framesetter_create_with_typesetter(typesetter.as_raw()) };
         Ok(Self::from_raw(expect_handle(
@@ -34,6 +36,7 @@ impl CTFramesetter {
         )?))
     }
 
+    /// Wraps `CTFramesetterGetTypesetter`.
     pub fn typesetter(&self) -> CoreTextResult<CTTypesetter> {
         let raw = unsafe { bridge::ct_framesetter_copy_typesetter(self.raw) };
         Ok(CTTypesetter::from_raw(expect_handle(
@@ -42,11 +45,13 @@ impl CTFramesetter {
         )?))
     }
 
+    /// Wraps `CTFramesetterSuggestFrameSizeWithConstraints`.
     #[must_use]
     pub fn suggest_frame_size_with_constraints(&self, constraints: CGSize) -> (CGSize, TextRange) {
         self.suggest_frame_size_for_range(TextRange::new(0, 0), constraints)
     }
 
+    /// Wraps `CTFramesetterSuggestFrameSizeWithConstraints`.
     #[must_use]
     pub fn suggest_frame_size_for_range(
         &self,
@@ -60,6 +65,7 @@ impl CTFramesetter {
         (size, fit.into())
     }
 
+    /// Wraps `CTFramesetterCreateFrame`.
     pub fn create_frame_in_rect(
         &self,
         rect: CGRect,
@@ -75,6 +81,7 @@ impl CTFramesetter {
     }
 }
 
+/// Wraps `CTFramesetterGetTypeID`.
 #[must_use]
 pub fn framesetter_type_id() -> u64 {
     unsafe { bridge::ct_framesetter_get_type_id() }
