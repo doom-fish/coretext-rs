@@ -13,17 +13,16 @@
 use core::ffi::{c_char, c_void};
 
 pub use apple_cf::raw::{
-    CFAllocatorRef, CFArrayRef, CFAttributedStringRef, CFCharacterSetRef, CFComparisonResult,
-    CFDataRef, CFDictionaryRef, CFErrorRef, CFIndex, CFLocaleRef, CFNumberRef,
-    CFOptionFlags, CFRange, CFSetRef, CFStringEncoding, CFStringRef, CFTypeID, CFTypeRef,
-    CFURLRef, CGContextRef, CGFloat,
+    Boolean, CFAllocatorRef, CFArrayRef, CFAttributedStringRef, CFCharacterSetRef,
+    CFComparisonResult, CFDataRef, CFDictionaryRef, CFErrorRef, CFIndex, CFLocaleRef,
+    CFNumberRef, CFOptionFlags, CFRange, CFSetRef, CFStringEncoding, CFStringRef, CFTypeID,
+    CFTypeRef, CFURLRef, CGContextRef, CGFloat,
 };
 
 // ── CoreFoundation primitives ──────────────────────────────────────────────
 
 /// NULL-based default allocator sentinel — identical to passing NULL.
 pub const kCFAllocatorDefault: CFAllocatorRef = core::ptr::null();
-pub type Boolean = u8;
 
 pub const kCFStringEncodingUTF8: CFStringEncoding = 0x0800_0100;
 

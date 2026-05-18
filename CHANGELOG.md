@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.1] - 2026-05-18
+
+### Changed
+
+- chore: re-export OS primitives (Boolean, FourCharCode) from apple-cf
+
 ## [0.6.0] - 2026-05-18
 
 ### Changed

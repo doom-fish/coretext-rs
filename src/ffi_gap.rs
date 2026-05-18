@@ -11,7 +11,7 @@ pub type CTTextTabRef = *const c_void;
 pub type CTTypesetterRef = *const c_void;
 pub type CTRunDelegateRef = *const c_void;
 pub type UniChar = u16;
-pub type FourCharCode = u32;
+pub use apple_cf::raw::FourCharCode;
 pub type Fixed = i32;
 
 pub const kCFCompareLessThan: CFComparisonResult = -1;
