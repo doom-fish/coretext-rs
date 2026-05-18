@@ -3,13 +3,29 @@
 version = 3
 
 [[package]]
-name = "coretext-rs"
-version = "0.3.1"
+name = "apple-cf"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d110ec64ba49edcbc97fb77907ae336be72f6a89e0e1ca6be155f6e9b146e204"
 dependencies = [
+ "doom-fish-utils",
+]
+
+[[package]]
+name = "coretext-rs"
+version = "0.4.0"
+dependencies = [
+ "apple-cf",
  "libc",
  "serde",
  "serde_json",
 ]
+
+[[package]]
+name = "doom-fish-utils"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c64a66e1fdd09573daeb89569701e8c3eab595cf3e2be0752ec6303e36689242"
 
 [[package]]
 name = "itoa"

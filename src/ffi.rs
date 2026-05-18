@@ -49,38 +49,7 @@ pub type CGFloat = f64;
 pub type CGGlyph = u16;
 pub type CGPathRef = *const c_void;
 
-#[repr(C)]
-#[derive(Debug, Clone, Copy, Default, PartialEq)]
-pub struct CGPoint {
-    pub x: CGFloat,
-    pub y: CGFloat,
-}
-
-#[repr(C)]
-#[derive(Debug, Clone, Copy, Default, PartialEq)]
-pub struct CGSize {
-    pub width: CGFloat,
-    pub height: CGFloat,
-}
-
-/// `CGRect` with the canonical C layout: `{origin: CGPoint, size: CGSize}`.
-#[repr(C)]
-#[derive(Debug, Clone, Copy, Default, PartialEq)]
-pub struct CGRect {
-    pub origin: CGPoint,
-    pub size: CGSize,
-}
-
-#[repr(C)]
-#[derive(Debug, Clone, Copy)]
-pub struct CGAffineTransform {
-    pub a: CGFloat,
-    pub b: CGFloat,
-    pub c: CGFloat,
-    pub d: CGFloat,
-    pub tx: CGFloat,
-    pub ty: CGFloat,
-}
+pub use apple_cf::cg::{CGAffineTransform, CGPoint, CGRect, CGSize};
 
 // ── CoreText opaque references ─────────────────────────────────────────────
 

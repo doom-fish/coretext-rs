@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0] - 2026-05-18
+
+### Changed
+
+- Re-exported `CGPoint`, `CGSize`, `CGRect`, and `CGAffineTransform` from `apple-cf` 0.8 now that its Core Graphics layout matches the canonical nested `CGRect` form.
+- Bumped `coretext-rs` to `0.4.0` for the nominal CG geometry type change.
+
 ## [0.3.1] - 2026-05-18
 
 ### Fixed
