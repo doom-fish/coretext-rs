@@ -1,7 +1,7 @@
 # coretext-rs coverage audit (vs MacOSX26.2.sdk)
 
-SDK_PUBLIC_SYMBOLS: 478
-VERIFIED: 467
+SDK_PUBLIC_SYMBOLS: 479
+VERIFIED: 468
 GAPS: 0
 EXEMPT: 11
 COVERAGE_PCT: 100.00%
@@ -255,10 +255,11 @@ This audit covers the full public C surface of CoreText.framework, including `SF
 | CTFontCreateWithGraphicsFont | function | CTFont.h | ffi::CTFontCreateWithGraphicsFont |
 | CTFontCreateWithNameAndOptions | function | CTFont.h | ffi::CTFontCreateWithNameAndOptions |
 | CTFontDrawGlyphs | function | CTFont.h | ffi::CTFontDrawGlyphs |
-| CTFontDrawImageFromAdaptiveImageProviderAtPoint | function | CTFont.h | ffi::CTFontDrawImageFromAdaptiveImageProviderAtPoint |
+| CTFontDrawImageFromAdaptiveImageProviderAtPoint | function | CTFont.h | ffi::CTFontDrawImageFromAdaptiveImageProviderAtPoint; CTFont::draw_image_from_adaptive_image_provider_at_point |
+| CTAdaptiveImageProviding | protocol | CTFont.h; CTRunDelegate.h | adaptive_image::{AdaptiveImageProviding, AdaptiveImageProvider, AdaptiveImageResponse} |
 | CTFontGetLigatureCaretPositions | function | CTFont.h | ffi::CTFontGetLigatureCaretPositions |
 | CTFontGetStringEncoding | function | CTFont.h | ffi::CTFontGetStringEncoding |
-| CTFontGetTypographicBoundsForAdaptiveImageProvider | function | CTFont.h | ffi::CTFontGetTypographicBoundsForAdaptiveImageProvider |
+| CTFontGetTypographicBoundsForAdaptiveImageProvider | function | CTFont.h | ffi::CTFontGetTypographicBoundsForAdaptiveImageProvider; CTFont::typographic_bounds_for_adaptive_image_provider |
 | CTFontOptions | options | CTFont.h | ffi::CTFontOptions |
 | CTFontTableOptions | options | CTFont.h | ffi::CTFontTableOptions |
 | kCTBaselineClassHanging | constant | CTFont.h | ffi::kCTBaselineClassHanging |

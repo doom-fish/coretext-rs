@@ -258,10 +258,11 @@ func ct_font_manager_register_fonts_for_urls(
     _ errorOut: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
 ) -> Bool {
     let urls = urlArrayFromJSONPaths(urlPathsJSON)
-    var errors: Unmanaged<CFArray>?
-    let ok = CTFontManagerRegisterFontsForURLs(urls as CFArray, fontManagerScope(scope), &errors)
-    errorOut?.pointee = jsonCString(fontManagerErrorMessages(errors?.takeRetainedValue()))
-    return ok
+    let errors = collectFontManagerErrors { handler in
+        CTFontManagerRegisterFontURLs(urls as CFArray, fontManagerScope(scope), true, handler)
+    }
+    errorOut?.pointee = jsonCString(errors)
+    return errors.isEmpty
 }
 
 @_cdecl("ct_font_manager_register_fonts_with_asset_names")
@@ -316,8 +317,9 @@ func ct_font_manager_unregister_fonts_for_urls(
     _ errorOut: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
 ) -> Bool {
     let urls = urlArrayFromJSONPaths(urlPathsJSON)
-    var errors: Unmanaged<CFArray>?
-    let ok = CTFontManagerUnregisterFontsForURLs(urls as CFArray, fontManagerScope(scope), &errors)
-    errorOut?.pointee = jsonCString(fontManagerErrorMessages(errors?.takeRetainedValue()))
-    return ok
+    let errors = collectFontManagerErrors { handler in
+        CTFontManagerUnregisterFontURLs(urls as CFArray, fontManagerScope(scope), handler)
+    }
+    errorOut?.pointee = jsonCString(errors)
+    return errors.isEmpty
 }

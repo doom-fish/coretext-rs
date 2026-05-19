@@ -100,6 +100,27 @@ unsafe extern "C" {
     pub fn ct_font_copy_feature_settings_json(font: Handle) -> *mut c_char;
     pub fn ct_font_copy_available_tables_json(font: Handle) -> *mut c_char;
     pub fn ct_font_has_table(font: Handle, tag: u32) -> bool;
+    pub fn ct_adaptive_image_provider_create(
+        refcon: *mut c_void,
+        callback: unsafe extern "C" fn(
+            refcon: *mut c_void,
+            proposed_size: CGSize,
+            scale_factor: f64,
+            out_image_offset: *mut CGPoint,
+            out_image_size: *mut CGSize,
+        ) -> *mut c_void,
+        release_callback: unsafe extern "C" fn(refcon: *mut c_void),
+    ) -> Handle;
+    pub fn ct_font_get_typographic_bounds_for_adaptive_image_provider(
+        font: Handle,
+        provider: Handle,
+    ) -> CGRect;
+    pub fn ct_font_draw_image_from_adaptive_image_provider_at_point(
+        font: Handle,
+        provider: Handle,
+        point: CGPoint,
+        context: *mut c_void,
+    );
 
     pub fn ct_font_descriptor_create(name: *const c_char, size: f64) -> Handle;
     pub fn ct_font_descriptor_copy_with_family(descriptor: Handle, family: *const c_char)

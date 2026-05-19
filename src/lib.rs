@@ -15,6 +15,8 @@
 mod bridge;
 mod common;
 
+/// Rust-backed wrappers for CoreText adaptive-image providers.
+pub mod adaptive_image;
 /// CoreText-ready attributed-string inputs for layout APIs like `CTLineCreateWithAttributedString`.
 pub mod attributed_string;
 /// Error types returned by CoreText wrapper APIs.
@@ -57,6 +59,8 @@ pub mod types;
 /// Safe wrappers around the `CTTypesetter` API family.
 pub mod typesetter;
 
+pub use adaptive_image::{AdaptiveImageProvider, AdaptiveImageProviding, AdaptiveImageResponse};
+pub use apple_cf::cg::{CGContext, CGImage};
 pub use attributed_string::AttributedString;
 pub use error::{CoreTextError, CoreTextResult};
 pub use font::{font_type_id, CTFont, FontNameKey, UIFontType};

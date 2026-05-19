@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0] - 2026-05-19
+
+### Added
+
+- Added a safe `CTAdaptiveImageProviding` bridge via `AdaptiveImageProviding` / `AdaptiveImageProvider`, plus `CTFont` helpers for `CTFontGetTypographicBoundsForAdaptiveImageProvider` and `CTFontDrawImageFromAdaptiveImageProviderAtPoint`.
+- Re-exported `CGContext` and `CGImage` alongside the new adaptive-image APIs so callers can implement providers without reaching into internal bridge details.
+
 ## [0.6.3] - 2026-05-18
 
 ### Changed

@@ -1,3 +1,6 @@
+use apple_cf::cg::CGContext;
+
+use crate::adaptive_image::AdaptiveImageProvider;
 use crate::bridge;
 use crate::common::{
     cstring, expect_handle, impl_handle, json_from_owned, option_string_from_owned,
@@ -8,7 +11,7 @@ use crate::font_descriptor::{FontDescriptor, FontOrientation};
 use crate::font_feature::{FontFeature, FontFeatureSetting};
 use crate::font_traits::FontTraits;
 use crate::font_variation::{FontVariationAxis, FontVariationCoordinate};
-use crate::types::{CFRange, CGAffineTransform, CGRect, CGSize, TextRange};
+use crate::types::{CFRange, CGAffineTransform, CGPoint, CGRect, CGSize, TextRange};
 
 /// Constants for `CTFontCopyName` / `CTFontCopyLocalizedName`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -608,6 +611,37 @@ impl CTFont {
     #[must_use]
     pub fn string_encoding(&self) -> u32 {
         unsafe { bridge::ct_font_get_string_encoding(self.raw) }
+    }
+
+    /// Wraps `CTFontGetTypographicBoundsForAdaptiveImageProvider`.
+    #[must_use]
+    pub fn typographic_bounds_for_adaptive_image_provider(
+        &self,
+        provider: Option<&AdaptiveImageProvider>,
+    ) -> CGRect {
+        unsafe {
+            bridge::ct_font_get_typographic_bounds_for_adaptive_image_provider(
+                self.raw,
+                provider.map_or(std::ptr::null_mut(), AdaptiveImageProvider::as_raw),
+            )
+        }
+    }
+
+    /// Wraps `CTFontDrawImageFromAdaptiveImageProviderAtPoint`.
+    pub fn draw_image_from_adaptive_image_provider_at_point(
+        &self,
+        provider: &AdaptiveImageProvider,
+        point: CGPoint,
+        context: &CGContext,
+    ) {
+        unsafe {
+            bridge::ct_font_draw_image_from_adaptive_image_provider_at_point(
+                self.raw,
+                provider.as_raw(),
+                point,
+                context.as_ptr(),
+            );
+        }
     }
 }
 
