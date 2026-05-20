@@ -54,3 +54,39 @@ pub struct TypographicBounds {
     /// Wraps the `leading` value returned by `CTLineGetTypographicBounds` and `CTRunGetTypographicBounds`.
     pub leading: f64,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{CFRange, TextRange, TypographicBounds};
+
+    fn assert_close(left: f64, right: f64) {
+        assert!((left - right).abs() < f64::EPSILON, "expected {left} to match {right}");
+    }
+
+    #[test]
+    fn text_range_new_sets_location_and_length() {
+        let range = TextRange::new(3, 5);
+
+        assert_eq!(range.location, 3);
+        assert_eq!(range.length, 5);
+    }
+
+    #[test]
+    fn text_range_round_trips_through_cfrange() {
+        let range = TextRange::new(7, 9);
+        let cf_range: CFRange = range.into();
+        let round_trip = TextRange::from(cf_range);
+
+        assert_eq!(round_trip, range);
+    }
+
+    #[test]
+    fn typographic_bounds_default_is_zeroed() {
+        let bounds = TypographicBounds::default();
+
+        assert_close(bounds.width, 0.0);
+        assert_close(bounds.ascent, 0.0);
+        assert_close(bounds.descent, 0.0);
+        assert_close(bounds.leading, 0.0);
+    }
+}

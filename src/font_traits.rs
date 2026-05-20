@@ -53,3 +53,54 @@ impl FontTraits {
         self.symbolic_traits & symbolic_traits::CLASS_MASK
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{symbolic_traits, FontTraits};
+
+    fn assert_close(left: f64, right: f64) {
+        assert!((left - right).abs() < f64::EPSILON, "expected {left} to match {right}");
+    }
+
+    #[test]
+    fn symbolic_trait_constants_are_stable() {
+        assert_eq!(symbolic_traits::ITALIC, 1 << 0);
+        assert_eq!(symbolic_traits::BOLD, 1 << 1);
+        assert_eq!(symbolic_traits::EXPANDED, 1 << 5);
+        assert_eq!(symbolic_traits::CLASS_MASK_SHIFT, 28);
+        assert_eq!(symbolic_traits::CLASS_MASK, 15 << 28);
+    }
+
+    #[test]
+    fn has_checks_requested_trait_bits() {
+        let traits = FontTraits {
+            symbolic_traits: symbolic_traits::ITALIC | symbolic_traits::BOLD,
+            ..FontTraits::default()
+        };
+
+        assert!(traits.has(symbolic_traits::ITALIC));
+        assert!(traits.has(symbolic_traits::ITALIC | symbolic_traits::BOLD));
+        assert!(!traits.has(symbolic_traits::EXPANDED));
+    }
+
+    #[test]
+    fn stylistic_class_masks_non_class_bits() {
+        let class_bits = 3 << symbolic_traits::CLASS_MASK_SHIFT;
+        let traits = FontTraits {
+            symbolic_traits: class_bits | symbolic_traits::MONOSPACE,
+            ..FontTraits::default()
+        };
+
+        assert_eq!(traits.stylistic_class(), class_bits);
+    }
+
+    #[test]
+    fn default_traits_zero_out_numeric_fields() {
+        let traits = FontTraits::default();
+
+        assert_eq!(traits.symbolic_traits, 0);
+        assert_close(traits.weight, 0.0);
+        assert_close(traits.width, 0.0);
+        assert_close(traits.slant, 0.0);
+    }
+}

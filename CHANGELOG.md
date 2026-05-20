@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.7.1] - 2026-05-20
+
+- Added in-`src/` unit tests across error, font_traits, line, paragraph, and types (Tier 2 quality polish), providing fast `cargo test --lib` fail-fast signal alongside the existing integration tests under `tests/`.
+
 ## [0.7.0] - 2026-05-19
 
 ### Added

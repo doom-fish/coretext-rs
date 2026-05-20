@@ -187,3 +187,41 @@ impl CTLine {
 pub fn line_type_id() -> u64 {
     unsafe { bridge::ct_line_get_type_id() }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{bounds_options, LineTruncationType};
+
+    #[test]
+    fn bounds_option_flags_are_unique_single_bits() {
+        let flags = [
+            bounds_options::EXCLUDE_TYPOGRAPHIC_LEADING,
+            bounds_options::EXCLUDE_TYPOGRAPHIC_SHIFTS,
+            bounds_options::USE_HANGING_PUNCTUATION,
+            bounds_options::USE_GLYPH_PATH_BOUNDS,
+            bounds_options::USE_OPTICAL_BOUNDS,
+            bounds_options::INCLUDE_LANGUAGE_EXTENTS,
+        ];
+
+        for flag in flags {
+            assert_eq!(flag.count_ones(), 1);
+        }
+    }
+
+    #[test]
+    fn bounds_option_flags_combine_without_overlap() {
+        let combined = bounds_options::EXCLUDE_TYPOGRAPHIC_LEADING
+            | bounds_options::USE_GLYPH_PATH_BOUNDS
+            | bounds_options::INCLUDE_LANGUAGE_EXTENTS;
+
+        assert_eq!(combined, (1 << 0) | (1 << 3) | (1 << 5));
+    }
+
+    #[test]
+    fn line_truncation_type_defaults_and_discriminants_are_stable() {
+        assert_eq!(LineTruncationType::default(), LineTruncationType::Start);
+        assert_eq!(LineTruncationType::Start as u32, 0);
+        assert_eq!(LineTruncationType::End as u32, 1);
+        assert_eq!(LineTruncationType::Middle as u32, 2);
+    }
+}

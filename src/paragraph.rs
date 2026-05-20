@@ -349,3 +349,79 @@ impl ParagraphStyle {
 pub fn paragraph_style_type_id() -> u64 {
     unsafe { bridge::ct_paragraph_style_get_type_id() }
 }
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+
+    use super::{
+        LineBreakMode, ParagraphStyleOptions, TextAlignment, WritingDirection,
+    };
+
+    fn assert_close(left: f64, right: f64) {
+        assert!((left - right).abs() < f64::EPSILON, "expected {left} to match {right}");
+    }
+
+    #[test]
+    fn text_alignment_from_raw_and_default_are_stable() {
+        assert_eq!(TextAlignment::default(), TextAlignment::Natural);
+        assert_eq!(TextAlignment::from_raw(0), TextAlignment::Left);
+        assert_eq!(TextAlignment::from_raw(1), TextAlignment::Right);
+        assert_eq!(TextAlignment::from_raw(2), TextAlignment::Center);
+        assert_eq!(TextAlignment::from_raw(3), TextAlignment::Justified);
+        assert_eq!(TextAlignment::from_raw(255), TextAlignment::Natural);
+    }
+
+    #[test]
+    fn line_break_mode_from_raw_and_default_are_stable() {
+        assert_eq!(LineBreakMode::default(), LineBreakMode::WordWrapping);
+        assert_eq!(LineBreakMode::from_raw(1), LineBreakMode::CharWrapping);
+        assert_eq!(LineBreakMode::from_raw(2), LineBreakMode::Clipping);
+        assert_eq!(LineBreakMode::from_raw(3), LineBreakMode::TruncatingHead);
+        assert_eq!(LineBreakMode::from_raw(4), LineBreakMode::TruncatingTail);
+        assert_eq!(LineBreakMode::from_raw(5), LineBreakMode::TruncatingMiddle);
+        assert_eq!(LineBreakMode::from_raw(255), LineBreakMode::WordWrapping);
+    }
+
+    #[test]
+    fn writing_direction_from_raw_and_default_are_stable() {
+        assert_eq!(WritingDirection::default(), WritingDirection::Natural);
+        assert_eq!(WritingDirection::from_raw(0), WritingDirection::LeftToRight);
+        assert_eq!(WritingDirection::from_raw(1), WritingDirection::RightToLeft);
+        assert_eq!(WritingDirection::from_raw(-1), WritingDirection::Natural);
+    }
+
+    #[test]
+    fn encoded_options_preserve_selected_values() {
+        let options = ParagraphStyleOptions {
+            alignment: Some(TextAlignment::Center),
+            first_line_head_indent: Some(12.0),
+            line_break_mode: Some(LineBreakMode::TruncatingMiddle),
+            base_writing_direction: Some(WritingDirection::RightToLeft),
+            line_bounds_options: Some(0b101),
+            ..ParagraphStyleOptions::default()
+        };
+        let encoded = options.encoded();
+
+        assert_eq!(encoded.alignment, Some(2));
+        assert_close(encoded.first_line_head_indent.expect("indent should be present"), 12.0);
+        assert_eq!(encoded.line_break_mode, Some(5));
+        assert_eq!(encoded.base_writing_direction, Some(1));
+        assert_eq!(encoded.line_bounds_options, Some(0b101));
+    }
+
+    #[test]
+    fn paragraph_style_json_uses_camel_case_keys() {
+        let options = ParagraphStyleOptions {
+            first_line_head_indent: Some(12.0),
+            maximum_line_spacing: Some(18.0),
+            ..ParagraphStyleOptions::default()
+        };
+        let json = options.json().expect("json serialization should succeed");
+        let value: serde_json::Value =
+            serde_json::from_slice(json.as_bytes()).expect("json should parse");
+
+        assert_eq!(value["firstLineHeadIndent"], json!(12.0));
+        assert_eq!(value["maximumLineSpacing"], json!(18.0));
+    }
+}
