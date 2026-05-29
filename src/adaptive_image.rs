@@ -80,24 +80,29 @@ unsafe extern "C" fn adaptive_image_callback(
     out_image_size: *mut CGSize,
 ) -> *mut c_void {
     let provider = unsafe { &*refcon.cast::<Box<dyn AdaptiveImageProviding>>() };
-    let Some(response) = provider
-        .as_ref()
-        .image_for_proposed_size(proposed_size, scale_factor)
-    else {
-        return ptr::null_mut();
-    };
+    // A panic unwinding across the C ABI into CoreText is undefined behaviour;
+    // contain any panic from the user trait method and report "no image".
+    std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        let Some(response) = provider
+            .as_ref()
+            .image_for_proposed_size(proposed_size, scale_factor)
+        else {
+            return ptr::null_mut();
+        };
 
-    if !out_image_offset.is_null() {
-        unsafe { *out_image_offset = response.image_offset };
-    }
-    if !out_image_size.is_null() {
-        unsafe { *out_image_size = response.image_size };
-    }
+        if !out_image_offset.is_null() {
+            unsafe { *out_image_offset = response.image_offset };
+        }
+        if !out_image_size.is_null() {
+            unsafe { *out_image_size = response.image_size };
+        }
 
-    let image = response.image;
-    let raw = image.as_ptr();
-    mem::forget(image);
-    raw
+        let image = response.image;
+        let raw = image.as_ptr();
+        mem::forget(image);
+        raw
+    }))
+    .unwrap_or(ptr::null_mut())
 }
 
 unsafe extern "C" fn adaptive_image_release(refcon: *mut c_void) {
