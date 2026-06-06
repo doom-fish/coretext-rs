@@ -43,8 +43,9 @@ func ct_run_copy_glyphs(
 ) -> Int {
     guard let runPtr, let buffer, capacity > 0 else { return 0 }
     let run: CTRun = unbox(runPtr, as: CTRun.self)
-    CTRunGetGlyphs(run, CFRange(location: 0, length: capacity), buffer)
-    return min(capacity, CTRunGetGlyphCount(run))
+    let count = min(capacity, CTRunGetGlyphCount(run))
+    CTRunGetGlyphs(run, CFRange(location: 0, length: count), buffer)
+    return count
 }
 
 @_cdecl("ct_run_copy_positions")
@@ -55,8 +56,9 @@ func ct_run_copy_positions(
 ) -> Int {
     guard let runPtr, let buffer, capacity > 0 else { return 0 }
     let run: CTRun = unbox(runPtr, as: CTRun.self)
-    CTRunGetPositions(run, CFRange(location: 0, length: capacity), buffer)
-    return min(capacity, CTRunGetGlyphCount(run))
+    let count = min(capacity, CTRunGetGlyphCount(run))
+    CTRunGetPositions(run, CFRange(location: 0, length: count), buffer)
+    return count
 }
 
 @_cdecl("ct_run_copy_advances")
@@ -67,8 +69,9 @@ func ct_run_copy_advances(
 ) -> Int {
     guard let runPtr, let buffer, capacity > 0 else { return 0 }
     let run: CTRun = unbox(runPtr, as: CTRun.self)
-    CTRunGetAdvances(run, CFRange(location: 0, length: capacity), buffer)
-    return min(capacity, CTRunGetGlyphCount(run))
+    let count = min(capacity, CTRunGetGlyphCount(run))
+    CTRunGetAdvances(run, CFRange(location: 0, length: count), buffer)
+    return count
 }
 
 @_cdecl("ct_run_copy_string_indices")
@@ -79,8 +82,9 @@ func ct_run_copy_string_indices(
 ) -> Int {
     guard let runPtr, let buffer, capacity > 0 else { return 0 }
     let run: CTRun = unbox(runPtr, as: CTRun.self)
-    CTRunGetStringIndices(run, CFRange(location: 0, length: capacity), buffer)
-    return min(capacity, CTRunGetGlyphCount(run))
+    let count = min(capacity, CTRunGetGlyphCount(run))
+    CTRunGetStringIndices(run, CFRange(location: 0, length: count), buffer)
+    return count
 }
 
 @_cdecl("ct_run_get_string_range")
@@ -125,8 +129,9 @@ func ct_run_copy_base_advances_and_origins(
 ) -> Int {
     guard let runPtr, capacity > 0 else { return 0 }
     let run: CTRun = unbox(runPtr, as: CTRun.self)
-    CTRunGetBaseAdvancesAndOrigins(run, CFRange(location: 0, length: capacity), advances, origins)
-    return min(capacity, CTRunGetGlyphCount(run))
+    let count = min(capacity, CTRunGetGlyphCount(run))
+    CTRunGetBaseAdvancesAndOrigins(run, CFRange(location: 0, length: count), advances, origins)
+    return count
 }
 
 @_cdecl("ct_run_get_type_id")

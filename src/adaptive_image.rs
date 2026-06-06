@@ -107,6 +107,10 @@ unsafe extern "C" fn adaptive_image_callback(
 
 unsafe extern "C" fn adaptive_image_release(refcon: *mut c_void) {
     if !refcon.is_null() {
-        unsafe { drop(Box::from_raw(refcon.cast::<Box<dyn AdaptiveImageProviding>>())) };
+        // This callback is invoked from the Swift bridge's `deinit` across the C
+        // ABI; a panic in the user trait's `Drop` unwinding into Swift is
+        // undefined behaviour, so contain it here (mirrors adaptive_image_callback).
+        let boxed = unsafe { Box::from_raw(refcon.cast::<Box<dyn AdaptiveImageProviding>>()) };
+        let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| drop(boxed)));
     }
 }
