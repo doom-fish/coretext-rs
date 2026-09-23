@@ -1,5 +1,48 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.8.0] - Unreleased
+
+### Security
+
+- `CTFont::font_for_string` passed its range to `CTFontCreateForString` unchecked, so a range past the end of the string made CoreText read out of bounds (a segfault in testing). Every range is now checked first (see Fixed).
+- Every wrapper was `Send + Sync`, including `MutableFontCollection`, whose setters mutated Core Foundation state through `&self`, so safe code could race on it. The layout objects were `Sync` too, against Apple's guidance to keep a layout on one thread. See Changed for the new markers.
+- The public `from_raw` constructors were safe and adopted any pointer, which was then released on drop. They are now crate-private.
+
+### Fixed
+
+- Negative, overflowing or out-of-range `TextRange`s and break indices no longer reach CoreText, where they raised uncatchable `NSException`s (`CTTypesetterCreateLine`, `CTFramesetterCreateFrame`, `CTFramesetterSuggestFrameSizeWithConstraints`) or returned garbage. They are checked with checked arithmetic against the string's length in UTF-16 code units and rejected with `CoreTextError::RangeOutOfBounds` or `IndexOutOfBounds`. `TextRange` is documented as counting UTF-16 code units.
+- Font registration (`register_font_urls`, `register_font_descriptors`, `register_fonts_for_urls` and the `unregister_*` functions) appended CoreText's handler messages to an unsynchronized Swift array and reported `Ok(())` when its fixed 5-second wait ran out while registration was still pending. The handler state is now lock-protected, a timeout returns `CoreTextError::TimedOut` and makes CoreText stop at its next callback, and the timeout is configurable.
+- `register_fonts_for_urls` and `unregister_fonts_for_urls` leaked the bridge's message string on success.
+- `CTFrame::line_origins` no longer asks CoreText for more origins than the frame has lines.
+- Tautological and assertion-free tests now assert real values, and the font-enable test that changes the user's font registry only runs with `--ignored`.
+- `COVERAGE_AUDIT.md` counted symbols that are only declared in the unsafe `raw-ffi` module as verified (240 of 468 rows) and now says so; the `COVERAGE_AUDIT_V2.md` totals now match its tables. The README states the macOS 10.15 and Rust 1.82 minimums.
+
+### Changed
+
+- **BREAKING:** only the font and attribute objects (`CTFont`, `FontDescriptor`, `FontCollection`, `MutableFontCollection`, `GlyphInfo`, `AttributedString`, `ParagraphStyle`, `TextTab`, `RubyAnnotation`) are `Send + Sync`. `CTTypesetter`, `CTFramesetter`, `CTFrame`, `CTLine` and `CTRun` are neither, because their clones and children share the same CoreText objects.
+- **BREAKING:** `MutableFontCollection::set_query_descriptors` and `set_exclusion_descriptors` take `&mut self`, `clone` makes an independent mutable copy, and `as_font_collection` returns an immutable snapshot instead of an alias.
+- **BREAKING:** `CTTypesetter::suggest_line_break`, `suggest_line_break_with_offset`, `suggest_cluster_break`, `suggest_cluster_break_with_offset` and `CTFramesetter::suggest_frame_size_for_range` return `CoreTextResult`.
+- **BREAKING:** `from_raw` is no longer public on the wrapper types.
+- **BREAKING:** `CoreTextError` is `#[non_exhaustive]` and has new variants.
+- **BREAKING:** requires `apple-cf` `>=0.11, <0.12` and Rust 1.82.
+
+### Added
+
+- `CTLine::draw`, `CTFrame::draw` and `CTFont::draw_glyphs` draw into an `apple-cf` `CGContext`.
+- `CTFont::path_for_glyph` returns a `GlyphPath` (bounding boxes and `PathElement`s) from `CTFontCreatePathForGlyph`.
+- `CTLine::caret_offsets` returns `CaretOffset`s from `CTLineEnumerateCaretOffsets`.
+- `AttributedString::utf16_len`, `MutableFontCollection::into_font_collection`, and `FontManager::set_registration_timeout` / `registration_timeout` (30 s by default).
+- `CoreTextError::RangeOutOfBounds`, `IndexOutOfBounds`, `LengthMismatch` and `TimedOut`.
+
+## [0.7.2] - 2026-06-06
+
+- Clamped `CTRun` glyph, position, advance and string-index reads to the run's glyph count, and contained panics in the adaptive-image callback and release trampoline.
+
 ## [0.7.1] - 2026-05-20
 
 - Added in-`src/` unit tests across error, font_traits, line, paragraph, and types (Tier 2 quality polish), providing fast `cargo test --lib` fail-fast signal alongside the existing integration tests under `tests/`.
