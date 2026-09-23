@@ -534,15 +534,21 @@ unsafe extern "C" {
         count: isize,
         scope: u32,
         enabled: bool,
+        timeout_nanoseconds: u64,
+        timed_out: *mut bool,
     ) -> *mut c_char;
     pub fn ct_font_manager_register_font_urls(
         url_paths_json: *const c_char,
         scope: u32,
         enabled: bool,
+        timeout_nanoseconds: u64,
+        timed_out: *mut bool,
     ) -> *mut c_char;
     pub fn ct_font_manager_register_fonts_for_urls(
         url_paths_json: *const c_char,
         scope: u32,
+        timeout_nanoseconds: u64,
+        timed_out: *mut bool,
         error_out: *mut *mut c_char,
     ) -> bool;
     pub fn ct_font_manager_register_fonts_with_asset_names(
@@ -554,14 +560,20 @@ unsafe extern "C" {
         descriptors: *const Handle,
         count: isize,
         scope: u32,
+        timeout_nanoseconds: u64,
+        timed_out: *mut bool,
     ) -> *mut c_char;
     pub fn ct_font_manager_unregister_font_urls(
         url_paths_json: *const c_char,
         scope: u32,
+        timeout_nanoseconds: u64,
+        timed_out: *mut bool,
     ) -> *mut c_char;
     pub fn ct_font_manager_unregister_fonts_for_urls(
         url_paths_json: *const c_char,
         scope: u32,
+        timeout_nanoseconds: u64,
+        timed_out: *mut bool,
         error_out: *mut *mut c_char,
     ) -> bool;
 
