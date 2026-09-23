@@ -1,3 +1,4 @@
+import CoreGraphics
 import CoreText
 import Foundation
 
@@ -150,4 +151,43 @@ func ct_line_copy_runs(
 @_cdecl("ct_line_get_type_id")
 func ct_line_get_type_id() -> UInt64 {
     UInt64(CTLineGetTypeID())
+}
+
+@_cdecl("ct_line_draw")
+func ct_line_draw(
+    _ linePtr: UnsafeMutableRawPointer?,
+    _ contextPtr: UnsafeMutableRawPointer?,
+    _ textPosition: CGPoint
+) {
+    guard let linePtr, let contextPtr else { return }
+    let line: CTLine = unbox(linePtr, as: CTLine.self)
+    let context = Unmanaged<CGContext>.fromOpaque(contextPtr).takeUnretainedValue()
+    context.textPosition = textPosition
+    CTLineDraw(line, context)
+}
+
+@_cdecl("ct_line_copy_caret_offsets")
+func ct_line_copy_caret_offsets(
+    _ linePtr: UnsafeMutableRawPointer?,
+    _ offsets: UnsafeMutablePointer<Double>?,
+    _ stringIndices: UnsafeMutablePointer<Int>?,
+    _ leadingEdges: UnsafeMutablePointer<Bool>?,
+    _ capacity: Int
+) -> Int {
+    guard let linePtr else { return 0 }
+    let line: CTLine = unbox(linePtr, as: CTLine.self)
+    var carets: [(offset: Double, stringIndex: Int, leadingEdge: Bool)] = []
+    CTLineEnumerateCaretOffsets(line) { offset, stringIndex, leadingEdge, _ in
+        carets.append((Double(offset), stringIndex, leadingEdge))
+    }
+    guard let offsets, let stringIndices, let leadingEdges else {
+        return carets.count
+    }
+    let count = min(max(capacity, 0), carets.count)
+    for index in 0..<count {
+        offsets[index] = carets[index].offset
+        stringIndices[index] = carets[index].stringIndex
+        leadingEdges[index] = carets[index].leadingEdge
+    }
+    return count
 }

@@ -1,3 +1,5 @@
+use apple_cf::cg::CGContext;
+
 use crate::attributed_string::AttributedString;
 use crate::bridge;
 use crate::common::{expect_handle, impl_handle};
@@ -32,6 +34,13 @@ pub enum LineTruncationType {
     End = 1,
     /// Selects the middle case of `CTLineTruncationType`.
     Middle = 2,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct CaretOffset {
+    pub offset: f64,
+    pub string_index: isize,
+    pub leading_edge: bool,
 }
 
 /// An immutable `CTLine` wrapper.
@@ -179,6 +188,51 @@ impl CTLine {
         let written = unsafe { bridge::ct_line_copy_runs(self.raw, handles.as_mut_ptr(), count) };
         handles.truncate(usize::try_from(written).unwrap_or(0));
         handles.into_iter().map(CTRun::from_raw).collect()
+    }
+
+    pub fn draw(&self, context: &CGContext, text_position: CGPoint) {
+        unsafe { bridge::ct_line_draw(self.raw, context.as_ptr(), text_position) };
+    }
+
+    #[must_use]
+    pub fn caret_offsets(&self) -> Vec<CaretOffset> {
+        let count = unsafe {
+            bridge::ct_line_copy_caret_offsets(
+                self.raw,
+                std::ptr::null_mut(),
+                std::ptr::null_mut(),
+                std::ptr::null_mut(),
+                0,
+            )
+        };
+        let len = usize::try_from(count).unwrap_or(0);
+        if len == 0 {
+            return Vec::new();
+        }
+        let mut offsets = vec![0.0_f64; len];
+        let mut string_indices = vec![0_isize; len];
+        let mut leading_edges = vec![false; len];
+        let written = unsafe {
+            bridge::ct_line_copy_caret_offsets(
+                self.raw,
+                offsets.as_mut_ptr(),
+                string_indices.as_mut_ptr(),
+                leading_edges.as_mut_ptr(),
+                count,
+            )
+        };
+        let written = usize::try_from(written).unwrap_or(0).min(len);
+        offsets
+            .into_iter()
+            .zip(string_indices)
+            .zip(leading_edges)
+            .take(written)
+            .map(|((offset, string_index), leading_edge)| CaretOffset {
+                offset,
+                string_index,
+                leading_edge,
+            })
+            .collect()
     }
 }
 

@@ -310,6 +310,36 @@ unsafe extern "C" {
     ) -> f64;
     pub fn ct_line_get_run_count(line: Handle) -> isize;
     pub fn ct_line_copy_runs(line: Handle, buffer: *mut Handle, capacity: isize) -> isize;
+    pub fn ct_line_draw(line: Handle, context: *mut c_void, text_position: CGPoint);
+    pub fn ct_line_copy_caret_offsets(
+        line: Handle,
+        offsets: *mut f64,
+        string_indices: *mut isize,
+        leading_edges: *mut bool,
+        capacity: isize,
+    ) -> isize;
+    pub fn ct_frame_draw(frame: Handle, context: *mut c_void);
+    pub fn ct_font_draw_glyphs(
+        font: Handle,
+        glyphs: *const u16,
+        positions: *const CGPoint,
+        count: isize,
+        context: *mut c_void,
+    );
+    pub fn ct_font_create_path_for_glyph(
+        font: Handle,
+        glyph: u16,
+        transform: *const CGAffineTransform,
+    ) -> Handle;
+    pub fn ct_path_get_bounding_box(path: Handle) -> CGRect;
+    pub fn ct_path_get_path_bounding_box(path: Handle) -> CGRect;
+    pub fn ct_path_is_empty(path: Handle) -> bool;
+    pub fn ct_path_copy_elements(
+        path: Handle,
+        kinds: *mut u8,
+        points: *mut CGPoint,
+        capacity: isize,
+    ) -> isize;
 
     pub fn ct_paragraph_style_create(
         options_json: *const c_char,

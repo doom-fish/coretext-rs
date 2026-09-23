@@ -48,6 +48,7 @@ pub mod glyph;
 pub mod line;
 /// Safe wrappers around the `CTParagraphStyle` API family.
 pub mod paragraph;
+pub mod path;
 /// Safe wrappers around the `CTRubyAnnotation` API family.
 pub mod ruby_annotation;
 /// Safe wrappers around the `CTRun` API family.
@@ -75,11 +76,12 @@ pub use font_variation::{FontVariationAxis, FontVariationCoordinate};
 pub use frame::{frame_type_id, CTFrame};
 pub use framesetter::{framesetter_type_id, CTFramesetter};
 pub use glyph::{glyph_info_type_id, CharacterCollection, GlyphId, GlyphInfo};
-pub use line::{bounds_options, line_type_id, CTLine, LineTruncationType};
+pub use line::{bounds_options, line_type_id, CTLine, CaretOffset, LineTruncationType};
 pub use paragraph::{
     paragraph_style_type_id, LineBreakMode, ParagraphStyle, ParagraphStyleOptions, TextAlignment,
     WritingDirection,
 };
+pub use path::{GlyphPath, PathElement};
 pub use ruby_annotation::{
     ruby_annotation_type_id, RubyAlignment, RubyAnnotation, RubyOverhang, RubyPosition,
 };

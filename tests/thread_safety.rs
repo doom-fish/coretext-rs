@@ -1,6 +1,7 @@
 use coretext::{
     AttributedString, CTFont, CTFrame, CTFramesetter, CTLine, CTRun, CTTypesetter, FontCollection,
-    FontDescriptor, GlyphInfo, MutableFontCollection, ParagraphStyle, RubyAnnotation, TextTab,
+    FontDescriptor, GlyphInfo, GlyphPath, MutableFontCollection, ParagraphStyle, RubyAnnotation,
+    TextTab,
 };
 
 const fn assert_send_sync<T: Send + Sync>() {}
@@ -24,6 +25,7 @@ fn immutable_font_objects_are_send_and_sync() {
     assert_send_sync::<FontCollection>();
     assert_send_sync::<MutableFontCollection>();
     assert_send_sync::<GlyphInfo>();
+    assert_send_sync::<GlyphPath>();
     assert_send_sync::<ParagraphStyle>();
     assert_send_sync::<TextTab>();
     assert_send_sync::<RubyAnnotation>();

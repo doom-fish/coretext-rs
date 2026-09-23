@@ -11,6 +11,7 @@ use crate::font_descriptor::{FontDescriptor, FontOrientation};
 use crate::font_feature::{FontFeature, FontFeatureSetting};
 use crate::font_traits::FontTraits;
 use crate::font_variation::{FontVariationAxis, FontVariationCoordinate};
+use crate::path::GlyphPath;
 use crate::types::{utf16_length, CGAffineTransform, CGPoint, CGRect, CGSize, TextRange};
 
 /// Constants for `CTFontCopyName` / `CTFontCopyLocalizedName`.
@@ -459,6 +460,46 @@ impl CTFont {
             )
         };
         (total, advances)
+    }
+
+    pub fn draw_glyphs(
+        &self,
+        glyphs: &[u16],
+        positions: &[CGPoint],
+        context: &CGContext,
+    ) -> CoreTextResult<()> {
+        if glyphs.len() != positions.len() {
+            return Err(CoreTextError::LengthMismatch {
+                expected: glyphs.len(),
+                actual: positions.len(),
+            });
+        }
+        unsafe {
+            bridge::ct_font_draw_glyphs(
+                self.raw,
+                glyphs.as_ptr(),
+                positions.as_ptr(),
+                isize::try_from(glyphs.len()).unwrap_or(isize::MAX),
+                context.as_ptr(),
+            );
+        }
+        Ok(())
+    }
+
+    #[must_use]
+    pub fn path_for_glyph(
+        &self,
+        glyph: u16,
+        transform: Option<&CGAffineTransform>,
+    ) -> Option<GlyphPath> {
+        let raw = unsafe {
+            bridge::ct_font_create_path_for_glyph(
+                self.raw,
+                glyph,
+                transform.map_or(std::ptr::null(), std::ptr::from_ref),
+            )
+        };
+        (!raw.is_null()).then(|| GlyphPath::from_raw(raw))
     }
 
     /// Wraps `CTFontGetVerticalTranslationsForGlyphs`.

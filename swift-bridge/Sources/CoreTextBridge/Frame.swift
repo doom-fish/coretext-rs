@@ -78,3 +78,11 @@ func ct_frame_copy_frame_attributes_json(_ framePtr: UnsafeMutableRawPointer?) -
 func ct_frame_get_type_id() -> UInt64 {
     UInt64(CTFrameGetTypeID())
 }
+
+@_cdecl("ct_frame_draw")
+func ct_frame_draw(_ framePtr: UnsafeMutableRawPointer?, _ contextPtr: UnsafeMutableRawPointer?) {
+    guard let framePtr, let contextPtr else { return }
+    let frame: CTFrame = unbox(framePtr, as: CTFrame.self)
+    let context = Unmanaged<CGContext>.fromOpaque(contextPtr).takeUnretainedValue()
+    CTFrameDraw(frame, context)
+}

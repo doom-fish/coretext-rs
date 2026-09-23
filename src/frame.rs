@@ -1,3 +1,5 @@
+use apple_cf::cg::CGContext;
+
 use crate::bridge;
 use crate::common::impl_handle;
 use crate::line::CTLine;
@@ -60,6 +62,10 @@ impl CTFrame {
             unsafe { bridge::ct_frame_copy_line_origins(self.raw, origins.as_mut_ptr(), count) };
         origins.truncate(usize::try_from(written).unwrap_or(0));
         origins
+    }
+
+    pub fn draw(&self, context: &CGContext) {
+        unsafe { bridge::ct_frame_draw(self.raw, context.as_ptr()) };
     }
 
     /// Wraps `CTFrameGetFrameAttributes`.
