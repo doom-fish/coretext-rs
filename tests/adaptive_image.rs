@@ -39,6 +39,6 @@ fn adaptive_image_provider_smoke() -> Result<(), Box<dyn std::error::Error>> {
         CGPoint::new(4.0, 20.0),
         &context,
     );
-    assert!(context.as_bytes().iter().any(|value| *value != 0));
+    assert!(unsafe { context.as_bytes() }.iter().any(|value| *value != 0));
     Ok(())
 }
