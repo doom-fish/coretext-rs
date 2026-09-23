@@ -1,7 +1,11 @@
 use std::fmt;
+use std::time::Duration;
+
+use crate::types::TextRange;
 
 /// Errors returned by coretext-rs wrappers.
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum CoreTextError {
     /// A Core Text or bridge API returned a null reference unexpectedly.
     Null(&'static str),
@@ -13,6 +17,19 @@ pub enum CoreTextError {
     NulByte,
     /// JSON returned from the Swift bridge could not be parsed.
     Json(String),
+    RangeOutOfBounds {
+        range: TextRange,
+        string_length: usize,
+    },
+    IndexOutOfBounds {
+        index: isize,
+        string_length: usize,
+    },
+    LengthMismatch {
+        expected: usize,
+        actual: usize,
+    },
+    TimedOut(Duration),
 }
 
 impl fmt::Display for CoreTextError {
@@ -23,6 +40,25 @@ impl fmt::Display for CoreTextError {
             Self::StringConversion => write!(f, "C string conversion failed"),
             Self::NulByte => write!(f, "string contains an interior NUL byte"),
             Self::Json(message) => write!(f, "json decode failed: {message}"),
+            Self::RangeOutOfBounds {
+                range,
+                string_length,
+            } => write!(
+                f,
+                "range {{location: {}, length: {}}} is outside a string of {string_length} UTF-16 code units",
+                range.location, range.length
+            ),
+            Self::IndexOutOfBounds {
+                index,
+                string_length,
+            } => write!(
+                f,
+                "index {index} is outside a string of {string_length} UTF-16 code units"
+            ),
+            Self::LengthMismatch { expected, actual } => {
+                write!(f, "expected {expected} elements, got {actual}")
+            }
+            Self::TimedOut(timeout) => write!(f, "timed out after {timeout:?}"),
         }
     }
 }
@@ -40,7 +76,10 @@ pub type CoreTextResult<T> = Result<T, CoreTextError>;
 
 #[cfg(test)]
 mod tests {
+    use std::time::Duration;
+
     use super::CoreTextError;
+    use crate::types::TextRange;
 
     #[test]
     fn display_formats_each_error_variant() {
@@ -49,6 +88,38 @@ mod tests {
         assert_eq!(CoreTextError::StringConversion.to_string(), "C string conversion failed");
         assert_eq!(CoreTextError::NulByte.to_string(), "string contains an interior NUL byte");
         assert_eq!(CoreTextError::Json("oops".to_string()).to_string(), "json decode failed: oops");
+    }
+
+    #[test]
+    fn display_formats_validation_and_timeout_variants() {
+        assert_eq!(
+            CoreTextError::RangeOutOfBounds {
+                range: TextRange::new(2, 9),
+                string_length: 4,
+            }
+            .to_string(),
+            "range {location: 2, length: 9} is outside a string of 4 UTF-16 code units"
+        );
+        assert_eq!(
+            CoreTextError::IndexOutOfBounds {
+                index: -1,
+                string_length: 4,
+            }
+            .to_string(),
+            "index -1 is outside a string of 4 UTF-16 code units"
+        );
+        assert_eq!(
+            CoreTextError::LengthMismatch {
+                expected: 3,
+                actual: 2,
+            }
+            .to_string(),
+            "expected 3 elements, got 2"
+        );
+        assert_eq!(
+            CoreTextError::TimedOut(Duration::from_millis(1500)).to_string(),
+            "timed out after 1.5s"
+        );
     }
 
     #[test]

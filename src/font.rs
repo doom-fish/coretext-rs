@@ -11,7 +11,7 @@ use crate::font_descriptor::{FontDescriptor, FontOrientation};
 use crate::font_feature::{FontFeature, FontFeatureSetting};
 use crate::font_traits::FontTraits;
 use crate::font_variation::{FontVariationAxis, FontVariationCoordinate};
-use crate::types::{CFRange, CGAffineTransform, CGPoint, CGRect, CGSize, TextRange};
+use crate::types::{utf16_length, CGAffineTransform, CGPoint, CGRect, CGSize, TextRange};
 
 /// Constants for `CTFontCopyName` / `CTFontCopyLocalizedName`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -215,13 +215,14 @@ impl CTFont {
         range: TextRange,
         language: Option<&str>,
     ) -> CoreTextResult<Self> {
+        let range = range.checked_cf_range(utf16_length(string))?;
         let string = cstring(string)?;
         let language = optional_cstring(language)?;
         let raw = unsafe {
             bridge::ct_font_create_for_string(
                 self.raw,
                 string.as_ptr(),
-                CFRange::from(range),
+                range,
                 language
                     .as_ref()
                     .map_or(std::ptr::null(), |value| value.as_ptr()),

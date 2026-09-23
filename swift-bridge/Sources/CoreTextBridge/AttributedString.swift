@@ -23,3 +23,10 @@ func ct_attributed_string_create(
     let attributed = NSAttributedString(string: text, attributes: attributes)
     return retainBox(attributed)
 }
+
+@_cdecl("ct_attributed_string_get_length")
+func ct_attributed_string_get_length(_ attributedStringPtr: UnsafeMutableRawPointer?) -> Int {
+    guard let attributedStringPtr else { return 0 }
+    let attributed: NSAttributedString = unbox(attributedStringPtr, as: NSAttributedString.self)
+    return attributed.length
+}

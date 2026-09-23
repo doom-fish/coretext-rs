@@ -59,8 +59,10 @@ func ct_frame_copy_line_origins(
     guard let framePtr, let buffer, capacity > 0 else { return 0 }
     let frame: CTFrame = unbox(framePtr, as: CTFrame.self)
     let lines: [CTLine] = typedArray(CTFrameGetLines(frame))
-    CTFrameGetLineOrigins(frame, CFRange(location: 0, length: capacity), buffer)
-    return min(capacity, lines.count)
+    let count = min(capacity, lines.count)
+    guard count > 0 else { return 0 }
+    CTFrameGetLineOrigins(frame, CFRange(location: 0, length: count), buffer)
+    return count
 }
 
 @_cdecl("ct_frame_copy_frame_attributes_json")

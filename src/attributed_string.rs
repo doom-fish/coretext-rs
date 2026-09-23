@@ -35,4 +35,9 @@ impl AttributedString {
             "ct_attributed_string_create returned NULL",
         )?))
     }
+
+    #[must_use]
+    pub fn utf16_len(&self) -> usize {
+        usize::try_from(unsafe { bridge::ct_attributed_string_get_length(self.raw) }).unwrap_or(0)
+    }
 }

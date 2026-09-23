@@ -29,7 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             forced_embedding_level: Some(0),
         },
     )?;
-    let break_index = typesetter.suggest_line_break(0, 260.0);
+    let break_index = typesetter.suggest_line_break(0, 260.0)?;
     let line = typesetter.create_line(TextRange::new(0, break_index))?;
     let line_bounds = line.typographic_bounds();
     println!(

@@ -51,7 +51,7 @@ pub fn typesetter() -> CTTypesetter {
 
 pub fn line() -> CTLine {
     let typesetter = typesetter();
-    let break_index = typesetter.suggest_line_break(0, 220.0);
+    let break_index = typesetter.suggest_line_break(0, 220.0).expect("line break");
     typesetter
         .create_line(TextRange::new(0, break_index))
         .expect("CTLine")

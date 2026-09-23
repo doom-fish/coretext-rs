@@ -19,6 +19,7 @@ unsafe extern "C" {
         font: Handle,
         paragraph_style: Handle,
     ) -> Handle;
+    pub fn ct_attributed_string_get_length(attributed_string: Handle) -> isize;
 
     pub fn ct_font_create_with_name(name: *const c_char, size: f64) -> Handle;
     pub fn ct_font_create_with_descriptor(descriptor: Handle, size: f64) -> Handle;

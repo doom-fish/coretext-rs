@@ -5,7 +5,7 @@ use crate::bridge;
 use crate::common::{cstring, expect_handle, impl_handle};
 use crate::error::CoreTextResult;
 use crate::line::CTLine;
-use crate::types::TextRange;
+use crate::types::{checked_string_index, TextRange};
 
 /// Options for `CTTypesetterCreateWithAttributedStringAndOptions`.
 #[derive(Debug, Clone, Copy, Default, Serialize)]
@@ -26,11 +26,20 @@ impl TypesetterOptions {
 /// An immutable `CTTypesetter` wrapper.
 pub struct CTTypesetter {
     raw: bridge::Handle,
+    string_length: usize,
 }
 
-impl_handle!(CTTypesetter);
+impl_handle!(CTTypesetter { string_length });
 
 impl CTTypesetter {
+    pub(crate) const fn from_raw_with_length(raw: bridge::Handle, string_length: usize) -> Self {
+        Self { raw, string_length }
+    }
+
+    pub(crate) const fn string_length(&self) -> usize {
+        self.string_length
+    }
+
     /// Wraps `CTTypesetterCreateWithAttributedString`.
     pub fn create_with_attributed_string(
         attributed_string: &AttributedString,
@@ -50,15 +59,19 @@ impl CTTypesetter {
                 json.as_ptr(),
             )
         };
-        Ok(Self::from_raw(expect_handle(
-            raw,
-            "ct_typesetter_create_with_attributed_string returned NULL",
-        )?))
+        Ok(Self::from_raw_with_length(
+            expect_handle(
+                raw,
+                "ct_typesetter_create_with_attributed_string returned NULL",
+            )?,
+            attributed_string.utf16_len(),
+        ))
     }
 
     /// Wraps `CTTypesetterCreateLine`.
     pub fn create_line(&self, string_range: TextRange) -> CoreTextResult<CTLine> {
-        let raw = unsafe { bridge::ct_typesetter_create_line(self.raw, string_range.into()) };
+        let string_range = string_range.checked_cf_range(self.string_length)?;
+        let raw = unsafe { bridge::ct_typesetter_create_line(self.raw, string_range) };
         Ok(CTLine::from_raw(expect_handle(
             raw,
             "ct_typesetter_create_line returned NULL",
@@ -71,8 +84,9 @@ impl CTTypesetter {
         string_range: TextRange,
         offset: f64,
     ) -> CoreTextResult<CTLine> {
+        let string_range = string_range.checked_cf_range(self.string_length)?;
         let raw = unsafe {
-            bridge::ct_typesetter_create_line_with_offset(self.raw, string_range.into(), offset)
+            bridge::ct_typesetter_create_line_with_offset(self.raw, string_range, offset)
         };
         Ok(CTLine::from_raw(expect_handle(
             raw,
@@ -81,51 +95,51 @@ impl CTTypesetter {
     }
 
     /// Wraps `CTTypesetterSuggestLineBreak`.
-    #[must_use]
-    pub fn suggest_line_break(&self, start_index: isize, width: f64) -> isize {
-        unsafe { bridge::ct_typesetter_suggest_line_break(self.raw, start_index, width) }
+    pub fn suggest_line_break(&self, start_index: isize, width: f64) -> CoreTextResult<isize> {
+        let start_index = checked_string_index(start_index, self.string_length)?;
+        Ok(unsafe { bridge::ct_typesetter_suggest_line_break(self.raw, start_index, width) })
     }
 
     /// Wraps `CTTypesetterSuggestLineBreakWithOffset`.
-    #[must_use]
     pub fn suggest_line_break_with_offset(
         &self,
         start_index: isize,
         width: f64,
         offset: f64,
-    ) -> isize {
-        unsafe {
+    ) -> CoreTextResult<isize> {
+        let start_index = checked_string_index(start_index, self.string_length)?;
+        Ok(unsafe {
             bridge::ct_typesetter_suggest_line_break_with_offset(
                 self.raw,
                 start_index,
                 width,
                 offset,
             )
-        }
+        })
     }
 
     /// Wraps `CTTypesetterSuggestClusterBreak`.
-    #[must_use]
-    pub fn suggest_cluster_break(&self, start_index: isize, width: f64) -> isize {
-        unsafe { bridge::ct_typesetter_suggest_cluster_break(self.raw, start_index, width) }
+    pub fn suggest_cluster_break(&self, start_index: isize, width: f64) -> CoreTextResult<isize> {
+        let start_index = checked_string_index(start_index, self.string_length)?;
+        Ok(unsafe { bridge::ct_typesetter_suggest_cluster_break(self.raw, start_index, width) })
     }
 
     /// Wraps `CTTypesetterSuggestClusterBreakWithOffset`.
-    #[must_use]
     pub fn suggest_cluster_break_with_offset(
         &self,
         start_index: isize,
         width: f64,
         offset: f64,
-    ) -> isize {
-        unsafe {
+    ) -> CoreTextResult<isize> {
+        let start_index = checked_string_index(start_index, self.string_length)?;
+        Ok(unsafe {
             bridge::ct_typesetter_suggest_cluster_break_with_offset(
                 self.raw,
                 start_index,
                 width,
                 offset,
             )
-        }
+        })
     }
 }
 
