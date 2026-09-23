@@ -2,7 +2,8 @@ use serde_json::Value;
 
 use crate::bridge;
 use crate::common::{
-    cstring, expect_handle, impl_handle, json_from_owned, option_string_from_owned,
+    cstring, expect_handle, impl_handle, impl_thread_safe, json_from_owned,
+    option_string_from_owned,
 };
 use crate::error::CoreTextResult;
 use crate::font_feature::{FontFeature, FontFeatureSetting};
@@ -70,6 +71,7 @@ pub struct FontDescriptor {
 }
 
 impl_handle!(FontDescriptor);
+impl_thread_safe!(FontDescriptor);
 
 impl FontDescriptor {
     /// Wraps `CTFontDescriptorCreateWithNameAndSize`.

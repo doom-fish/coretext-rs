@@ -64,22 +64,22 @@ where
 
 macro_rules! impl_handle {
     ($name:ident) => {
-        // SAFETY: All $name types wrap opaque Apple framework handles (raw pointers)
-        // that are thread-safe and can be sent across threads. The underlying Objective-C
-        // objects are managed via reference counting (retain/release), which is atomic.
-        /// Marks this retained wrapper as safe to move across threads.
-        unsafe impl Send for $name {}
-        /// Marks this retained wrapper as safe to share across threads.
-        unsafe impl Sync for $name {}
-
         impl $name {
             /// Wraps an owned bridge handle without changing its retain count.
             #[allow(dead_code)]
             #[inline]
-            pub const fn from_raw(raw: crate::bridge::Handle) -> Self {
+            pub(crate) const fn from_raw(raw: crate::bridge::Handle) -> Self {
                 Self { raw }
             }
+        }
 
+        crate::common::impl_handle!(@retained $name);
+    };
+    ($name:ident { $($field:ident),+ $(,)? }) => {
+        crate::common::impl_handle!(@retained $name $(, $field)+);
+    };
+    (@retained $name:ident $(, $field:ident)*) => {
+        impl $name {
             /// Returns the underlying opaque bridge handle.
             #[inline]
             pub fn as_raw(&self) -> crate::bridge::Handle {
@@ -91,13 +91,17 @@ macro_rules! impl_handle {
         impl Clone for $name {
             fn clone(&self) -> Self {
                 if self.raw.is_null() {
-                    Self { raw: self.raw }
+                    Self {
+                        raw: self.raw,
+                        $($field: self.$field,)*
+                    }
                 } else {
                     Self {
                         // SAFETY: self.raw is non-null (checked above) and is a valid
                         // handle that we own. ct_retain increments the retain count and
                         // returns the same handle.
                         raw: unsafe { crate::bridge::ct_retain(self.raw) },
+                        $($field: self.$field,)*
                     }
                 }
             }
@@ -115,4 +119,19 @@ macro_rules! impl_handle {
     };
 }
 
+macro_rules! impl_thread_safe {
+    ($($name:ident),+ $(,)?) => {
+        $(
+            // SAFETY: $name wraps an immutable CoreText or Core Graphics object that
+            // Apple documents as usable from several threads at once, inside a Swift
+            // box whose retain count is atomic.
+            /// Marks this retained wrapper as safe to move across threads.
+            unsafe impl Send for $name {}
+            /// Marks this retained wrapper as safe to share across threads.
+            unsafe impl Sync for $name {}
+        )+
+    };
+}
+
 pub(crate) use impl_handle;
+pub(crate) use impl_thread_safe;

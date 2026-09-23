@@ -1,5 +1,5 @@
 use crate::bridge;
-use crate::common::{expect_handle, impl_handle};
+use crate::common::{expect_handle, impl_handle, impl_thread_safe};
 use crate::error::CoreTextResult;
 use crate::paragraph::TextAlignment;
 
@@ -10,6 +10,7 @@ pub struct TextTab {
 }
 
 impl_handle!(TextTab);
+impl_thread_safe!(TextTab);
 
 impl TextTab {
     /// Wraps `CTTextTabCreate`.

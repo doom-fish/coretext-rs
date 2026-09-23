@@ -1,5 +1,5 @@
 use crate::bridge;
-use crate::common::{cstring, expect_handle, impl_handle};
+use crate::common::{cstring, expect_handle, impl_handle, impl_thread_safe};
 use crate::error::CoreTextResult;
 use crate::font::CTFont;
 use crate::paragraph::ParagraphStyle;
@@ -10,6 +10,7 @@ pub struct AttributedString {
 }
 
 impl_handle!(AttributedString);
+impl_thread_safe!(AttributedString);
 
 impl AttributedString {
     /// Creates a CoreText-ready attributed string using `CFAttributedStringCreate`.

@@ -3,8 +3,8 @@ use apple_cf::cg::CGContext;
 use crate::adaptive_image::AdaptiveImageProvider;
 use crate::bridge;
 use crate::common::{
-    cstring, expect_handle, impl_handle, json_from_owned, option_string_from_owned,
-    optional_cstring, string_from_owned,
+    cstring, expect_handle, impl_handle, impl_thread_safe, json_from_owned,
+    option_string_from_owned, optional_cstring, string_from_owned,
 };
 use crate::error::{CoreTextError, CoreTextResult};
 use crate::font_descriptor::{FontDescriptor, FontOrientation};
@@ -123,6 +123,7 @@ pub struct CTFont {
 }
 
 impl_handle!(CTFont);
+impl_thread_safe!(CTFont);
 
 impl CTFont {
     /// Wraps `CTFontCreateWithName`.

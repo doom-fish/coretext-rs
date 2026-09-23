@@ -3,7 +3,7 @@ use std::ffi::CString;
 use serde::Serialize;
 
 use crate::bridge;
-use crate::common::{expect_handle, impl_handle};
+use crate::common::{expect_handle, impl_handle, impl_thread_safe};
 use crate::error::CoreTextResult;
 use crate::text_tab::TextTab;
 
@@ -185,6 +185,7 @@ pub struct ParagraphStyle {
 }
 
 impl_handle!(ParagraphStyle);
+impl_thread_safe!(ParagraphStyle);
 
 impl ParagraphStyle {
     /// Wraps `CTParagraphStyleCreate`.

@@ -1,5 +1,7 @@
 use crate::bridge;
-use crate::common::{cstring, expect_handle, impl_handle, option_string_from_owned};
+use crate::common::{
+    cstring, expect_handle, impl_handle, impl_thread_safe, option_string_from_owned,
+};
 use crate::error::CoreTextResult;
 
 /// How ruby text aligns relative to base text.
@@ -99,6 +101,7 @@ pub struct RubyAnnotation {
 }
 
 impl_handle!(RubyAnnotation);
+impl_thread_safe!(RubyAnnotation);
 
 impl RubyAnnotation {
     /// Wraps `CTRubyAnnotationCreate`.

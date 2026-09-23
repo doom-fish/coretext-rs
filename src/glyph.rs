@@ -1,5 +1,7 @@
 use crate::bridge;
-use crate::common::{cstring, expect_handle, impl_handle, option_string_from_owned};
+use crate::common::{
+    cstring, expect_handle, impl_handle, impl_thread_safe, option_string_from_owned,
+};
 use crate::error::CoreTextResult;
 use crate::font::CTFont;
 
@@ -44,6 +46,7 @@ pub struct GlyphInfo {
 }
 
 impl_handle!(GlyphInfo);
+impl_thread_safe!(GlyphInfo);
 
 impl GlyphInfo {
     /// Wraps `CTGlyphInfoCreateWithGlyphName`.

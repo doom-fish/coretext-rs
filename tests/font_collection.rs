@@ -1,6 +1,6 @@
 mod support;
 
-use coretext::{font_collection_type_id, FontCollection, FontCollectionOptions};
+use coretext::{font_collection_type_id, FontCollection, FontCollectionOptions, FontDescriptor};
 
 #[test]
 fn font_collection_queries() -> Result<(), Box<dyn std::error::Error>> {
@@ -32,8 +32,47 @@ fn font_collection_queries() -> Result<(), Box<dyn std::error::Error>> {
         .matching_descriptors_for_family(&family_name)?
         .is_empty());
 
-    let mutable = available.mutable_copy()?;
+    let mut mutable = available.mutable_copy()?;
     mutable.set_query_descriptors(std::slice::from_ref(&descriptor));
     mutable.set_exclusion_descriptors(&[]);
+    assert_eq!(mutable.as_font_collection().query_descriptors().len(), 1);
+    Ok(())
+}
+
+#[test]
+fn mutable_collections_are_uniquely_owned() -> Result<(), Box<dyn std::error::Error>> {
+    let helvetica = FontDescriptor::new("Helvetica", 12.0)?;
+    let times = FontDescriptor::new("Times-Roman", 12.0)?;
+    let base = FontCollection::with_descriptors(
+        &[helvetica.clone(), times.clone()],
+        FontCollectionOptions::default(),
+    )?;
+
+    let mut mutable = base.mutable_copy()?;
+    mutable.set_exclusion_descriptors(std::slice::from_ref(&times));
+    let snapshot = mutable.as_font_collection();
+    assert_eq!(snapshot.query_descriptors().len(), 2);
+    assert_eq!(snapshot.exclusion_descriptors().len(), 1);
+
+    let mut copy = mutable.clone();
+    copy.set_query_descriptors(std::slice::from_ref(&helvetica));
+    copy.set_exclusion_descriptors(&[]);
+    assert_eq!(copy.as_font_collection().query_descriptors().len(), 1);
+    assert!(copy.as_font_collection().exclusion_descriptors().is_empty());
+    assert_eq!(mutable.as_font_collection().query_descriptors().len(), 2);
+    assert_eq!(
+        mutable.as_font_collection().exclusion_descriptors().len(),
+        1
+    );
+
+    mutable.set_query_descriptors(std::slice::from_ref(&times));
+    assert_eq!(snapshot.query_descriptors().len(), 2);
+    assert_eq!(snapshot.exclusion_descriptors().len(), 1);
+
+    let frozen = mutable.into_font_collection();
+    assert_eq!(frozen.query_descriptors().len(), 1);
+    assert_eq!(frozen.exclusion_descriptors().len(), 1);
+    assert_eq!(base.query_descriptors().len(), 2);
+    assert!(base.exclusion_descriptors().is_empty());
     Ok(())
 }

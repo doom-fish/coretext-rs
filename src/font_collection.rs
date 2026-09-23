@@ -1,7 +1,7 @@
 use serde::Serialize;
 
 use crate::bridge;
-use crate::common::{cstring, expect_handle, impl_handle};
+use crate::common::{cstring, expect_handle, impl_handle, impl_thread_safe};
 use crate::error::CoreTextResult;
 use crate::font_descriptor::FontDescriptor;
 
@@ -29,6 +29,7 @@ pub struct FontCollection {
 }
 
 impl_handle!(FontCollection);
+impl_thread_safe!(FontCollection);
 
 impl FontCollection {
     /// Wraps `CTFontCollectionCreateFromAvailableFonts`.
@@ -237,11 +238,22 @@ pub struct MutableFontCollection {
     raw: bridge::Handle,
 }
 
-impl_handle!(MutableFontCollection);
+unsafe impl Send for MutableFontCollection {}
+unsafe impl Sync for MutableFontCollection {}
 
 impl MutableFontCollection {
+    const fn from_raw(raw: bridge::Handle) -> Self {
+        Self { raw }
+    }
+
+    /// Returns the underlying opaque bridge handle.
+    #[inline]
+    pub fn as_raw(&self) -> bridge::Handle {
+        self.raw
+    }
+
     /// Wraps `CTFontCollectionSetExclusionDescriptors`.
-    pub fn set_exclusion_descriptors(&self, descriptors: &[FontDescriptor]) {
+    pub fn set_exclusion_descriptors(&mut self, descriptors: &[FontDescriptor]) {
         let handles: Vec<_> = descriptors.iter().map(FontDescriptor::as_raw).collect();
         unsafe {
             bridge::ct_font_collection_set_exclusion_descriptors(
@@ -253,7 +265,7 @@ impl MutableFontCollection {
     }
 
     /// Wraps `CTFontCollectionSetQueryDescriptors`.
-    pub fn set_query_descriptors(&self, descriptors: &[FontDescriptor]) {
+    pub fn set_query_descriptors(&mut self, descriptors: &[FontDescriptor]) {
         let handles: Vec<_> = descriptors.iter().map(FontDescriptor::as_raw).collect();
         unsafe {
             bridge::ct_font_collection_set_query_descriptors(
@@ -264,10 +276,38 @@ impl MutableFontCollection {
         }
     }
 
-    /// Retains the mutable wrapper as a `CTFontCollection` handle.
+    /// Copies the current state into an immutable `CTFontCollection`.
     #[must_use]
     pub fn as_font_collection(&self) -> FontCollection {
-        FontCollection::from_raw(unsafe { bridge::ct_retain(self.raw) })
+        FontCollection::from_raw(unsafe {
+            bridge::ct_font_collection_copy_with_descriptors(
+                self.raw,
+                std::ptr::null(),
+                0,
+                std::ptr::null(),
+            )
+        })
+    }
+
+    #[must_use]
+    pub fn into_font_collection(self) -> FontCollection {
+        let raw = self.raw;
+        std::mem::forget(self);
+        FontCollection::from_raw(raw)
+    }
+}
+
+impl Clone for MutableFontCollection {
+    fn clone(&self) -> Self {
+        Self::from_raw(unsafe { bridge::ct_font_collection_create_mutable_copy(self.raw) })
+    }
+}
+
+impl Drop for MutableFontCollection {
+    fn drop(&mut self) {
+        if !self.raw.is_null() {
+            unsafe { bridge::ct_release(self.raw) };
+        }
     }
 }
 
