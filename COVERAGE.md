@@ -1,10 +1,11 @@
 # CoreText coverage
 
-This document tracks the v0.2.0 coverage pass for `coretext-rs`.
+This document tracks the safe-wrapper coverage of `coretext-rs` 0.8.0.
 
 - Architecture: safe Rust wrappers over a bundled Swift bridge, plus an opt-in legacy `raw-ffi` module.
 - Validation: `tests/api_coverage.rs`, per-area integration tests under `tests/`, and the numbered runtime examples under `examples/`.
-- SDK audit baseline: Xcode macOS SDK `MacOSX26.2.sdk`.
+- SDK audit baseline: Xcode macOS SDK `MacOSX26.2.sdk`; the audit tables have not been regenerated for newer SDKs.
+- `COVERAGE_AUDIT.md` counts a symbol as verified when it is reachable from Rust at all. 240 of its 468 verified rows are only declared in the unsafe `raw-ffi` module; 228 have a safe wrapper. `COVERAGE_AUDIT_V2.md` counts safe wrappers for the 204 functions in the wrapped headers (177 wrapped).
 
 ## Requested area matrix
 
@@ -26,6 +27,10 @@ This document tracks the v0.2.0 coverage pass for `coretext-rs`.
 | Run | `CTRun`, `run_status` | `tests/layout.rs`, `tests/api_coverage.rs` | `examples/01_layout_smoke.rs` |
 | Typesetter | `CTTypesetter`, `TypesetterOptions` | `tests/layout.rs` | `examples/01_layout_smoke.rs` |
 | Ruby annotation | `RubyAnnotation`, `RubyAlignment`, `RubyOverhang`, `RubyPosition` | `tests/ruby_annotation.rs` | `examples/05_ruby_annotation.rs` |
+| Drawing | `CTLine::draw`, `CTFrame::draw`, `CTFont::draw_glyphs` | `tests/drawing.rs` | — |
+| Glyph paths and carets | `CTFont::path_for_glyph`, `GlyphPath`, `PathElement`, `CTLine::caret_offsets`, `CaretOffset` | `tests/drawing.rs` | — |
+| Range validation | `TextRange` (UTF-16 code units) checked by every range-taking wrapper | `tests/layout.rs` | — |
+| Thread safety | `Send`/`Sync` only on font and attribute objects | `tests/thread_safety.rs` | — |
 
 ## Supporting surface
 
@@ -37,9 +42,11 @@ The requested areas rely on a few supporting wrappers that are also validated by
 
 ## Intentionally not wrapped in this pass
 
-The 0.2.0 pass targets the requested surface areas rather than every symbol in `CoreText.framework`. The following audited APIs remain outside the safe wrapper surface:
+The safe API targets the areas above rather than every symbol in `CoreText.framework`. The following audited APIs remain outside the safe wrapper surface:
 
-- `CTRubyAnnotationCreateWithAttributes` and ruby per-position attribute dictionaries
+- `CTRunDelegate` (run delegates with ascent, descent and width callbacks) and `CTRunDraw`; both are declared in `raw-ffi` only
+- `CTFramesetterCreateFrame` with non-rectangular paths or frame attributes (`CTFramesetter::create_frame_in_rect` builds a rectangular path)
+- Arbitrary ruby attribute dictionaries: `RubyAnnotation::with_attributes` sets only the size factor and calls `CTRubyAnnotationCreateWithAttributes` only when a single position has text
 - `CTFontManagerCompareFontFamilyNames`
 - Deprecated graphics-font registration APIs such as `CTFontManagerRegisterGraphicsFont` / `CTFontManagerUnregisterGraphicsFont`
 - Deprecated typesetter options such as `kCTTypesetterOptionDisableBidiProcessing`

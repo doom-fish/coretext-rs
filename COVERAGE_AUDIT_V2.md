@@ -1,12 +1,12 @@
 # coretext-rs coverage audit v2 (vs MacOSX26.2.sdk)
 
 SDK_PUBLIC_SYMBOLS: 204
-VERIFIED: 173
+VERIFIED: 177
 GAPS: 0
-EXEMPT: 175
-COVERAGE_PCT: 84.8
+EXEMPT: 27
+COVERAGE_PCT: 86.8
 
-The audit examines 204 public CoreText function symbols across the safe-wrapper target headers. `coretext-rs` now verifies every safe-surface-appropriate entry point in this set. The remaining exclusions are deliberate: the original 143 type/constant namespace items plus callback-driven, drawing-only, borrowed-pointer, deprecated, or macOS-unavailable APIs that are intentionally kept out of the ergonomic safe Rust surface.
+The audit examines the 204 public function symbols in the headers that the safe wrappers target; 177 of them have a safe wrapper. The other 27 are listed as EXEMPT. Those exemptions are this crate's own scope decisions (callback-driven, borrowed-pointer, deprecated or macOS-unavailable APIs), not SDK restrictions, and most of those symbols are still declared in the unsafe `raw-ffi` module. The EXEMPT table also lists type and constant symbols, which are not part of the 204. Earlier revisions of this file reported 173 verified and 175 exempt symbols, which did not match the tables. The table was generated against MacOSX26.2.sdk and has not been regenerated for newer SDKs.
 
 ## 🟢 VERIFIED
 | Symbol | Kind | Header | Wrapped by |
@@ -48,6 +48,7 @@ The audit examines 204 public CoreText function symbols across the safe-wrapper 
 | CTFontCreateCopyWithSymbolicTraits | function | CTFont.h | CTFont::copy_with_symbolic_traits |
 | CTFontCreateForString | function | CTFont.h | CTFont::font_for_string |
 | CTFontCreateForStringWithLanguage | function | CTFont.h | CTFont::font_for_string |
+| CTFontCreatePathForGlyph | function | CTFont.h | CTFont::path_for_glyph |
 | CTFontCreateUIFontForLanguage | function | CTFont.h | CTFont::ui_font |
 | CTFontCreateWithFontDescriptor | function | CTFont.h | CTFont::from_descriptor |
 | CTFontCreateWithFontDescriptorAndOptions | function | CTFont.h | CTFont::from_descriptor_with_options |
@@ -66,6 +67,7 @@ The audit examines 204 public CoreText function symbols across the safe-wrapper 
 | CTFontDescriptorCreateWithAttributes | function | CTFontDescriptor.h | FontDescriptor::with_attributes_json |
 | CTFontDescriptorCreateWithNameAndSize | function | CTFontDescriptor.h | FontDescriptor::new |
 | CTFontDescriptorGetTypeID | function | CTFontDescriptor.h | font_descriptor_type_id |
+| CTFontDrawGlyphs | function | CTFont.h | CTFont::draw_glyphs |
 | CTFontGetAdvancesForGlyphs | function | CTFont.h | CTFont::advances_for_glyphs |
 | CTFontGetAscent | function | CTFont.h | CTFont::ascent |
 | CTFontGetBoundingBox | function | CTFont.h | CTFont::bounding_box |
@@ -109,6 +111,7 @@ The audit examines 204 public CoreText function symbols across the safe-wrapper 
 | CTFontManagerUnregisterFontURLs | function | CTFontManager.h | FontManager::unregister_font_urls |
 | CTFontManagerUnregisterFontsForURL | function | CTFontManager.h | FontManager::unregister_fonts_for_url |
 | CTFontManagerUnregisterFontsForURLs | function | CTFontManager.h | FontManager::unregister_fonts_for_urls |
+| CTFrameDraw | function | CTFrame.h | CTFrame::draw |
 | CTFrameGetFrameAttributes | function | CTFrame.h | CTFrame::has_frame_attributes |
 | CTFrameGetLineOrigins | function | CTFrame.h | CTFrame::line_origins |
 | CTFrameGetLines | function | CTFrame.h | CTFrame::line_origins, CTFrame::lines |
@@ -133,6 +136,8 @@ The audit examines 204 public CoreText function symbols across the safe-wrapper 
 | CTLineCreateJustifiedLine | function | CTLine.h | CTLine::justified |
 | CTLineCreateTruncatedLine | function | CTLine.h | CTLine::truncated |
 | CTLineCreateWithAttributedString | function | CTLine.h | CTLine::create_with_attributed_string |
+| CTLineDraw | function | CTLine.h | CTLine::draw |
+| CTLineEnumerateCaretOffsets | function | CTLine.h | CTLine::caret_offsets |
 | CTLineGetBoundsWithOptions | function | CTLine.h | CTLine::bounds_with_options |
 | CTLineGetGlyphCount | function | CTLine.h | CTLine::glyph_count |
 | CTLineGetGlyphRuns | function | CTLine.h | CTLine::runs |
@@ -196,13 +201,11 @@ The audit examines 204 public CoreText function symbols across the safe-wrapper 
 | CTFontCollectionRef | typedef | CTFontCollection.h | Type definition (not directly wrapped) | - |
 | CTFontCopyCharacterSet | function | CTFont.h | CFCharacterSet interop is intentionally left out of the safe surface. | - |
 | CTFontCopyGraphicsFont | function | CTFont.h | CGFont ownership API intentionally left raw-ffi only. | - |
-| CTFontCreatePathForGlyph | function | CTFont.h | CGPath/CoreGraphics path interop intentionally left raw-ffi only. | - |
 | CTFontCreateWithGraphicsFont | function | CTFont.h | CGFont ownership API intentionally left raw-ffi only. | - |
 | CTFontCreateWithPlatformFont | function | CTFont.h | Deprecated on macOS; intentionally excluded from the safe wrapper audit. | CT_DEPRECATED("ATS is deprecated", macos(10.5, 11.0)) |
 | CTFontCreateWithQuickdrawInstance | function | CTFont.h | Deprecated on macOS; intentionally excluded from the safe wrapper audit. | CT_DEPRECATED("Quickdraw font references are deprecated", macos(10.5, 10.15)) |
 | CTFontDescriptorMatchFontDescriptorsWithProgressHandler | function | CTFontDescriptor.h | Progress-handler matching API intentionally left raw-ffi only. | - |
 | CTFontDescriptorRef | typedef | CTFontDescriptor.h | Type definition (not directly wrapped) | - |
-| CTFontDrawGlyphs | function | CTFont.h | Direct CGContext drawing API intentionally left raw-ffi only. | - |
 | CTFontDrawImageFromAdaptiveImageProviderAtPoint | function | CTFont.h | Adaptive-image-provider drawing API intentionally left raw-ffi only. | API_AVAILABLE(macos(15.0), ios(18.0), watchos(11.0), tvos(18.0)) |
 | CTFontGetPlatformFont | function | CTFont.h | Deprecated on macOS; intentionally excluded from the safe wrapper audit. | CT_DEPRECATED("ATS is deprecated", macos(10.5, 11.0)) |
 | CTFontGetTypographicBoundsForAdaptiveImageProvider | function | CTFont.h | Adaptive-image-provider metrics API intentionally left raw-ffi only. | API_AVAILABLE(macos(15.0), ios(18.0), watchos(11.0), tvos(18.0)) |
@@ -214,12 +217,9 @@ The audit examines 204 public CoreText function symbols across the safe-wrapper 
 | CTFontManagerRequestFonts | function | CTFontManager.h | iOS-only font-request API unavailable on macOS target. | CT_AVAILABLE(ios(13.0)) API_UNAVAILABLE(macos, watchos, tvos) |
 | CTFontManagerUnregisterGraphicsFont | function | CTFontManager.h | Deprecated on macOS; intentionally excluded from the safe wrapper audit. | CT_DEPRECATED("Use the API corresponding to the one used to register the font", macos(10.8, 15), ios(4.1, 18), watchos(2, 11), tvos(9, 18)) |
 | CTFontRef | typedef | CTFont.h | Type definition (not directly wrapped) | - |
-| CTFrameDraw | function | CTFrame.h | Direct CGContext drawing API intentionally left raw-ffi only. | - |
 | CTFrameRef | typedef | CTFrame.h | Type definition (not directly wrapped) | - |
 | CTFramesetterRef | typedef | CTFramesetter.h | Type definition (not directly wrapped) | - |
 | CTGlyphInfoRef | typedef | CTGlyphInfo.h | Type definition (not directly wrapped) | - |
-| CTLineDraw | function | CTLine.h | Direct CGContext drawing API intentionally left raw-ffi only. | - |
-| CTLineEnumerateCaretOffsets | function | CTLine.h | Caret-enumeration callback API intentionally left raw-ffi only. | - |
 | CTLineRef | typedef | CTLine.h | Type definition (not directly wrapped) | - |
 | CTMutableFontCollectionRef | typedef | CTFontCollection.h | Type definition (not directly wrapped) | - |
 | CTParagraphStyleRef | typedef | CTParagraphStyle.h | Type definition (not directly wrapped) | - |

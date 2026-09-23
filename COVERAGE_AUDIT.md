@@ -2,11 +2,14 @@
 
 SDK_PUBLIC_SYMBOLS: 479
 VERIFIED: 468
+VERIFIED_SAFE_API: 228
+VERIFIED_RAW_FFI_ONLY: 240
 GAPS: 0
 EXEMPT: 11
-COVERAGE_PCT: 100.00%
+COVERAGE_PCT: 100.00% (reachable from Rust, raw FFI included)
+SAFE_COVERAGE_PCT: 47.60% (228 of 479)
 
-This audit covers the full public C surface of CoreText.framework, including `SFNTTypes.h` and `SFNTLayoutTypes.h`. Verified rows include both the default safe Swift-backed API and symbols exposed directly by the optional `raw-ffi` feature.
+This audit covers the full public C surface of CoreText.framework, including `SFNTTypes.h` and `SFNTLayoutTypes.h`. `VERIFIED` means a symbol is reachable from Rust, not that it has a safe wrapper: 240 of the 468 rows, every `struct` row and most constants among them, are only declared in the unsafe `raw-ffi` module (their `Wrapped by` column lists only `ffi::` items). The other 228 rows have a safe wrapper. The table was generated against MacOSX26.2.sdk and has not been regenerated for newer SDKs.
 
 ## 🟢 VERIFIED
 | Symbol | Kind | Header | Wrapped by |
@@ -250,11 +253,11 @@ This audit covers the full public C surface of CoreText.framework, including `SF
 | CTFontCopyDefaultCascadeListForLanguages | function | CTFont.h | ffi::CTFontCopyDefaultCascadeListForLanguages |
 | CTFontCopyGraphicsFont | function | CTFont.h | ffi::CTFontCopyGraphicsFont |
 | CTFontCopyTable | function | CTFont.h | ffi::CTFontCopyTable |
-| CTFontCreatePathForGlyph | function | CTFont.h | ffi::CTFontCreatePathForGlyph |
+| CTFontCreatePathForGlyph | function | CTFont.h | CTFont::path_for_glyph, ffi::CTFontCreatePathForGlyph |
 | CTFontCreateWithFontDescriptorAndOptions | function | CTFont.h | ffi::CTFontCreateWithFontDescriptorAndOptions |
 | CTFontCreateWithGraphicsFont | function | CTFont.h | ffi::CTFontCreateWithGraphicsFont |
 | CTFontCreateWithNameAndOptions | function | CTFont.h | ffi::CTFontCreateWithNameAndOptions |
-| CTFontDrawGlyphs | function | CTFont.h | ffi::CTFontDrawGlyphs |
+| CTFontDrawGlyphs | function | CTFont.h | CTFont::draw_glyphs, ffi::CTFontDrawGlyphs |
 | CTFontDrawImageFromAdaptiveImageProviderAtPoint | function | CTFont.h | ffi::CTFontDrawImageFromAdaptiveImageProviderAtPoint; CTFont::draw_image_from_adaptive_image_provider_at_point |
 | CTAdaptiveImageProviding | protocol | CTFont.h; CTRunDelegate.h | adaptive_image::{AdaptiveImageProviding, AdaptiveImageProvider, AdaptiveImageResponse} |
 | CTFontGetLigatureCaretPositions | function | CTFont.h | ffi::CTFontGetLigatureCaretPositions |
@@ -319,7 +322,7 @@ This audit covers the full public C surface of CoreText.framework, including `SF
 | CTFontManagerError | enum | CTFontManagerErrors.h | ffi::CTFontManagerError |
 | kCTFontManagerErrorDomain | constant | CTFontManagerErrors.h | ffi::kCTFontManagerErrorDomain |
 | kCTFontManagerErrorFontURLsKey | constant | CTFontManagerErrors.h | ffi::kCTFontManagerErrorFontURLsKey |
-| CTFrameDraw | function | CTFrame.h | ffi::CTFrameDraw |
+| CTFrameDraw | function | CTFrame.h | CTFrame::draw, ffi::CTFrameDraw |
 | CTFramePathFillRule | enum | CTFrame.h | ffi::CTFramePathFillRule |
 | CTFrameProgression | enum | CTFrame.h | ffi::CTFrameProgression |
 | kCTFrameClippingPathsAttributeName | constant | CTFrame.h | ffi::kCTFrameClippingPathsAttributeName |
@@ -328,8 +331,8 @@ This audit covers the full public C surface of CoreText.framework, including `SF
 | kCTFramePathWidthAttributeName | constant | CTFrame.h | ffi::kCTFramePathWidthAttributeName |
 | kCTFrameProgressionAttributeName | constant | CTFrame.h | ffi::kCTFrameProgressionAttributeName |
 | CTGlyphInfoGetTypeID | function | CTGlyphInfo.h | ffi::CTGlyphInfoGetTypeID |
-| CTLineDraw | function | CTLine.h | ffi::CTLineDraw |
-| CTLineEnumerateCaretOffsets | function | CTLine.h | ffi::CTLineEnumerateCaretOffsets |
+| CTLineDraw | function | CTLine.h | CTLine::draw, ffi::CTLineDraw |
+| CTLineEnumerateCaretOffsets | function | CTLine.h | CTLine::caret_offsets, ffi::CTLineEnumerateCaretOffsets |
 | CTRubyAnnotationCreateWithAttributes | function | CTRubyAnnotation.h | ffi::CTRubyAnnotationCreateWithAttributes |
 | CTRubyAnnotationGetTypeID | function | CTRubyAnnotation.h | ffi::CTRubyAnnotationGetTypeID |
 | kCTRubyAnnotationScaleToFitAttributeName | constant | CTRubyAnnotation.h | ffi::kCTRubyAnnotationScaleToFitAttributeName |
