@@ -121,9 +121,9 @@ impl CTLine {
         let width = unsafe {
             bridge::ct_line_get_typographic_bounds(
                 self.raw,
-                &mut ascent,
-                &mut descent,
-                &mut leading,
+                &raw mut ascent,
+                &raw mut descent,
+                &raw mut leading,
             )
         };
         TypographicBounds {
@@ -163,7 +163,7 @@ impl CTLine {
     pub fn offset_for_string_index(&self, char_index: isize) -> (f64, f64) {
         let mut secondary = 0.0;
         let primary = unsafe {
-            bridge::ct_line_get_offset_for_string_index(self.raw, char_index, &mut secondary)
+            bridge::ct_line_get_offset_for_string_index(self.raw, char_index, &raw mut secondary)
         };
         (primary, secondary)
     }

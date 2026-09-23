@@ -543,7 +543,7 @@ impl CTFont {
             return Err(CoreTextError::Bridge("font table not present".to_string()));
         }
         let mut len = 0_isize;
-        let bytes = unsafe { bridge::ct_font_copy_table_bytes(self.raw, tag, &mut len) };
+        let bytes = unsafe { bridge::ct_font_copy_table_bytes(self.raw, tag, &raw mut len) };
         if bytes.is_null() {
             return if len == 0 {
                 Ok(Vec::new())

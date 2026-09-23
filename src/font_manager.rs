@@ -111,7 +111,11 @@ impl FontManager {
         let path = cstring(&path.as_ref().to_string_lossy())?;
         let mut error = std::ptr::null_mut();
         let ok = unsafe {
-            bridge::ct_font_manager_register_fonts_for_url(path.as_ptr(), scope as u32, &mut error)
+            bridge::ct_font_manager_register_fonts_for_url(
+                path.as_ptr(),
+                scope as u32,
+                &raw mut error,
+            )
         };
         if ok {
             Ok(())
@@ -134,7 +138,7 @@ impl FontManager {
             bridge::ct_font_manager_unregister_fonts_for_url(
                 path.as_ptr(),
                 scope as u32,
-                &mut error,
+                &raw mut error,
             )
         };
         if ok {
@@ -324,7 +328,7 @@ impl FontManager {
             bridge::ct_font_manager_register_fonts_for_urls(
                 paths.as_ptr(),
                 scope as u32,
-                &mut error,
+                &raw mut error,
             )
         };
         if ok {
@@ -411,7 +415,7 @@ impl FontManager {
             bridge::ct_font_manager_unregister_fonts_for_urls(
                 paths.as_ptr(),
                 scope as u32,
-                &mut error,
+                &raw mut error,
             )
         };
         if ok {

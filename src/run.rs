@@ -109,7 +109,12 @@ impl CTRun {
         let mut descent = 0.0;
         let mut leading = 0.0;
         let width = unsafe {
-            bridge::ct_run_get_typographic_bounds(self.raw, &mut ascent, &mut descent, &mut leading)
+            bridge::ct_run_get_typographic_bounds(
+                self.raw,
+                &raw mut ascent,
+                &raw mut descent,
+                &raw mut leading,
+            )
         };
         TypographicBounds {
             width,

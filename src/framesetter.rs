@@ -60,7 +60,12 @@ impl CTFramesetter {
     ) -> (CGSize, TextRange) {
         let mut fit = range.into();
         let size = unsafe {
-            bridge::ct_framesetter_suggest_frame_size(self.raw, range.into(), constraints, &mut fit)
+            bridge::ct_framesetter_suggest_frame_size(
+                self.raw,
+                range.into(),
+                constraints,
+                &raw mut fit,
+            )
         };
         (size, fit.into())
     }
