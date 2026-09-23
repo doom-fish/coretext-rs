@@ -31,7 +31,7 @@ fn adaptive_image_provider_smoke() -> Result<(), Box<dyn std::error::Error>> {
 
     let bounds = font.typographic_bounds_for_adaptive_image_provider(Some(&provider));
     assert!(bounds.size.width >= 0.0);
-    assert!(bounds.size.height >= 0.0);
+    assert!(bounds.size.height > 0.0);
 
     let context = CGContext::new_rgba8(48, 48)?;
     font.draw_image_from_adaptive_image_provider_at_point(

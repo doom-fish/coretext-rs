@@ -18,17 +18,9 @@ fn descriptor_surface_smoke() -> Result<(), Box<dyn std::error::Error>> {
         descriptor.family_name().as_deref()
     );
     let localized = descriptor.localized_attribute_json("displayName")?;
-    assert!(localized.is_string() || localized.is_null());
+    assert_eq!(localized.as_str(), descriptor.display_name().as_deref());
     assert!(font_descriptor_type_id() > 0);
-    assert!(matches!(
-        descriptor.format(),
-        FontFormat::Unrecognized
-            | FontFormat::OpenTypePostScript
-            | FontFormat::OpenTypeTrueType
-            | FontFormat::TrueType
-            | FontFormat::PostScript
-            | FontFormat::Bitmap
-    ));
+    assert_eq!(descriptor.format(), FontFormat::TrueType);
     Ok(())
 }
 
@@ -53,7 +45,7 @@ fn descriptor_copy_helpers_and_metadata() -> Result<(), Box<dyn std::error::Erro
     let variation_axes = descriptor.variation_axes()?;
     let variation_coordinates = descriptor.variation_coordinates()?;
     let traits = descriptor.traits()?;
-    let _ = traits.symbolic_traits;
+    assert_eq!(traits.symbolic_traits, support::font().symbolic_traits());
 
     if let Some(feature) = features.first() {
         if let Some(selector) = feature.selectors.first() {
@@ -74,7 +66,7 @@ fn descriptor_copy_helpers_and_metadata() -> Result<(), Box<dyn std::error::Erro
     let built = FontDescriptor::with_attributes_json("{\"name\":\"Helvetica\",\"size\":12.0}")?;
     assert!((built.size() - 12.0).abs() < f64::EPSILON);
 
-    let _ = feature_settings;
-    let _ = variation_coordinates;
+    assert!(feature_settings.is_empty());
+    assert!(variation_coordinates.is_empty());
     Ok(())
 }

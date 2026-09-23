@@ -21,17 +21,21 @@ fn font_surface_smoke() -> Result<(), Box<dyn std::error::Error>> {
     assert!(font.ascent() > 0.0);
     assert!(font.units_per_em() > 0);
     assert!(font.glyph_count() > 0);
-    assert!(font.bounding_box().size.width >= 0.0);
-    assert!(font.underline_thickness() >= 0.0);
+    assert!(font.bounding_box().size.width > 0.0);
+    assert!(font.underline_thickness() > 0.0);
     assert!(font.cap_height() > 0.0);
-    assert!(font.x_height() >= 0.0);
+    assert!(font.x_height() > 0.0 && font.x_height() < font.cap_height());
     assert!(!font.supported_languages()?.is_empty());
     assert_eq!(
         font.attribute_json("familyName")?.as_str(),
         Some(font.family_name()?.as_str())
     );
-    let _ = font.string_encoding();
-    let _ = font.default_cascade_list(&[])?;
+    assert_eq!(
+        font.string_encoding(),
+        0,
+        "Helvetica reports kCFStringEncodingMacRoman"
+    );
+    assert!(!font.default_cascade_list(&[])?.is_empty());
     assert!(font_type_id() > 0);
     Ok(())
 }
@@ -41,7 +45,8 @@ fn font_traits_features_and_variations() -> Result<(), Box<dyn std::error::Error
     let font = support::font();
     let traits = font.traits()?;
     assert_eq!(traits.symbolic_traits, font.symbolic_traits());
-    let _ = traits.has(symbolic_traits::BOLD);
+    assert!(!traits.has(symbolic_traits::BOLD));
+    assert!(!traits.has(symbolic_traits::ITALIC));
 
     let glyphs = font.glyphs_for_string("Hello")?;
     assert_eq!(glyphs.len(), 5);
@@ -54,14 +59,16 @@ fn font_traits_features_and_variations() -> Result<(), Box<dyn std::error::Error
     let (overall_bounds, glyph_bounds) =
         font.bounding_rects_for_glyphs(FontOrientation::Horizontal, &[glyph]);
     assert_eq!(glyph_bounds.len(), 1);
-    assert!(overall_bounds.size.width >= 0.0);
+    assert!(overall_bounds.size.width > 0.0);
+    assert_eq!(overall_bounds, glyph_bounds[0]);
 
     let (_, optical_bounds) = font.optical_bounds_for_glyphs(&[glyph]);
     assert_eq!(optical_bounds.len(), 1);
 
     let (advance_total, advances) = font.advances_for_glyphs(FontOrientation::Horizontal, &[glyph]);
     assert_eq!(advances.len(), 1);
-    assert!(advance_total >= 0.0);
+    assert!(advance_total > 0.0);
+    assert!((advance_total - advances[0].width).abs() < f64::EPSILON);
 
     assert_eq!(font.vertical_translations_for_glyphs(&[glyph]).len(), 1);
 
@@ -69,13 +76,13 @@ fn font_traits_features_and_variations() -> Result<(), Box<dyn std::error::Error
     if let Some(feature) = features.first() {
         assert!(!feature.name.is_empty());
     }
-    let _ = font.feature_settings()?;
+    assert!(font.feature_settings()?.is_empty());
 
     let variation_axes = font.variation_axes()?;
     if let Some(axis) = variation_axes.first() {
         assert!(!axis.name.is_empty());
     }
-    let _ = font.variation_coordinates()?;
+    assert!(font.variation_coordinates()?.is_empty());
 
     let tables = font.available_tables()?;
     if let Some(tag) = tables.first() {
@@ -83,7 +90,9 @@ fn font_traits_features_and_variations() -> Result<(), Box<dyn std::error::Error
         assert!(!font.table_data(*tag)?.is_empty());
     }
 
-    let _ = font.ligature_caret_positions(support::first_glyph_for("fi"));
+    assert!(font
+        .ligature_caret_positions(support::first_glyph_for("f"))
+        .is_empty());
 
     Ok(())
 }

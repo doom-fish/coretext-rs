@@ -16,7 +16,7 @@ fn glyph_info_round_trips_font_metadata() -> Result<(), Box<dyn std::error::Erro
             glyph_by_name.glyph_name().as_deref(),
             Some(glyph_name.as_str())
         );
-        let _ = glyph_by_name.glyph();
+        assert_eq!(font.glyph_with_name(&glyph_name)?, glyph);
     }
 
     let character_identifier = glyph_info.character_identifier();

@@ -6,14 +6,14 @@ use coretext::ffi;
 
 #[test]
 fn raw_ffi_gap_symbols_compile() {
-    let _ = ffi::kCTUnderlineStyleSingle;
-    let _ = ffi::kCTUnderlinePatternDashDot;
-    let _ = ffi::kCTFontOptionsPreventAutoActivation;
-    let _ = ffi::kCTFontDescriptorMatchingDidBegin;
-    let _ = ffi::kCTFontManagerErrorAlreadyRegistered;
-    let _ = ffi::kCTFrameProgressionRightToLeft;
-    let _ = unsafe { ffi::kCTTabColumnTerminatorsAttributeName };
-    let _ = unsafe { ffi::kCTBaselineClassRoman };
+    assert_eq!(ffi::kCTUnderlineStyleSingle, 0x01);
+    assert_eq!(ffi::kCTUnderlinePatternDashDot, 0x0300);
+    assert_eq!(ffi::kCTFontOptionsPreventAutoActivation, 1);
+    assert_eq!(ffi::kCTFontDescriptorMatchingDidBegin, 0);
+    assert_eq!(ffi::kCTFontManagerErrorAlreadyRegistered, 105);
+    assert_eq!(ffi::kCTFrameProgressionRightToLeft, 1);
+    assert!(!unsafe { ffi::kCTTabColumnTerminatorsAttributeName }.is_null());
+    assert!(!unsafe { ffi::kCTBaselineClassRoman }.is_null());
 
     let _: unsafe extern "C" fn(ffi::CTFontRef, ffi::CFStringRef) -> ffi::CFTypeRef =
         ffi::CTFontCopyAttribute;

@@ -41,7 +41,14 @@ fn font_names() {
 fn font_metrics() {
     let font = make_font();
     assert!(font.ascent() > 0.0, "ascent > 0");
-    assert!(font.descent() < 0.0 || font.descent() >= 0.0); // just check it returns
+    assert!(
+        font.descent() > 0.0,
+        "descent is a positive distance below the baseline"
+    );
+    assert!(
+        font.descent() < font.ascent(),
+        "descent < ascent for Helvetica"
+    );
     assert!(font.glyph_count() > 0, "glyph count > 0");
 }
 
@@ -70,14 +77,27 @@ fn paragraph_style_justified() {
 #[test]
 fn attributed_string_no_paragraph_style() {
     let font = make_font();
-    make_attr(&font, None);
+    assert_eq!(
+        make_attr(&font, None).utf16_len(),
+        TEXT.encode_utf16().count()
+    );
 }
 
 #[test]
 fn attributed_string_with_paragraph_style() {
     let font = make_font();
     let ps = ParagraphStyle::with_alignment(TextAlignment::Right).unwrap();
-    make_attr(&font, Some(&ps));
+    assert_eq!(
+        make_attr(&font, Some(&ps)).utf16_len(),
+        TEXT.encode_utf16().count()
+    );
+}
+
+#[test]
+fn attributed_string_length_counts_utf16_code_units() {
+    let font = make_font();
+    let attr = AttributedString::new("é😀", &font, None).expect("AttributedString::new");
+    assert_eq!(attr.utf16_len(), 3);
 }
 
 // ── CTLine ────────────────────────────────────────────────────────────────────
@@ -97,7 +117,10 @@ fn line_string_range() {
     let line = CTLine::create_with_attributed_string(&attr).expect("CTLine");
     let r = line.string_range();
     assert_eq!(r.location, 0);
-    assert_eq!(r.length, isize::try_from(TEXT.len()).unwrap());
+    assert_eq!(
+        r.length,
+        isize::try_from(TEXT.encode_utf16().count()).unwrap()
+    );
 }
 
 #[test]
@@ -124,7 +147,11 @@ fn line_trailing_whitespace() {
     let font = make_font();
     let attr = make_attr(&font, None);
     let line = CTLine::create_with_attributed_string(&attr).expect("CTLine");
-    let _ = line.trailing_whitespace_width(); // must not panic
+    assert!(line.trailing_whitespace_width().abs() < f64::EPSILON);
+
+    let spaced = AttributedString::new("CoreText   ", &font, None).expect("AttributedString::new");
+    let spaced_line = CTLine::create_with_attributed_string(&spaced).expect("CTLine");
+    assert!(spaced_line.trailing_whitespace_width() > 0.0);
 }
 
 #[test]
@@ -236,6 +263,9 @@ fn frame_string_range() {
         .expect("CTFrame");
     let sr = frame.string_range();
     let vsr = frame.visible_string_range();
-    assert_eq!(sr, TextRange::new(0, isize::try_from(TEXT.len()).unwrap()));
+    assert_eq!(
+        sr,
+        TextRange::new(0, isize::try_from(TEXT.encode_utf16().count()).unwrap())
+    );
     assert!(vsr.length > 0);
 }

@@ -17,7 +17,11 @@ fn font_collection_queries() -> Result<(), Box<dyn std::error::Error>> {
     assert!(collection.exclusion_descriptors().is_empty());
     assert!(!collection.font_attribute_json("familyName")?.is_null());
     let attrs = collection.font_attributes_json(&["familyName", "name"])?;
-    assert!(attrs.is_array() || attrs.is_object());
+    let attrs = attrs
+        .as_array()
+        .expect("one attribute dictionary per matching font");
+    assert!(!attrs.is_empty());
+    assert!(attrs.iter().all(serde_json::Value::is_object));
     assert!(!collection.matching_descriptors_with_options(options).is_empty());
     assert!(font_collection_type_id() > 0);
 
