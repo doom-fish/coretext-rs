@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `CTFrame::line_origins` no longer asks CoreText for more origins than the frame has lines.
 - Tautological and assertion-free tests now assert real values, and the font-enable test that changes the user's font registry only runs with `--ignored`.
 - `COVERAGE_AUDIT.md` counted symbols that are only declared in the unsafe `raw-ffi` module as verified (240 of 468 rows) and now says so; the `COVERAGE_AUDIT_V2.md` totals now match its tables. The README states the macOS 10.15 and Rust 1.82 minimums.
+- `build.rs` no longer adds the toolchain's Swift 5.5 back-deployment directory (`usr/lib/swift-5.5/macosx`) to the link search path or rpath. Its old `libswift_Concurrency.dylib` could shadow the SDK's `libswift_Concurrency.tbd` for the whole binary and break linking next to Swift bridges that use newer concurrency APIs.
 
 ### Changed
 

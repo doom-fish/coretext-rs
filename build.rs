@@ -66,11 +66,6 @@ fn main() {
     match Command::new("xcode-select").arg("-p").output() {
         Ok(output) if output.status.success() => {
             let developer_dir = String::from_utf8_lossy(&output.stdout).trim().to_string();
-            let legacy_path = format!(
-                "{developer_dir}/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-5.5/macosx"
-            );
-            println!("cargo:rustc-link-search=native={legacy_path}");
-            println!("cargo:rustc-link-arg=-Wl,-rpath,{legacy_path}");
             let swift_path =
                 format!("{developer_dir}/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx");
             println!("cargo:rustc-link-search=native={swift_path}");
