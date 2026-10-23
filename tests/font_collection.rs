@@ -59,7 +59,25 @@ fn exact_font_family_query_matches_all_faces() -> Result<(), Box<dyn std::error:
             .iter()
             .all(|descriptor| descriptor.family_name().as_deref() == Some("Helvetica"))
     );
-    assert!(FontCollection::for_family("unknown-family-DOOMFISH-99999").is_err());
+    let wildcard = FontDescriptor::with_attributes_json(r#"{"familyName":"Helvetica"}"#)?;
+    let legacy = FontCollection::with_descriptors(
+        &[wildcard],
+        FontCollectionOptions {
+            remove_duplicates: true,
+            ..FontCollectionOptions::default()
+        },
+    )?;
+    assert_eq!(
+        descriptors
+            .iter()
+            .map(FontDescriptor::postscript_name)
+            .collect::<Vec<_>>(),
+        legacy
+            .matching_descriptors()
+            .iter()
+            .map(FontDescriptor::postscript_name)
+            .collect::<Vec<_>>()
+    );
     Ok(())
 }
 

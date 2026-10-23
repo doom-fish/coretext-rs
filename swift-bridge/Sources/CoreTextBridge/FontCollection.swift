@@ -38,13 +38,15 @@ func ct_font_collection_create_for_family(_ familyName: UnsafePointer<CChar>?) -
     guard let familyName = stringFromCString(familyName) else { return nil }
     let attributes: [CFString: Any] = [kCTFontFamilyNameAttribute: familyName as CFString]
     let descriptor = CTFontDescriptorCreateWithAttributes(attributes as CFDictionary)
-    let mandatory = NSSet(array: [kCTFontFamilyNameAttribute]) as CFSet
-    guard let matching = CTFontDescriptorCreateMatchingFontDescriptors(descriptor, mandatory),
+    let options: [CFString: Any] = [kCTFontCollectionRemoveDuplicatesOption: true]
+    let collection = CTFontCollectionCreateWithFontDescriptors(
+        [descriptor] as CFArray, options as CFDictionary
+    )
+    guard let matching = CTFontCollectionCreateMatchingFontDescriptors(collection),
           CFArrayGetCount(matching) > 0 else {
         return nil
     }
-    let options: [CFString: Any] = [kCTFontCollectionRemoveDuplicatesOption: true]
-    return retainBox(CTFontCollectionCreateWithFontDescriptors(matching, options as CFDictionary))
+    return retainBox(collection)
 }
 
 @_cdecl("ct_font_collection_create_with_descriptors")

@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `FontCollection::for_family` selects all faces in an exact family.
+- `FontCollection::for_family` selects CoreText matches for a font family.
 - `CTFont` loads graphics font data, applies OpenType settings and fallback fonts, and restores a graphics font without attributes.
 - `AttributedString::from_runs` assigns fonts to text ranges. `CTRun::font` returns the font that CoreText selects for each run.
 
