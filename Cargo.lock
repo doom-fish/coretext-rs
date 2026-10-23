@@ -4,14 +4,14 @@ version = 3
 
 [[package]]
 name = "apple-cf"
-version = "0.11.1"
+version = "0.11.2"
 dependencies = [
  "doom-fish-utils",
 ]
 
 [[package]]
 name = "coretext-rs"
-version = "0.8.0"
+version = "0.8.1"
 dependencies = [
  "apple-cf",
  "libc",
