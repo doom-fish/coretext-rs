@@ -13,9 +13,15 @@ fn missing_font() -> PathBuf {
 
 #[test]
 fn font_manager_listing_and_lookup() -> Result<(), Box<dyn std::error::Error>> {
-    assert!(!FontManager::available_postscript_names()?.is_empty());
-    assert!(!FontManager::available_font_family_names()?.is_empty());
-    assert!(!FontManager::available_font_urls()?.is_empty());
+    assert_ne!(
+        FontManager::available_postscript_names()?,
+        Vec::<String>::new()
+    );
+    assert_ne!(
+        FontManager::available_font_family_names()?,
+        Vec::<String>::new()
+    );
+    assert_ne!(FontManager::available_font_urls()?, Vec::<String>::new());
 
     let font_url = support::first_font_url();
     assert!(FontManager::is_supported_font(&font_url)?);
@@ -34,9 +40,11 @@ fn font_manager_listing_and_lookup() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     let data = fs::read(&font_url)?;
-    assert!(FontManager::font_descriptor_from_data(&data)?
-        .family_name()
-        .is_some());
+    assert!(
+        FontManager::font_descriptor_from_data(&data)?
+            .family_name()
+            .is_some()
+    );
     assert!(!FontManager::font_descriptors_from_data(&data).is_empty());
     assert!(FontManager::font_descriptors_from_data(b"not a font").is_empty());
     Ok(())
@@ -55,7 +63,7 @@ fn registering_a_missing_font_reports_an_error() {
     ];
     for result in results {
         match result {
-            Err(CoreTextError::Bridge(message)) => assert!(!message.is_empty()),
+            Err(CoreTextError::Bridge(message)) => assert_ne!(message, ""),
             other => panic!("expected a font manager error, got {other:?}"),
         }
     }

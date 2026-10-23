@@ -1,6 +1,6 @@
 mod support;
 
-use coretext::{font_collection_type_id, FontCollection, FontCollectionOptions, FontDescriptor};
+use coretext::{FontCollection, FontCollectionOptions, FontDescriptor, font_collection_type_id};
 
 #[test]
 fn font_collection_queries() -> Result<(), Box<dyn std::error::Error>> {
@@ -20,9 +20,13 @@ fn font_collection_queries() -> Result<(), Box<dyn std::error::Error>> {
     let attrs = attrs
         .as_array()
         .expect("one attribute dictionary per matching font");
-    assert!(!attrs.is_empty());
+    assert_ne!(attrs.len(), 0);
     assert!(attrs.iter().all(serde_json::Value::is_object));
-    assert!(!collection.matching_descriptors_with_options(options).is_empty());
+    assert!(
+        !collection
+            .matching_descriptors_with_options(options)
+            .is_empty()
+    );
     assert!(font_collection_type_id() > 0);
 
     let available = FontCollection::available()?;
@@ -32,14 +36,30 @@ fn font_collection_queries() -> Result<(), Box<dyn std::error::Error>> {
     assert!(!copy.matching_descriptors().is_empty());
 
     let family_name = descriptor.family_name().expect("family name");
-    assert!(!available
-        .matching_descriptors_for_family(&family_name)?
-        .is_empty());
+    assert!(
+        !available
+            .matching_descriptors_for_family(&family_name)?
+            .is_empty()
+    );
 
     let mut mutable = available.mutable_copy()?;
     mutable.set_query_descriptors(std::slice::from_ref(&descriptor));
     mutable.set_exclusion_descriptors(&[]);
     assert_eq!(mutable.as_font_collection().query_descriptors().len(), 1);
+    Ok(())
+}
+
+#[test]
+fn exact_font_family_query_matches_all_faces() -> Result<(), Box<dyn std::error::Error>> {
+    let collection = FontCollection::for_family("Helvetica")?;
+    let descriptors = collection.matching_descriptors();
+    assert!(!descriptors.is_empty());
+    assert!(
+        descriptors
+            .iter()
+            .all(|descriptor| descriptor.family_name().as_deref() == Some("Helvetica"))
+    );
+    assert!(FontCollection::for_family("unknown-family-DOOMFISH-99999").is_err());
     Ok(())
 }
 

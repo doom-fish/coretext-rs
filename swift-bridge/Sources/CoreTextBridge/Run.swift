@@ -28,6 +28,17 @@ func ct_run_copy_attributes_json(_ runPtr: UnsafeMutableRawPointer?) -> UnsafeMu
     return jsonCString(runAttributesPayload(run))
 }
 
+@_cdecl("ct_run_copy_font")
+func ct_run_copy_font(_ runPtr: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
+    guard let runPtr else { return nil }
+    let run: CTRun = unbox(runPtr, as: CTRun.self)
+    guard let value = (CTRunGetAttributes(run) as NSDictionary)[kCTFontAttributeName],
+          CFGetTypeID(value as CFTypeRef) == CTFontGetTypeID() else {
+        return nil
+    }
+    return retainBox(value as! CTFont)
+}
+
 @_cdecl("ct_run_get_status")
 func ct_run_get_status(_ runPtr: UnsafeMutableRawPointer?) -> UInt32 {
     guard let runPtr else { return 0 }

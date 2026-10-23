@@ -12,7 +12,7 @@ use crate::font_feature::{FontFeature, FontFeatureSetting};
 use crate::font_traits::FontTraits;
 use crate::font_variation::{FontVariationAxis, FontVariationCoordinate};
 use crate::path::GlyphPath;
-use crate::types::{utf16_length, CGAffineTransform, CGPoint, CGRect, CGSize, TextRange};
+use crate::types::{CGAffineTransform, CGPoint, CGRect, CGSize, TextRange, utf16_length};
 
 /// Constants for `CTFontCopyName` / `CTFontCopyLocalizedName`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -146,6 +146,16 @@ impl CTFont {
         )?))
     }
 
+    pub fn from_graphics_data(data: &[u8], size: f64) -> CoreTextResult<Self> {
+        let length = isize::try_from(data.len())
+            .map_err(|_| CoreTextError::Bridge("font data exceeds supported size".into()))?;
+        let raw = unsafe { bridge::ct_font_create_with_graphics_data(data.as_ptr(), length, size) };
+        Ok(Self::from_raw(expect_handle(
+            raw,
+            "could not create a graphics font from data",
+        )?))
+    }
+
     /// Wraps `CTFontCreateUIFontForLanguage`.
     pub fn ui_font(ui_type: UIFontType, size: f64, language: Option<&str>) -> CoreTextResult<Self> {
         let language = optional_cstring(language)?;
@@ -181,6 +191,49 @@ impl CTFont {
             raw,
             "ct_font_copy_with_attributes returned NULL",
         )?))
+    }
+
+    pub fn recreate_with_graphics_font(&self, size: f64) -> CoreTextResult<Self> {
+        let raw = unsafe { bridge::ct_font_copy_with_graphics_font(self.raw, size) };
+        Ok(Self::from_raw(expect_handle(
+            raw,
+            "could not recreate a graphics font",
+        )?))
+    }
+
+    pub fn copy_with_feature_settings(
+        &self,
+        features: &[(String, u32)],
+        fallbacks: &[&str],
+    ) -> CoreTextResult<Self> {
+        #[derive(serde::Serialize)]
+        struct Feature<'a> {
+            tag: &'a str,
+            value: u32,
+        }
+
+        let features: Vec<_> = features
+            .iter()
+            .map(|(tag, value)| Feature { tag, value: *value })
+            .collect();
+        let features = cstring(&serde_json::to_string(&features)?)?;
+        let fallbacks = cstring(&serde_json::to_string(fallbacks)?)?;
+        let raw = unsafe {
+            bridge::ct_font_copy_with_feature_settings(
+                self.raw,
+                features.as_ptr(),
+                fallbacks.as_ptr(),
+            )
+        };
+        Ok(Self::from_raw(expect_handle(
+            raw,
+            "could not apply font features and fallbacks",
+        )?))
+    }
+
+    #[must_use]
+    pub fn has_matching_traits(&self) -> bool {
+        unsafe { bridge::ct_font_has_matching_traits(self.raw) }
     }
 
     /// Wraps `CTFontCopyWithFamily`.
@@ -393,6 +446,22 @@ impl CTFont {
                 "one or more characters could not be mapped to glyphs".to_string(),
             ))
         }
+    }
+
+    #[must_use]
+    pub fn glyph_for_char(&self, character: char) -> Option<u16> {
+        let mut characters = [0_u16; 2];
+        character.encode_utf16(&mut characters);
+        let mut glyphs = [0_u16; 2];
+        unsafe {
+            bridge::ct_font_get_glyphs_for_characters(
+                self.raw,
+                characters.as_ptr(),
+                glyphs.as_mut_ptr(),
+                2,
+            );
+        }
+        (glyphs[0] != 0).then_some(glyphs[0])
     }
 
     /// Wraps `CTFontGetGlyphWithName`.

@@ -35,6 +35,12 @@ impl CTRun {
         unsafe { json_from_owned(bridge::ct_run_copy_attributes_json(self.raw)) }
     }
 
+    #[must_use]
+    pub fn font(&self) -> Option<CTFont> {
+        let raw = unsafe { bridge::ct_run_copy_font(self.raw) };
+        (!raw.is_null()).then(|| CTFont::from_raw(raw))
+    }
+
     /// Wraps `CTRunGetStatus`.
     #[must_use]
     pub fn status(&self) -> u32 {
@@ -168,3 +174,4 @@ pub fn run_type_id() -> u64 {
 }
 
 use crate::error::CoreTextResult;
+use crate::font::CTFont;

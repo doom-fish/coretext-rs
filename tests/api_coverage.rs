@@ -186,7 +186,7 @@ fn run_glyphs_and_positions() {
     let p = run.positions();
     let a = run.advances();
     let idx = run.string_indices();
-    assert!(!g.is_empty());
+    assert_ne!(g.len(), 0);
     assert_eq!(g.len(), p.len());
     assert_eq!(g.len(), a.len());
     assert_eq!(g.len(), idx.len());

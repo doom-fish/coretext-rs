@@ -1,6 +1,6 @@
 mod support;
 
-use coretext::{font_descriptor_type_id, FontDescriptor, FontFormat, FontOrientation};
+use coretext::{FontDescriptor, FontFormat, FontOrientation, font_descriptor_type_id};
 
 #[test]
 fn descriptor_surface_smoke() -> Result<(), Box<dyn std::error::Error>> {
@@ -66,7 +66,7 @@ fn descriptor_copy_helpers_and_metadata() -> Result<(), Box<dyn std::error::Erro
     let built = FontDescriptor::with_attributes_json("{\"name\":\"Helvetica\",\"size\":12.0}")?;
     assert!((built.size() - 12.0).abs() < f64::EPSILON);
 
-    assert!(feature_settings.is_empty());
-    assert!(variation_coordinates.is_empty());
+    assert_eq!(feature_settings, Vec::new());
+    assert_eq!(variation_coordinates, Vec::new());
     Ok(())
 }

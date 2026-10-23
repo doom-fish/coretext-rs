@@ -32,6 +32,15 @@ impl_handle!(FontCollection);
 impl_thread_safe!(FontCollection);
 
 impl FontCollection {
+    pub fn for_family(name: &str) -> CoreTextResult<Self> {
+        let name = cstring(name)?;
+        let raw = unsafe { bridge::ct_font_collection_create_for_family(name.as_ptr()) };
+        Ok(Self::from_raw(expect_handle(
+            raw,
+            "no matching font family",
+        )?))
+    }
+
     /// Wraps `CTFontCollectionCreateFromAvailableFonts`.
     pub fn available() -> CoreTextResult<Self> {
         Self::available_with_options(FontCollectionOptions::default())

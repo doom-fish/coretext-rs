@@ -33,6 +33,20 @@ func ct_font_collection_create_available(_ optionsJSON: UnsafePointer<CChar>?) -
     retainBox(CTFontCollectionCreateFromAvailableFonts(fontCollectionOptions(optionsJSON)))
 }
 
+@_cdecl("ct_font_collection_create_for_family")
+func ct_font_collection_create_for_family(_ familyName: UnsafePointer<CChar>?) -> UnsafeMutableRawPointer? {
+    guard let familyName = stringFromCString(familyName) else { return nil }
+    let attributes: [CFString: Any] = [kCTFontFamilyNameAttribute: familyName as CFString]
+    let descriptor = CTFontDescriptorCreateWithAttributes(attributes as CFDictionary)
+    let mandatory = NSSet(array: [kCTFontFamilyNameAttribute]) as CFSet
+    guard let matching = CTFontDescriptorCreateMatchingFontDescriptors(descriptor, mandatory),
+          CFArrayGetCount(matching) > 0 else {
+        return nil
+    }
+    let options: [CFString: Any] = [kCTFontCollectionRemoveDuplicatesOption: true]
+    return retainBox(CTFontCollectionCreateWithFontDescriptors(matching, options as CFDictionary))
+}
+
 @_cdecl("ct_font_collection_create_with_descriptors")
 func ct_font_collection_create_with_descriptors(
     _ descriptorHandles: UnsafePointer<UnsafeMutableRawPointer?>?,

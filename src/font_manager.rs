@@ -551,7 +551,7 @@ impl EmptyFallback for String {
 mod tests {
     use std::time::Duration;
 
-    use super::{registration_result, FontManager};
+    use super::{FontManager, registration_result};
     use crate::common::json_from_owned;
     use crate::error::CoreTextError;
 
@@ -593,7 +593,7 @@ mod tests {
         let (timed_out, messages) =
             wait_for_test_handler(Duration::from_millis(300), Duration::from_millis(10));
         assert!(timed_out);
-        assert!(messages.is_empty());
+        assert_eq!(messages, Vec::<String>::new());
         std::thread::sleep(Duration::from_millis(600));
     }
 

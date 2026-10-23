@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `FontCollection::for_family` selects all faces in an exact family.
+- `CTFont` loads graphics font data, applies OpenType settings and fallback fonts, and restores a graphics font without attributes.
+- `AttributedString::from_runs` assigns fonts to text ranges. `CTRun::font` returns the font that CoreText selects for each run.
+
 ## [0.8.0] - 2026-09-24
 
 ### Security

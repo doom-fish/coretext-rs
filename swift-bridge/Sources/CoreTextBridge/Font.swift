@@ -103,6 +103,20 @@ func ct_font_create_with_descriptor(
     return retainBox(font)
 }
 
+@_cdecl("ct_font_create_with_graphics_data")
+func ct_font_create_with_graphics_data(
+    _ data: UnsafePointer<UInt8>?,
+    _ length: Int,
+    _ size: Double
+) -> UnsafeMutableRawPointer? {
+    guard let data, length > 0,
+          let provider = CGDataProvider(data: Data(bytes: data, count: length) as CFData),
+          let graphicsFont = CGFont(provider) else {
+        return nil
+    }
+    return retainBox(CTFontCreateWithGraphicsFont(graphicsFont, CGFloat(size), nil, nil))
+}
+
 @_cdecl("ct_font_create_ui_font")
 func ct_font_create_ui_font(
     _ uiType: UInt32,
@@ -131,6 +145,81 @@ func ct_font_copy_with_attributes(
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     let descriptor: CTFontDescriptor? = descriptorPtr.map { unbox($0, as: CTFontDescriptor.self) }
     return retainBox(CTFontCreateCopyWithAttributes(font, CGFloat(size), nil, descriptor))
+}
+
+@_cdecl("ct_font_copy_with_graphics_font")
+func ct_font_copy_with_graphics_font(
+    _ fontPtr: UnsafeMutableRawPointer?,
+    _ size: Double
+) -> UnsafeMutableRawPointer? {
+    guard let fontPtr else { return nil }
+    let font: CTFont = unbox(fontPtr, as: CTFont.self)
+    let graphicsFont = CTFontCopyGraphicsFont(font, nil)
+    return retainBox(CTFontCreateWithGraphicsFont(graphicsFont, CGFloat(size), nil, nil))
+}
+
+private struct OpenTypeSetting: Decodable {
+    let tag: String
+    let value: UInt32
+}
+
+@_cdecl("ct_font_copy_with_feature_settings")
+func ct_font_copy_with_feature_settings(
+    _ fontPtr: UnsafeMutableRawPointer?,
+    _ featuresJSON: UnsafePointer<CChar>?,
+    _ fallbacksJSON: UnsafePointer<CChar>?
+) -> UnsafeMutableRawPointer? {
+    guard let fontPtr,
+          let features = decodeJSON(featuresJSON, as: [OpenTypeSetting].self),
+          let fallbacks = decodeJSON(fallbacksJSON, as: [String].self) else {
+        return nil
+    }
+    let font: CTFont = unbox(fontPtr, as: CTFont.self)
+    let featureSettings: [[CFString: Any]] = features.map { setting in
+        [
+            kCTFontOpenTypeFeatureTag: setting.tag as CFString,
+            kCTFontOpenTypeFeatureValue: NSNumber(value: Int32(bitPattern: setting.value))
+        ]
+    }
+    var attributes: [CFString: Any] = [kCTFontFeatureSettingsAttribute: featureSettings as CFArray]
+    if !fallbacks.isEmpty {
+        let traits = CTFontCopyTraits(font) as NSDictionary
+        let weight = (traits[kCTFontWeightTrait] as? NSNumber)?.doubleValue ?? 0
+        let italic = CTFontGetSymbolicTraits(font).contains(.traitItalic)
+        var cascade = fallbacks.map { name in
+            let fallbackTraits: [CFString: Any] = [
+                kCTFontWeightTrait: NSNumber(value: weight),
+                kCTFontSlantTrait: NSNumber(value: italic ? 1.0 : 0.0)
+            ]
+            let fallbackAttributes: [CFString: Any] = [
+                kCTFontFamilyNameAttribute: name as CFString,
+                kCTFontTraitsAttribute: fallbackTraits as CFDictionary
+            ]
+            return CTFontDescriptorCreateWithAttributes(fallbackAttributes as CFDictionary)
+        }
+        let languages = CFLocaleCopyPreferredLanguages()
+        let systemCascade: [CTFontDescriptor] = typedArray(
+            CTFontCopyDefaultCascadeListForLanguages(font, languages)
+        )
+        cascade.append(contentsOf: systemCascade.filter {
+            CTFontDescriptorCopyAttribute($0, kCTFontURLAttribute) != nil
+        })
+        attributes[kCTFontCascadeListAttribute] = cascade as CFArray
+    }
+    let descriptor = CTFontDescriptorCreateWithAttributes(attributes as CFDictionary)
+    return retainBox(CTFontCreateCopyWithAttributes(font, 0, nil, descriptor))
+}
+
+@_cdecl("ct_font_has_matching_traits")
+func ct_font_has_matching_traits(_ fontPtr: UnsafeMutableRawPointer?) -> Bool {
+    guard let fontPtr else { return false }
+    let font: CTFont = unbox(fontPtr, as: CTFont.self)
+    let traits = CTFontCopyTraits(font) as NSDictionary
+    return [kCTFontSymbolicTrait, kCTFontWidthTrait, kCTFontWeightTrait, kCTFontSlantTrait]
+        .allSatisfy { key in
+            guard let value = traits[key] else { return false }
+            return CFGetTypeID(value as CFTypeRef) == CFNumberGetTypeID()
+        }
 }
 
 @_cdecl("ct_font_copy_with_family")

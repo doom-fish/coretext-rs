@@ -1,11 +1,11 @@
 mod support;
 
 use coretext::{
-    bounds_options, frame_type_id, framesetter_type_id, line_type_id, paragraph_style_type_id,
-    run_type_id, text_tab_type_id, typesetter_type_id, AttributedString, CGPoint, CGRect, CGSize,
-    CTFramesetter, CTLine, CTTypesetter, CoreTextError, CoreTextResult, LineBreakMode,
-    LineTruncationType, ParagraphStyle, ParagraphStyleOptions, TextAlignment, TextRange, TextTab,
-    TypesetterOptions, WritingDirection,
+    AttributedString, CGPoint, CGRect, CGSize, CTFramesetter, CTLine, CTTypesetter, CoreTextError,
+    CoreTextResult, LineBreakMode, LineTruncationType, ParagraphStyle, ParagraphStyleOptions,
+    TextAlignment, TextRange, TextTab, TypesetterOptions, WritingDirection, bounds_options,
+    frame_type_id, framesetter_type_id, line_type_id, paragraph_style_type_id, run_type_id,
+    text_tab_type_id, typesetter_type_id,
 };
 
 #[test]
@@ -98,9 +98,10 @@ fn line_run_typesetter_framesetter_and_frame() -> Result<(), Box<dyn std::error:
 
     let token_attr = AttributedString::new("…", &support::font(), None)?;
     let token = CTLine::create_with_attributed_string(&token_attr)?;
-    assert!(line
-        .truncated(bounds.width / 2.0, LineTruncationType::End, Some(&token))
-        .is_some());
+    assert!(
+        line.truncated(bounds.width / 2.0, LineTruncationType::End, Some(&token))
+            .is_some()
+    );
 
     let runs = line.runs();
     assert!(!runs.is_empty());
@@ -113,9 +114,11 @@ fn line_run_typesetter_framesetter_and_frame() -> Result<(), Box<dyn std::error:
     assert!(run.image_bounds().size.width > 0.0);
     assert_eq!(run.text_matrix(), coretext::CGAffineTransform::IDENTITY);
     let attributes = run.attributes_json()?;
-    assert!(attributes["keys"]
-        .as_array()
-        .is_some_and(|keys| keys.iter().any(|key| key == "NSFont")));
+    assert!(
+        attributes["keys"]
+            .as_array()
+            .is_some_and(|keys| keys.iter().any(|key| key == "NSFont"))
+    );
     let (base_advances, origins) = run.base_advances_and_origins();
     assert_eq!(base_advances.len(), origins.len());
     assert_eq!(base_advances.len(), run.glyphs().len());
@@ -141,6 +144,40 @@ fn line_run_typesetter_framesetter_and_frame() -> Result<(), Box<dyn std::error:
     assert!((path_bounds.size.width - (suggested.width + 24.0)).abs() < f64::EPSILON);
     assert!((path_bounds.size.height - 120.0).abs() < f64::EPSILON);
     assert!(!frame.has_frame_attributes());
+    Ok(())
+}
+
+#[test]
+fn attributed_font_runs_keep_offsets_and_fonts() -> Result<(), Box<dyn std::error::Error>> {
+    let helvetica = coretext::CTFont::new("Helvetica", 16.0)?;
+    let times = coretext::CTFont::new("Times-Roman", 16.0)?;
+    let attributed = AttributedString::from_runs(&[("a", &helvetica), ("😀b", &times)])?;
+    assert_eq!(attributed.utf16_len(), 4);
+    let line = CTLine::create_with_attributed_string(&attributed)?;
+    let runs = line.runs();
+    assert!(runs.len() >= 2);
+    assert_eq!(
+        runs[0].font().expect("first font").postscript_name()?,
+        "Helvetica"
+    );
+    assert_eq!(
+        runs.last()
+            .expect("last run")
+            .font()
+            .expect("last font")
+            .postscript_name()?,
+        "Times-Roman"
+    );
+    assert_eq!(
+        runs.last().expect("last run").string_indices().last(),
+        Some(&3)
+    );
+
+    let bom = AttributedString::from_runs(&[("\u{feff}", &helvetica)])?;
+    assert_eq!(
+        CTLine::create_with_attributed_string(&bom)?.glyph_count(),
+        0
+    );
     Ok(())
 }
 
@@ -279,9 +316,10 @@ fn font_for_string_validates_utf16_ranges() -> Result<(), Box<dyn std::error::Er
             .glyph_count()
             > 0
     );
-    assert!(font
-        .font_for_string(text, TextRange::new(length, 0), None)
-        .is_ok());
+    assert!(
+        font.font_for_string(text, TextRange::new(length, 0), None)
+            .is_ok()
+    );
     for range in [
         TextRange::new(0, isize::try_from(text.len())?),
         TextRange::new(length + 5, 1),

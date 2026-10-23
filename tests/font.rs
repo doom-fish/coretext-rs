@@ -1,7 +1,7 @@
 mod support;
 
 use coretext::{
-    font_type_id, symbolic_traits, CTFont, FontNameKey, FontOrientation, TextRange, UIFontType,
+    CTFont, FontNameKey, FontOrientation, TextRange, UIFontType, font_type_id, symbolic_traits,
 };
 
 #[test]
@@ -9,10 +9,10 @@ fn font_surface_smoke() -> Result<(), Box<dyn std::error::Error>> {
     let font = support::font();
     assert!((font.size() - 16.0).abs() < f64::EPSILON);
     assert_eq!(font.matrix(), coretext::CGAffineTransform::IDENTITY);
-    assert!(!font.postscript_name()?.is_empty());
-    assert!(!font.family_name()?.is_empty());
-    assert!(!font.full_name()?.is_empty());
-    assert!(!font.display_name()?.is_empty());
+    assert_ne!(font.postscript_name()?, "");
+    assert_ne!(font.family_name()?, "");
+    assert_ne!(font.full_name()?, "");
+    assert_ne!(font.display_name()?, "");
     assert_eq!(
         font.name(FontNameKey::Full).as_deref(),
         Some(font.full_name()?.as_str())
@@ -25,7 +25,7 @@ fn font_surface_smoke() -> Result<(), Box<dyn std::error::Error>> {
     assert!(font.underline_thickness() > 0.0);
     assert!(font.cap_height() > 0.0);
     assert!(font.x_height() > 0.0 && font.x_height() < font.cap_height());
-    assert!(!font.supported_languages()?.is_empty());
+    assert_ne!(font.supported_languages()?, Vec::<String>::new());
     assert_eq!(
         font.attribute_json("familyName")?.as_str(),
         Some(font.family_name()?.as_str())
@@ -35,7 +35,7 @@ fn font_surface_smoke() -> Result<(), Box<dyn std::error::Error>> {
         0,
         "Helvetica reports kCFStringEncodingMacRoman"
     );
-    assert!(!font.default_cascade_list(&[])?.is_empty());
+    assert_ne!(font.default_cascade_list(&[])?.len(), 0);
     assert!(font_type_id() > 0);
     Ok(())
 }
@@ -74,25 +74,26 @@ fn font_traits_features_and_variations() -> Result<(), Box<dyn std::error::Error
 
     let features = font.features()?;
     if let Some(feature) = features.first() {
-        assert!(!feature.name.is_empty());
+        assert_ne!(feature.name, "");
     }
-    assert!(font.feature_settings()?.is_empty());
+    assert_eq!(font.feature_settings()?, Vec::new());
 
     let variation_axes = font.variation_axes()?;
     if let Some(axis) = variation_axes.first() {
-        assert!(!axis.name.is_empty());
+        assert_ne!(axis.name, "");
     }
-    assert!(font.variation_coordinates()?.is_empty());
+    assert_eq!(font.variation_coordinates()?, Vec::new());
 
     let tables = font.available_tables()?;
     if let Some(tag) = tables.first() {
         assert!(font.has_table(*tag));
-        assert!(!font.table_data(*tag)?.is_empty());
+        assert_ne!(font.table_data(*tag)?, Vec::<u8>::new());
     }
 
-    assert!(font
-        .ligature_caret_positions(support::first_glyph_for("f"))
-        .is_empty());
+    assert_eq!(
+        font.ligature_caret_positions(support::first_glyph_for("f")),
+        Vec::<f64>::new()
+    );
 
     Ok(())
 }
@@ -108,7 +109,7 @@ fn font_creation_helpers() -> Result<(), Box<dyn std::error::Error>> {
     assert!(ui_font.size() > 0.0);
 
     let family_copy = font.copy_with_family(16.0, &font.family_name()?)?;
-    assert!(!family_copy.full_name()?.is_empty());
+    assert_ne!(family_copy.full_name()?, "");
 
     let trait_copy = font.copy_with_symbolic_traits(
         font.size(),
@@ -128,5 +129,35 @@ fn font_creation_helpers() -> Result<(), Box<dyn std::error::Error>> {
 
     let descriptor_options = CTFont::from_descriptor_with_options(&descriptor, 12.0, 0)?;
     assert!((descriptor_options.size() - 12.0).abs() < f64::EPSILON);
+    Ok(())
+}
+
+#[test]
+fn graphics_font_features_and_traits() -> Result<(), Box<dyn std::error::Error>> {
+    let font = support::font();
+    let path = font.descriptor()?.url_path().expect("system font path");
+    let data = std::fs::read(path)?;
+    let graphics_font = CTFont::from_graphics_data(&data, 16.0)?;
+    assert_eq!(graphics_font.size(), 16.0);
+    assert!(graphics_font.glyph_for_char('m').is_some());
+    assert_eq!(
+        graphics_font.glyph_for_char('m'),
+        graphics_font.glyphs_for_string("m")?.first().copied()
+    );
+
+    let recreated = font.recreate_with_graphics_font(16.0)?;
+    assert_eq!(recreated.postscript_name()?, font.postscript_name()?);
+    assert!(font.has_matching_traits());
+
+    let featured = font.copy_with_feature_settings(&[("liga".into(), 0)], &["Times"])?;
+    assert_eq!(featured.postscript_name()?, font.postscript_name()?);
+    assert_eq!(
+        featured
+            .attribute_json("featureSettings")?
+            .as_array()
+            .map(Vec::len),
+        Some(1)
+    );
+    assert!(featured.attribute_json("cascadeList")?.as_array().is_some());
     Ok(())
 }

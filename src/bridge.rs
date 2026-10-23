@@ -19,12 +19,26 @@ unsafe extern "C" {
         font: Handle,
         paragraph_style: Handle,
     ) -> Handle;
+    pub fn ct_attributed_string_create_with_runs(
+        texts: *const *const u8,
+        lengths: *const isize,
+        fonts: *const Handle,
+        count: isize,
+    ) -> Handle;
     pub fn ct_attributed_string_get_length(attributed_string: Handle) -> isize;
 
     pub fn ct_font_create_with_name(name: *const c_char, size: f64) -> Handle;
     pub fn ct_font_create_with_descriptor(descriptor: Handle, size: f64) -> Handle;
+    pub fn ct_font_create_with_graphics_data(data: *const u8, length: isize, size: f64) -> Handle;
     pub fn ct_font_create_ui_font(ui_type: u32, size: f64, language: *const c_char) -> Handle;
     pub fn ct_font_copy_with_attributes(font: Handle, size: f64, descriptor: Handle) -> Handle;
+    pub fn ct_font_copy_with_graphics_font(font: Handle, size: f64) -> Handle;
+    pub fn ct_font_copy_with_feature_settings(
+        font: Handle,
+        features_json: *const c_char,
+        fallbacks_json: *const c_char,
+    ) -> Handle;
+    pub fn ct_font_has_matching_traits(font: Handle) -> bool;
     pub fn ct_font_copy_with_family(font: Handle, size: f64, family: *const c_char) -> Handle;
     pub fn ct_font_copy_with_symbolic_traits(
         font: Handle,
@@ -125,7 +139,7 @@ unsafe extern "C" {
 
     pub fn ct_font_descriptor_create(name: *const c_char, size: f64) -> Handle;
     pub fn ct_font_descriptor_copy_with_family(descriptor: Handle, family: *const c_char)
-        -> Handle;
+    -> Handle;
     pub fn ct_font_descriptor_copy_with_symbolic_traits(
         descriptor: Handle,
         trait_value: u32,
@@ -166,6 +180,7 @@ unsafe extern "C" {
     pub fn ct_font_descriptor_copy_attributes_json(descriptor: Handle) -> *mut c_char;
 
     pub fn ct_font_collection_create_available(options_json: *const c_char) -> Handle;
+    pub fn ct_font_collection_create_for_family(name: *const c_char) -> Handle;
     pub fn ct_font_collection_create_with_descriptors(
         descriptors: *const Handle,
         descriptor_count: isize,
@@ -373,6 +388,7 @@ unsafe extern "C" {
     pub fn ct_run_get_glyph_count(run: Handle) -> isize;
     pub fn ct_run_get_status(run: Handle) -> u32;
     pub fn ct_run_copy_attributes_json(run: Handle) -> *mut c_char;
+    pub fn ct_run_copy_font(run: Handle) -> Handle;
     pub fn ct_run_copy_glyphs(run: Handle, buffer: *mut u16, capacity: isize) -> isize;
     pub fn ct_run_copy_positions(run: Handle, buffer: *mut CGPoint, capacity: isize) -> isize;
     pub fn ct_run_copy_advances(run: Handle, buffer: *mut CGSize, capacity: isize) -> isize;
@@ -540,10 +556,7 @@ unsafe extern "C" {
         buffer: *mut Handle,
         capacity: isize,
     ) -> isize;
-    pub fn ct_font_manager_create_descriptor_from_data(
-        bytes: *const u8,
-        length: isize,
-    ) -> Handle;
+    pub fn ct_font_manager_create_descriptor_from_data(bytes: *const u8, length: isize) -> Handle;
     pub fn ct_font_manager_create_descriptors_from_data_count(
         bytes: *const u8,
         length: isize,
