@@ -25,7 +25,8 @@ fn main() {
         }
     };
 
-    let output = Command::new("swift")
+    let mut swift_build = Command::new("swift");
+    swift_build
         .args([
             "build",
             "-c",
@@ -37,25 +38,33 @@ fn main() {
             "--scratch-path",
             &swift_build_dir,
         ])
+        .args(["--jobs", "4"]);
+    let output = swift_build
         .output()
         .expect("failed to invoke `swift build`");
 
-    if !output.status.success() {
-        eprintln!(
-            "Swift build STDOUT:\n{}",
-            String::from_utf8_lossy(&output.stdout)
-        );
-        eprintln!(
-            "Swift build STDERR:\n{}",
-            String::from_utf8_lossy(&output.stderr)
-        );
-        panic!(
-            "Swift build failed with exit code {:?}",
-            output.status.code()
-        );
-    }
+    assert!(
+        output.status.success(),
+        "Swift build failed ({}):\n{}\n{}",
+        output.status,
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
 
-    println!("cargo:rustc-link-search=native={swift_build_dir}/release");
+    let output = swift_build
+        .arg("--show-bin-path")
+        .output()
+        .expect("failed to query the Swift product path");
+    assert!(
+        output.status.success(),
+        "Swift product path query failed:\n{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let swift_bin_dir = String::from_utf8(output.stdout).expect("Swift product path must be UTF-8");
+    let swift_bin_dir = swift_bin_dir.trim();
+    assert!(!swift_bin_dir.is_empty(), "Swift product path is empty");
+
+    println!("cargo:rustc-link-search=native={swift_bin_dir}");
     println!("cargo:rustc-link-lib=static=CoreTextBridge");
     println!("cargo:rustc-link-lib=framework=CoreText");
     println!("cargo:rustc-link-lib=framework=CoreFoundation");

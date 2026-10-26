@@ -3,35 +3,35 @@ import CoreText
 import Foundation
 
 @_cdecl("ct_frame_get_string_range")
-func ct_frame_get_string_range(_ framePtr: UnsafeMutableRawPointer?) -> CFRange {
+public func ct_frame_get_string_range(_ framePtr: UnsafeMutableRawPointer?) -> CFRange {
     guard let framePtr else { return CFRange(location: 0, length: 0) }
     let frame: CTFrame = unbox(framePtr, as: CTFrame.self)
     return CTFrameGetStringRange(frame)
 }
 
 @_cdecl("ct_frame_get_visible_string_range")
-func ct_frame_get_visible_string_range(_ framePtr: UnsafeMutableRawPointer?) -> CFRange {
+public func ct_frame_get_visible_string_range(_ framePtr: UnsafeMutableRawPointer?) -> CFRange {
     guard let framePtr else { return CFRange(location: 0, length: 0) }
     let frame: CTFrame = unbox(framePtr, as: CTFrame.self)
     return CTFrameGetVisibleStringRange(frame)
 }
 
 @_cdecl("ct_frame_copy_path_bounding_box")
-func ct_frame_copy_path_bounding_box(_ framePtr: UnsafeMutableRawPointer?) -> CGRect {
+public func ct_frame_copy_path_bounding_box(_ framePtr: UnsafeMutableRawPointer?) -> CGRect {
     guard let framePtr else { return .null }
     let frame: CTFrame = unbox(framePtr, as: CTFrame.self)
     return CTFrameGetPath(frame).boundingBox
 }
 
 @_cdecl("ct_frame_has_frame_attributes")
-func ct_frame_has_frame_attributes(_ framePtr: UnsafeMutableRawPointer?) -> Bool {
+public func ct_frame_has_frame_attributes(_ framePtr: UnsafeMutableRawPointer?) -> Bool {
     guard let framePtr else { return false }
     let frame: CTFrame = unbox(framePtr, as: CTFrame.self)
     return CTFrameGetFrameAttributes(frame) != nil
 }
 
 @_cdecl("ct_frame_get_line_count")
-func ct_frame_get_line_count(_ framePtr: UnsafeMutableRawPointer?) -> Int {
+public func ct_frame_get_line_count(_ framePtr: UnsafeMutableRawPointer?) -> Int {
     guard let framePtr else { return 0 }
     let frame: CTFrame = unbox(framePtr, as: CTFrame.self)
     let lines: [CTLine] = typedArray(CTFrameGetLines(frame))
@@ -39,7 +39,7 @@ func ct_frame_get_line_count(_ framePtr: UnsafeMutableRawPointer?) -> Int {
 }
 
 @_cdecl("ct_frame_copy_lines")
-func ct_frame_copy_lines(
+public func ct_frame_copy_lines(
     _ framePtr: UnsafeMutableRawPointer?,
     _ buffer: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
     _ capacity: Int
@@ -51,7 +51,7 @@ func ct_frame_copy_lines(
 }
 
 @_cdecl("ct_frame_copy_line_origins")
-func ct_frame_copy_line_origins(
+public func ct_frame_copy_line_origins(
     _ framePtr: UnsafeMutableRawPointer?,
     _ buffer: UnsafeMutablePointer<CGPoint>?,
     _ capacity: Int
@@ -66,7 +66,7 @@ func ct_frame_copy_line_origins(
 }
 
 @_cdecl("ct_frame_copy_frame_attributes_json")
-func ct_frame_copy_frame_attributes_json(_ framePtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_frame_copy_frame_attributes_json(_ framePtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let framePtr else {
         return duplicateCString("null")
     }
@@ -75,12 +75,12 @@ func ct_frame_copy_frame_attributes_json(_ framePtr: UnsafeMutableRawPointer?) -
 }
 
 @_cdecl("ct_frame_get_type_id")
-func ct_frame_get_type_id() -> UInt64 {
+public func ct_frame_get_type_id() -> UInt64 {
     UInt64(CTFrameGetTypeID())
 }
 
 @_cdecl("ct_frame_draw")
-func ct_frame_draw(_ framePtr: UnsafeMutableRawPointer?, _ contextPtr: UnsafeMutableRawPointer?) {
+public func ct_frame_draw(_ framePtr: UnsafeMutableRawPointer?, _ contextPtr: UnsafeMutableRawPointer?) {
     guard let framePtr, let contextPtr else { return }
     let frame: CTFrame = unbox(framePtr, as: CTFrame.self)
     let context = Unmanaged<CGContext>.fromOpaque(contextPtr).takeUnretainedValue()

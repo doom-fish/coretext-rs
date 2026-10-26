@@ -82,7 +82,7 @@ private func availableTableTags(for font: CTFont) -> [UInt32] {
 }
 
 @_cdecl("ct_font_create_with_name")
-func ct_font_create_with_name(_ name: UnsafePointer<CChar>?, _ size: Double) -> UnsafeMutableRawPointer? {
+public func ct_font_create_with_name(_ name: UnsafePointer<CChar>?, _ size: Double) -> UnsafeMutableRawPointer? {
     guard let name = stringFromCString(name) else {
         return nil
     }
@@ -91,7 +91,7 @@ func ct_font_create_with_name(_ name: UnsafePointer<CChar>?, _ size: Double) -> 
 }
 
 @_cdecl("ct_font_create_with_descriptor")
-func ct_font_create_with_descriptor(
+public func ct_font_create_with_descriptor(
     _ descriptorPtr: UnsafeMutableRawPointer?,
     _ size: Double
 ) -> UnsafeMutableRawPointer? {
@@ -104,7 +104,7 @@ func ct_font_create_with_descriptor(
 }
 
 @_cdecl("ct_font_create_with_graphics_data")
-func ct_font_create_with_graphics_data(
+public func ct_font_create_with_graphics_data(
     _ data: UnsafePointer<UInt8>?,
     _ length: Int,
     _ size: Double
@@ -118,7 +118,7 @@ func ct_font_create_with_graphics_data(
 }
 
 @_cdecl("ct_font_create_ui_font")
-func ct_font_create_ui_font(
+public func ct_font_create_ui_font(
     _ uiType: UInt32,
     _ size: Double,
     _ language: UnsafePointer<CChar>?
@@ -134,7 +134,7 @@ func ct_font_create_ui_font(
 }
 
 @_cdecl("ct_font_copy_with_attributes")
-func ct_font_copy_with_attributes(
+public func ct_font_copy_with_attributes(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ size: Double,
     _ descriptorPtr: UnsafeMutableRawPointer?
@@ -148,7 +148,7 @@ func ct_font_copy_with_attributes(
 }
 
 @_cdecl("ct_font_copy_with_graphics_font")
-func ct_font_copy_with_graphics_font(
+public func ct_font_copy_with_graphics_font(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ size: Double
 ) -> UnsafeMutableRawPointer? {
@@ -164,7 +164,7 @@ private struct OpenTypeSetting: Decodable {
 }
 
 @_cdecl("ct_font_copy_with_feature_settings")
-func ct_font_copy_with_feature_settings(
+public func ct_font_copy_with_feature_settings(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ featuresJSON: UnsafePointer<CChar>?,
     _ fallbacksJSON: UnsafePointer<CChar>?
@@ -211,7 +211,7 @@ func ct_font_copy_with_feature_settings(
 }
 
 @_cdecl("ct_font_has_matching_traits")
-func ct_font_has_matching_traits(_ fontPtr: UnsafeMutableRawPointer?) -> Bool {
+public func ct_font_has_matching_traits(_ fontPtr: UnsafeMutableRawPointer?) -> Bool {
     guard let fontPtr else { return false }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     let traits = CTFontCopyTraits(font) as NSDictionary
@@ -223,7 +223,7 @@ func ct_font_has_matching_traits(_ fontPtr: UnsafeMutableRawPointer?) -> Bool {
 }
 
 @_cdecl("ct_font_copy_with_family")
-func ct_font_copy_with_family(
+public func ct_font_copy_with_family(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ size: Double,
     _ family: UnsafePointer<CChar>?
@@ -239,7 +239,7 @@ func ct_font_copy_with_family(
 }
 
 @_cdecl("ct_font_copy_with_symbolic_traits")
-func ct_font_copy_with_symbolic_traits(
+public func ct_font_copy_with_symbolic_traits(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ size: Double,
     _ traitValue: UInt32,
@@ -262,7 +262,7 @@ func ct_font_copy_with_symbolic_traits(
 }
 
 @_cdecl("ct_font_create_for_string")
-func ct_font_create_for_string(
+public func ct_font_create_for_string(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ string: UnsafePointer<CChar>?,
     _ range: CFRange,
@@ -278,7 +278,7 @@ func ct_font_create_for_string(
 }
 
 @_cdecl("ct_font_copy_descriptor")
-func ct_font_copy_descriptor(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
+public func ct_font_copy_descriptor(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
     guard let fontPtr else {
         return nil
     }
@@ -287,56 +287,56 @@ func ct_font_copy_descriptor(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutab
 }
 
 @_cdecl("ct_font_get_size")
-func ct_font_get_size(_ fontPtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_font_get_size(_ fontPtr: UnsafeMutableRawPointer?) -> Double {
     guard let fontPtr else { return 0 }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return CTFontGetSize(font)
 }
 
 @_cdecl("ct_font_get_matrix")
-func ct_font_get_matrix(_ fontPtr: UnsafeMutableRawPointer?) -> CGAffineTransform {
+public func ct_font_get_matrix(_ fontPtr: UnsafeMutableRawPointer?) -> CGAffineTransform {
     guard let fontPtr else { return .identity }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return CTFontGetMatrix(font)
 }
 
 @_cdecl("ct_font_get_symbolic_traits")
-func ct_font_get_symbolic_traits(_ fontPtr: UnsafeMutableRawPointer?) -> UInt32 {
+public func ct_font_get_symbolic_traits(_ fontPtr: UnsafeMutableRawPointer?) -> UInt32 {
     guard let fontPtr else { return 0 }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return CTFontGetSymbolicTraits(font).rawValue
 }
 
 @_cdecl("ct_font_copy_postscript_name")
-func ct_font_copy_postscript_name(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_copy_postscript_name(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let fontPtr else { return nil }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return duplicateCString(CTFontCopyPostScriptName(font) as String)
 }
 
 @_cdecl("ct_font_copy_family_name")
-func ct_font_copy_family_name(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_copy_family_name(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let fontPtr else { return nil }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return duplicateCString(CTFontCopyFamilyName(font) as String)
 }
 
 @_cdecl("ct_font_copy_full_name")
-func ct_font_copy_full_name(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_copy_full_name(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let fontPtr else { return nil }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return duplicateCString(CTFontCopyFullName(font) as String)
 }
 
 @_cdecl("ct_font_copy_display_name")
-func ct_font_copy_display_name(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_copy_display_name(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let fontPtr else { return nil }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return duplicateCString(CTFontCopyDisplayName(font) as String)
 }
 
 @_cdecl("ct_font_copy_name")
-func ct_font_copy_name(
+public func ct_font_copy_name(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ key: UInt32
 ) -> UnsafeMutablePointer<CChar>? {
@@ -346,7 +346,7 @@ func ct_font_copy_name(
 }
 
 @_cdecl("ct_font_copy_localized_name")
-func ct_font_copy_localized_name(
+public func ct_font_copy_localized_name(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ key: UInt32
 ) -> UnsafeMutablePointer<CChar>? {
@@ -356,84 +356,84 @@ func ct_font_copy_localized_name(
 }
 
 @_cdecl("ct_font_get_ascent")
-func ct_font_get_ascent(_ fontPtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_font_get_ascent(_ fontPtr: UnsafeMutableRawPointer?) -> Double {
     guard let fontPtr else { return 0 }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return CTFontGetAscent(font)
 }
 
 @_cdecl("ct_font_get_descent")
-func ct_font_get_descent(_ fontPtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_font_get_descent(_ fontPtr: UnsafeMutableRawPointer?) -> Double {
     guard let fontPtr else { return 0 }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return CTFontGetDescent(font)
 }
 
 @_cdecl("ct_font_get_leading")
-func ct_font_get_leading(_ fontPtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_font_get_leading(_ fontPtr: UnsafeMutableRawPointer?) -> Double {
     guard let fontPtr else { return 0 }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return CTFontGetLeading(font)
 }
 
 @_cdecl("ct_font_get_units_per_em")
-func ct_font_get_units_per_em(_ fontPtr: UnsafeMutableRawPointer?) -> UInt32 {
+public func ct_font_get_units_per_em(_ fontPtr: UnsafeMutableRawPointer?) -> UInt32 {
     guard let fontPtr else { return 0 }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return CTFontGetUnitsPerEm(font)
 }
 
 @_cdecl("ct_font_get_glyph_count")
-func ct_font_get_glyph_count(_ fontPtr: UnsafeMutableRawPointer?) -> Int {
+public func ct_font_get_glyph_count(_ fontPtr: UnsafeMutableRawPointer?) -> Int {
     guard let fontPtr else { return 0 }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return CTFontGetGlyphCount(font)
 }
 
 @_cdecl("ct_font_get_bounding_box")
-func ct_font_get_bounding_box(_ fontPtr: UnsafeMutableRawPointer?) -> CGRect {
+public func ct_font_get_bounding_box(_ fontPtr: UnsafeMutableRawPointer?) -> CGRect {
     guard let fontPtr else { return .null }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return CTFontGetBoundingBox(font)
 }
 
 @_cdecl("ct_font_get_underline_position")
-func ct_font_get_underline_position(_ fontPtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_font_get_underline_position(_ fontPtr: UnsafeMutableRawPointer?) -> Double {
     guard let fontPtr else { return 0 }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return CTFontGetUnderlinePosition(font)
 }
 
 @_cdecl("ct_font_get_underline_thickness")
-func ct_font_get_underline_thickness(_ fontPtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_font_get_underline_thickness(_ fontPtr: UnsafeMutableRawPointer?) -> Double {
     guard let fontPtr else { return 0 }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return CTFontGetUnderlineThickness(font)
 }
 
 @_cdecl("ct_font_get_slant_angle")
-func ct_font_get_slant_angle(_ fontPtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_font_get_slant_angle(_ fontPtr: UnsafeMutableRawPointer?) -> Double {
     guard let fontPtr else { return 0 }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return CTFontGetSlantAngle(font)
 }
 
 @_cdecl("ct_font_get_cap_height")
-func ct_font_get_cap_height(_ fontPtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_font_get_cap_height(_ fontPtr: UnsafeMutableRawPointer?) -> Double {
     guard let fontPtr else { return 0 }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return CTFontGetCapHeight(font)
 }
 
 @_cdecl("ct_font_get_x_height")
-func ct_font_get_x_height(_ fontPtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_font_get_x_height(_ fontPtr: UnsafeMutableRawPointer?) -> Double {
     guard let fontPtr else { return 0 }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return CTFontGetXHeight(font)
 }
 
 @_cdecl("ct_font_copy_supported_languages_json")
-func ct_font_copy_supported_languages_json(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_copy_supported_languages_json(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let fontPtr else {
         return jsonCString([String]())
     }
@@ -443,7 +443,7 @@ func ct_font_copy_supported_languages_json(_ fontPtr: UnsafeMutableRawPointer?) 
 }
 
 @_cdecl("ct_font_get_glyphs_for_characters")
-func ct_font_get_glyphs_for_characters(
+public func ct_font_get_glyphs_for_characters(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ characters: UnsafePointer<UniChar>?,
     _ glyphs: UnsafeMutablePointer<CGGlyph>?,
@@ -457,7 +457,7 @@ func ct_font_get_glyphs_for_characters(
 }
 
 @_cdecl("ct_font_get_glyph_with_name")
-func ct_font_get_glyph_with_name(
+public func ct_font_get_glyph_with_name(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ glyphName: UnsafePointer<CChar>?
 ) -> CGGlyph {
@@ -469,7 +469,7 @@ func ct_font_get_glyph_with_name(
 }
 
 @_cdecl("ct_font_copy_name_for_glyph")
-func ct_font_copy_name_for_glyph(
+public func ct_font_copy_name_for_glyph(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ glyph: CGGlyph
 ) -> UnsafeMutablePointer<CChar>? {
@@ -479,7 +479,7 @@ func ct_font_copy_name_for_glyph(
 }
 
 @_cdecl("ct_font_get_bounding_rects_for_glyphs")
-func ct_font_get_bounding_rects_for_glyphs(
+public func ct_font_get_bounding_rects_for_glyphs(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ orientation: UInt32,
     _ glyphs: UnsafePointer<CGGlyph>?,
@@ -498,7 +498,7 @@ func ct_font_get_bounding_rects_for_glyphs(
 }
 
 @_cdecl("ct_font_get_optical_bounds_for_glyphs")
-func ct_font_get_optical_bounds_for_glyphs(
+public func ct_font_get_optical_bounds_for_glyphs(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ glyphs: UnsafePointer<CGGlyph>?,
     _ boundingRects: UnsafeMutablePointer<CGRect>?,
@@ -510,7 +510,7 @@ func ct_font_get_optical_bounds_for_glyphs(
 }
 
 @_cdecl("ct_font_get_advances_for_glyphs")
-func ct_font_get_advances_for_glyphs(
+public func ct_font_get_advances_for_glyphs(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ orientation: UInt32,
     _ glyphs: UnsafePointer<CGGlyph>?,
@@ -523,7 +523,7 @@ func ct_font_get_advances_for_glyphs(
 }
 
 @_cdecl("ct_font_get_vertical_translations_for_glyphs")
-func ct_font_get_vertical_translations_for_glyphs(
+public func ct_font_get_vertical_translations_for_glyphs(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ glyphs: UnsafePointer<CGGlyph>?,
     _ translations: UnsafeMutablePointer<CGSize>?,
@@ -535,7 +535,7 @@ func ct_font_get_vertical_translations_for_glyphs(
 }
 
 @_cdecl("ct_font_copy_available_tables_json")
-func ct_font_copy_available_tables_json(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_copy_available_tables_json(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let fontPtr else {
         return jsonCString([UInt32]())
     }
@@ -544,14 +544,14 @@ func ct_font_copy_available_tables_json(_ fontPtr: UnsafeMutableRawPointer?) -> 
 }
 
 @_cdecl("ct_font_has_table")
-func ct_font_has_table(_ fontPtr: UnsafeMutableRawPointer?, _ tag: UInt32) -> Bool {
+public func ct_font_has_table(_ fontPtr: UnsafeMutableRawPointer?, _ tag: UInt32) -> Bool {
     guard let fontPtr else { return false }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return CTFontHasTable(font, CTFontTableTag(tag))
 }
 
 @_cdecl("ct_font_copy_attribute_json")
-func ct_font_copy_attribute_json(
+public func ct_font_copy_attribute_json(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ attributeName: UnsafePointer<CChar>?
 ) -> UnsafeMutablePointer<CChar>? {
@@ -563,7 +563,7 @@ func ct_font_copy_attribute_json(
 }
 
 @_cdecl("ct_font_copy_default_cascade_list_count")
-func ct_font_copy_default_cascade_list_count(
+public func ct_font_copy_default_cascade_list_count(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ languagesJSON: UnsafePointer<CChar>?
 ) -> Int {
@@ -577,7 +577,7 @@ func ct_font_copy_default_cascade_list_count(
 }
 
 @_cdecl("ct_font_copy_default_cascade_list")
-func ct_font_copy_default_cascade_list(
+public func ct_font_copy_default_cascade_list(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ languagesJSON: UnsafePointer<CChar>?,
     _ buffer: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
@@ -593,7 +593,7 @@ func ct_font_copy_default_cascade_list(
 }
 
 @_cdecl("ct_font_copy_table_bytes")
-func ct_font_copy_table_bytes(
+public func ct_font_copy_table_bytes(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ tag: UInt32,
     _ outLen: UnsafeMutablePointer<Int>?
@@ -618,7 +618,7 @@ func ct_font_copy_table_bytes(
 }
 
 @_cdecl("ct_font_create_with_descriptor_and_options")
-func ct_font_create_with_descriptor_and_options(
+public func ct_font_create_with_descriptor_and_options(
     _ descriptorPtr: UnsafeMutableRawPointer?,
     _ size: Double,
     _ options: UInt32
@@ -636,7 +636,7 @@ func ct_font_create_with_descriptor_and_options(
 }
 
 @_cdecl("ct_font_create_with_name_and_options")
-func ct_font_create_with_name_and_options(
+public func ct_font_create_with_name_and_options(
     _ name: UnsafePointer<CChar>?,
     _ size: Double,
     _ options: UInt32
@@ -653,7 +653,7 @@ func ct_font_create_with_name_and_options(
 }
 
 @_cdecl("ct_font_get_ligature_caret_positions")
-func ct_font_get_ligature_caret_positions(
+public func ct_font_get_ligature_caret_positions(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ glyph: CGGlyph,
     _ buffer: UnsafeMutablePointer<CGFloat>?,
@@ -665,13 +665,13 @@ func ct_font_get_ligature_caret_positions(
 }
 
 @_cdecl("ct_font_get_string_encoding")
-func ct_font_get_string_encoding(_ fontPtr: UnsafeMutableRawPointer?) -> UInt32 {
+public func ct_font_get_string_encoding(_ fontPtr: UnsafeMutableRawPointer?) -> UInt32 {
     guard let fontPtr else { return 0 }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     return CTFontGetStringEncoding(font)
 }
 
 @_cdecl("ct_font_get_type_id")
-func ct_font_get_type_id() -> UInt64 {
+public func ct_font_get_type_id() -> UInt64 {
     UInt64(CTFontGetTypeID())
 }

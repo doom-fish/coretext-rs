@@ -89,7 +89,7 @@ private func featureSettingPayloads(from value: Any?) -> [FontFeatureSettingPayl
 }
 
 @_cdecl("ct_font_copy_features_json")
-func ct_font_copy_features_json(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_copy_features_json(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let fontPtr else {
         return jsonCString([FontFeaturePayload]())
     }
@@ -98,7 +98,7 @@ func ct_font_copy_features_json(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMu
 }
 
 @_cdecl("ct_font_copy_feature_settings_json")
-func ct_font_copy_feature_settings_json(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_copy_feature_settings_json(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let fontPtr else {
         return jsonCString([FontFeatureSettingPayload]())
     }
@@ -107,7 +107,7 @@ func ct_font_copy_feature_settings_json(_ fontPtr: UnsafeMutableRawPointer?) -> 
 }
 
 @_cdecl("ct_font_descriptor_copy_features_json")
-func ct_font_descriptor_copy_features_json(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_descriptor_copy_features_json(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let descriptorPtr else {
         return jsonCString([FontFeaturePayload]())
     }
@@ -118,7 +118,7 @@ func ct_font_descriptor_copy_features_json(_ descriptorPtr: UnsafeMutableRawPoin
 }
 
 @_cdecl("ct_font_descriptor_copy_feature_settings_json")
-func ct_font_descriptor_copy_feature_settings_json(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_descriptor_copy_feature_settings_json(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let descriptorPtr else {
         return jsonCString([FontFeatureSettingPayload]())
     }

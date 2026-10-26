@@ -17,32 +17,32 @@ private func fontDescriptors(from urlPath: String) -> [CTFontDescriptor] {
 }
 
 @_cdecl("ct_font_manager_copy_available_postscript_names_json")
-func ct_font_manager_copy_available_postscript_names_json() -> UnsafeMutablePointer<CChar>? {
+public func ct_font_manager_copy_available_postscript_names_json() -> UnsafeMutablePointer<CChar>? {
     let names = (CTFontManagerCopyAvailablePostScriptNames() as NSArray) as? [String] ?? []
     return jsonCString(names)
 }
 
 @_cdecl("ct_font_manager_copy_available_font_family_names_json")
-func ct_font_manager_copy_available_font_family_names_json() -> UnsafeMutablePointer<CChar>? {
+public func ct_font_manager_copy_available_font_family_names_json() -> UnsafeMutablePointer<CChar>? {
     let names = (CTFontManagerCopyAvailableFontFamilyNames() as NSArray) as? [String] ?? []
     return jsonCString(names)
 }
 
 @_cdecl("ct_font_manager_copy_available_font_urls_json")
-func ct_font_manager_copy_available_font_urls_json() -> UnsafeMutablePointer<CChar>? {
+public func ct_font_manager_copy_available_font_urls_json() -> UnsafeMutablePointer<CChar>? {
     let urls = ((CTFontManagerCopyAvailableFontURLs() as NSArray?) ?? [])
         .compactMap { ($0 as? URL)?.path }
     return jsonCString(urls)
 }
 
 @_cdecl("ct_font_manager_get_descriptor_count_for_url")
-func ct_font_manager_get_descriptor_count_for_url(_ urlPath: UnsafePointer<CChar>?) -> Int {
+public func ct_font_manager_get_descriptor_count_for_url(_ urlPath: UnsafePointer<CChar>?) -> Int {
     guard let urlPath = stringFromCString(urlPath) else { return 0 }
     return fontDescriptors(from: urlPath).count
 }
 
 @_cdecl("ct_font_manager_copy_descriptors_from_url")
-func ct_font_manager_copy_descriptors_from_url(
+public func ct_font_manager_copy_descriptors_from_url(
     _ urlPath: UnsafePointer<CChar>?,
     _ buffer: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
     _ capacity: Int
@@ -52,13 +52,13 @@ func ct_font_manager_copy_descriptors_from_url(
 }
 
 @_cdecl("ct_font_manager_is_supported_font")
-func ct_font_manager_is_supported_font(_ urlPath: UnsafePointer<CChar>?) -> Bool {
+public func ct_font_manager_is_supported_font(_ urlPath: UnsafePointer<CChar>?) -> Bool {
     guard let urlPath = stringFromCString(urlPath) else { return false }
     return CTFontManagerIsSupportedFont(URL(fileURLWithPath: urlPath) as CFURL)
 }
 
 @_cdecl("ct_font_manager_register_fonts_for_url")
-func ct_font_manager_register_fonts_for_url(
+public func ct_font_manager_register_fonts_for_url(
     _ urlPath: UnsafePointer<CChar>?,
     _ scope: UInt32,
     _ errorOut: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
@@ -75,7 +75,7 @@ func ct_font_manager_register_fonts_for_url(
 }
 
 @_cdecl("ct_font_manager_unregister_fonts_for_url")
-func ct_font_manager_unregister_fonts_for_url(
+public func ct_font_manager_unregister_fonts_for_url(
     _ urlPath: UnsafePointer<CChar>?,
     _ scope: UInt32,
     _ errorOut: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
@@ -92,13 +92,13 @@ func ct_font_manager_unregister_fonts_for_url(
 }
 
 @_cdecl("ct_font_manager_get_scope_for_url")
-func ct_font_manager_get_scope_for_url(_ urlPath: UnsafePointer<CChar>?) -> UInt32 {
+public func ct_font_manager_get_scope_for_url(_ urlPath: UnsafePointer<CChar>?) -> UInt32 {
     guard let urlPath = stringFromCString(urlPath) else { return 0 }
     return CTFontManagerGetScopeForURL(URL(fileURLWithPath: urlPath) as CFURL).rawValue
 }
 
 @_cdecl("ct_font_manager_get_auto_activation_setting")
-func ct_font_manager_get_auto_activation_setting(_ bundleIdentifier: UnsafePointer<CChar>?) -> UInt32 {
+public func ct_font_manager_get_auto_activation_setting(_ bundleIdentifier: UnsafePointer<CChar>?) -> UInt32 {
     let bundleIdentifier = stringFromCString(bundleIdentifier) as CFString?
     return CTFontManagerGetAutoActivationSetting(bundleIdentifier).rawValue
 }
@@ -164,7 +164,7 @@ private func collectFontManagerErrors(
 }
 
 @_cdecl("ct_font_manager_test_registration_wait")
-func ct_font_manager_test_registration_wait(
+public func ct_font_manager_test_registration_wait(
     _ handlerDelayNanoseconds: UInt64,
     _ timeoutNanoseconds: UInt64,
     _ timedOut: UnsafeMutablePointer<Bool>?
@@ -179,7 +179,7 @@ func ct_font_manager_test_registration_wait(
 }
 
 @_cdecl("ct_font_manager_set_auto_activation_setting")
-func ct_font_manager_set_auto_activation_setting(
+public func ct_font_manager_set_auto_activation_setting(
     _ bundleIdentifier: UnsafePointer<CChar>?,
     _ setting: UInt32
 ) {
@@ -191,7 +191,7 @@ func ct_font_manager_set_auto_activation_setting(
 }
 
 @_cdecl("ct_font_manager_copy_registered_descriptor_count")
-func ct_font_manager_copy_registered_descriptor_count(_ scope: UInt32, _ enabled: Bool) -> Int {
+public func ct_font_manager_copy_registered_descriptor_count(_ scope: UInt32, _ enabled: Bool) -> Int {
     #if os(macOS)
     let _ = scope
     let _ = enabled
@@ -205,7 +205,7 @@ func ct_font_manager_copy_registered_descriptor_count(_ scope: UInt32, _ enabled
 }
 
 @_cdecl("ct_font_manager_copy_registered_descriptors")
-func ct_font_manager_copy_registered_descriptors(
+public func ct_font_manager_copy_registered_descriptors(
     _ scope: UInt32,
     _ enabled: Bool,
     _ buffer: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
@@ -224,7 +224,7 @@ func ct_font_manager_copy_registered_descriptors(
 }
 
 @_cdecl("ct_font_manager_create_descriptor_from_data")
-func ct_font_manager_create_descriptor_from_data(
+public func ct_font_manager_create_descriptor_from_data(
     _ bytes: UnsafePointer<UInt8>?,
     _ length: Int
 ) -> UnsafeMutableRawPointer? {
@@ -237,7 +237,7 @@ func ct_font_manager_create_descriptor_from_data(
 }
 
 @_cdecl("ct_font_manager_create_descriptors_from_data_count")
-func ct_font_manager_create_descriptors_from_data_count(
+public func ct_font_manager_create_descriptors_from_data_count(
     _ bytes: UnsafePointer<UInt8>?,
     _ length: Int
 ) -> Int {
@@ -248,7 +248,7 @@ func ct_font_manager_create_descriptors_from_data_count(
 }
 
 @_cdecl("ct_font_manager_create_descriptors_from_data")
-func ct_font_manager_create_descriptors_from_data(
+public func ct_font_manager_create_descriptors_from_data(
     _ bytes: UnsafePointer<UInt8>?,
     _ length: Int,
     _ buffer: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
@@ -261,7 +261,7 @@ func ct_font_manager_create_descriptors_from_data(
 }
 
 @_cdecl("ct_font_manager_enable_font_descriptors")
-func ct_font_manager_enable_font_descriptors(
+public func ct_font_manager_enable_font_descriptors(
     _ descriptorHandles: UnsafePointer<UnsafeMutableRawPointer?>?,
     _ descriptorCount: Int,
     _ enable: Bool
@@ -277,7 +277,7 @@ func ct_font_manager_enable_font_descriptors(
 }
 
 @_cdecl("ct_font_manager_register_font_descriptors")
-func ct_font_manager_register_font_descriptors(
+public func ct_font_manager_register_font_descriptors(
     _ descriptorHandles: UnsafePointer<UnsafeMutableRawPointer?>?,
     _ descriptorCount: Int,
     _ scope: UInt32,
@@ -293,7 +293,7 @@ func ct_font_manager_register_font_descriptors(
 }
 
 @_cdecl("ct_font_manager_register_font_urls")
-func ct_font_manager_register_font_urls(
+public func ct_font_manager_register_font_urls(
     _ urlPathsJSON: UnsafePointer<CChar>?,
     _ scope: UInt32,
     _ enabled: Bool,
@@ -308,7 +308,7 @@ func ct_font_manager_register_font_urls(
 }
 
 @_cdecl("ct_font_manager_register_fonts_for_urls")
-func ct_font_manager_register_fonts_for_urls(
+public func ct_font_manager_register_fonts_for_urls(
     _ urlPathsJSON: UnsafePointer<CChar>?,
     _ scope: UInt32,
     _ timeoutNanoseconds: UInt64,
@@ -324,7 +324,7 @@ func ct_font_manager_register_fonts_for_urls(
 }
 
 @_cdecl("ct_font_manager_register_fonts_with_asset_names")
-func ct_font_manager_register_fonts_with_asset_names(
+public func ct_font_manager_register_fonts_with_asset_names(
     _ assetNamesJSON: UnsafePointer<CChar>?,
     _ scope: UInt32,
     _ enabled: Bool
@@ -344,7 +344,7 @@ func ct_font_manager_register_fonts_with_asset_names(
 }
 
 @_cdecl("ct_font_manager_unregister_font_descriptors")
-func ct_font_manager_unregister_font_descriptors(
+public func ct_font_manager_unregister_font_descriptors(
     _ descriptorHandles: UnsafePointer<UnsafeMutableRawPointer?>?,
     _ descriptorCount: Int,
     _ scope: UInt32,
@@ -359,7 +359,7 @@ func ct_font_manager_unregister_font_descriptors(
 }
 
 @_cdecl("ct_font_manager_unregister_font_urls")
-func ct_font_manager_unregister_font_urls(
+public func ct_font_manager_unregister_font_urls(
     _ urlPathsJSON: UnsafePointer<CChar>?,
     _ scope: UInt32,
     _ timeoutNanoseconds: UInt64,
@@ -373,7 +373,7 @@ func ct_font_manager_unregister_font_urls(
 }
 
 @_cdecl("ct_font_manager_unregister_fonts_for_urls")
-func ct_font_manager_unregister_fonts_for_urls(
+public func ct_font_manager_unregister_fonts_for_urls(
     _ urlPathsJSON: UnsafePointer<CChar>?,
     _ scope: UInt32,
     _ timeoutNanoseconds: UInt64,

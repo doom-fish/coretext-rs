@@ -2,7 +2,7 @@ import CoreGraphics
 import CoreText
 import Foundation
 
-typealias CTAdaptiveImageProviderCallback = @convention(c) (
+public typealias CTAdaptiveImageProviderCallback = @convention(c) (
     UnsafeMutableRawPointer?,
     CGSize,
     Double,
@@ -10,7 +10,7 @@ typealias CTAdaptiveImageProviderCallback = @convention(c) (
     UnsafeMutablePointer<CGSize>?
 ) -> UnsafeMutableRawPointer?
 
-typealias CTAdaptiveImageProviderReleaseCallback = @convention(c) (UnsafeMutableRawPointer?) -> Void
+public typealias CTAdaptiveImageProviderReleaseCallback = @convention(c) (UnsafeMutableRawPointer?) -> Void
 
 @available(macOS 15.0, *)
 final class CTAdaptiveImageProviderBridge: NSObject, CTAdaptiveImageProviding {
@@ -52,7 +52,7 @@ final class CTAdaptiveImageProviderBridge: NSObject, CTAdaptiveImageProviding {
 }
 
 @_cdecl("ct_adaptive_image_provider_create")
-func ct_adaptive_image_provider_create(
+public func ct_adaptive_image_provider_create(
     _ refcon: UnsafeMutableRawPointer?,
     _ callback: CTAdaptiveImageProviderCallback?,
     _ releaseCallback: CTAdaptiveImageProviderReleaseCallback?
@@ -69,7 +69,7 @@ func ct_adaptive_image_provider_create(
 }
 
 @_cdecl("ct_font_get_typographic_bounds_for_adaptive_image_provider")
-func ct_font_get_typographic_bounds_for_adaptive_image_provider(
+public func ct_font_get_typographic_bounds_for_adaptive_image_provider(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ providerPtr: UnsafeMutableRawPointer?
 ) -> CGRect {
@@ -84,7 +84,7 @@ func ct_font_get_typographic_bounds_for_adaptive_image_provider(
 }
 
 @_cdecl("ct_font_draw_image_from_adaptive_image_provider_at_point")
-func ct_font_draw_image_from_adaptive_image_provider_at_point(
+public func ct_font_draw_image_from_adaptive_image_provider_at_point(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ providerPtr: UnsafeMutableRawPointer?,
     _ point: CGPoint,

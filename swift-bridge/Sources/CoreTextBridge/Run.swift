@@ -13,14 +13,14 @@ private func runAttributesPayload(_ run: CTRun) -> RunAttributesPayload {
 }
 
 @_cdecl("ct_run_get_glyph_count")
-func ct_run_get_glyph_count(_ runPtr: UnsafeMutableRawPointer?) -> Int {
+public func ct_run_get_glyph_count(_ runPtr: UnsafeMutableRawPointer?) -> Int {
     guard let runPtr else { return 0 }
     let run: CTRun = unbox(runPtr, as: CTRun.self)
     return CTRunGetGlyphCount(run)
 }
 
 @_cdecl("ct_run_copy_attributes_json")
-func ct_run_copy_attributes_json(_ runPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_run_copy_attributes_json(_ runPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let runPtr else {
         return jsonCString(RunAttributesPayload(attributeCount: 0, keys: []))
     }
@@ -29,7 +29,7 @@ func ct_run_copy_attributes_json(_ runPtr: UnsafeMutableRawPointer?) -> UnsafeMu
 }
 
 @_cdecl("ct_run_copy_font")
-func ct_run_copy_font(_ runPtr: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
+public func ct_run_copy_font(_ runPtr: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
     guard let runPtr else { return nil }
     let run: CTRun = unbox(runPtr, as: CTRun.self)
     guard let value = (CTRunGetAttributes(run) as NSDictionary)[kCTFontAttributeName],
@@ -40,14 +40,14 @@ func ct_run_copy_font(_ runPtr: UnsafeMutableRawPointer?) -> UnsafeMutableRawPoi
 }
 
 @_cdecl("ct_run_get_status")
-func ct_run_get_status(_ runPtr: UnsafeMutableRawPointer?) -> UInt32 {
+public func ct_run_get_status(_ runPtr: UnsafeMutableRawPointer?) -> UInt32 {
     guard let runPtr else { return 0 }
     let run: CTRun = unbox(runPtr, as: CTRun.self)
     return CTRunGetStatus(run).rawValue
 }
 
 @_cdecl("ct_run_copy_glyphs")
-func ct_run_copy_glyphs(
+public func ct_run_copy_glyphs(
     _ runPtr: UnsafeMutableRawPointer?,
     _ buffer: UnsafeMutablePointer<CGGlyph>?,
     _ capacity: Int
@@ -60,7 +60,7 @@ func ct_run_copy_glyphs(
 }
 
 @_cdecl("ct_run_copy_positions")
-func ct_run_copy_positions(
+public func ct_run_copy_positions(
     _ runPtr: UnsafeMutableRawPointer?,
     _ buffer: UnsafeMutablePointer<CGPoint>?,
     _ capacity: Int
@@ -73,7 +73,7 @@ func ct_run_copy_positions(
 }
 
 @_cdecl("ct_run_copy_advances")
-func ct_run_copy_advances(
+public func ct_run_copy_advances(
     _ runPtr: UnsafeMutableRawPointer?,
     _ buffer: UnsafeMutablePointer<CGSize>?,
     _ capacity: Int
@@ -86,7 +86,7 @@ func ct_run_copy_advances(
 }
 
 @_cdecl("ct_run_copy_string_indices")
-func ct_run_copy_string_indices(
+public func ct_run_copy_string_indices(
     _ runPtr: UnsafeMutableRawPointer?,
     _ buffer: UnsafeMutablePointer<CFIndex>?,
     _ capacity: Int
@@ -99,14 +99,14 @@ func ct_run_copy_string_indices(
 }
 
 @_cdecl("ct_run_get_string_range")
-func ct_run_get_string_range(_ runPtr: UnsafeMutableRawPointer?) -> CFRange {
+public func ct_run_get_string_range(_ runPtr: UnsafeMutableRawPointer?) -> CFRange {
     guard let runPtr else { return CFRange(location: 0, length: 0) }
     let run: CTRun = unbox(runPtr, as: CTRun.self)
     return CTRunGetStringRange(run)
 }
 
 @_cdecl("ct_run_get_typographic_bounds")
-func ct_run_get_typographic_bounds(
+public func ct_run_get_typographic_bounds(
     _ runPtr: UnsafeMutableRawPointer?,
     _ ascent: UnsafeMutablePointer<CGFloat>?,
     _ descent: UnsafeMutablePointer<CGFloat>?,
@@ -118,21 +118,21 @@ func ct_run_get_typographic_bounds(
 }
 
 @_cdecl("ct_run_get_image_bounds")
-func ct_run_get_image_bounds(_ runPtr: UnsafeMutableRawPointer?) -> CGRect {
+public func ct_run_get_image_bounds(_ runPtr: UnsafeMutableRawPointer?) -> CGRect {
     guard let runPtr else { return .null }
     let run: CTRun = unbox(runPtr, as: CTRun.self)
     return CTRunGetImageBounds(run, nil, CFRange(location: 0, length: 0))
 }
 
 @_cdecl("ct_run_get_text_matrix")
-func ct_run_get_text_matrix(_ runPtr: UnsafeMutableRawPointer?) -> CGAffineTransform {
+public func ct_run_get_text_matrix(_ runPtr: UnsafeMutableRawPointer?) -> CGAffineTransform {
     guard let runPtr else { return .identity }
     let run: CTRun = unbox(runPtr, as: CTRun.self)
     return CTRunGetTextMatrix(run)
 }
 
 @_cdecl("ct_run_copy_base_advances_and_origins")
-func ct_run_copy_base_advances_and_origins(
+public func ct_run_copy_base_advances_and_origins(
     _ runPtr: UnsafeMutableRawPointer?,
     _ advances: UnsafeMutablePointer<CGSize>?,
     _ origins: UnsafeMutablePointer<CGPoint>?,
@@ -146,6 +146,6 @@ func ct_run_copy_base_advances_and_origins(
 }
 
 @_cdecl("ct_run_get_type_id")
-func ct_run_get_type_id() -> UInt64 {
+public func ct_run_get_type_id() -> UInt64 {
     UInt64(CTRunGetTypeID())
 }

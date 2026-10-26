@@ -55,7 +55,7 @@ private func variationCoordinatePayloads(from value: Any?) -> [FontVariationCoor
 }
 
 @_cdecl("ct_font_copy_variation_axes_json")
-func ct_font_copy_variation_axes_json(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_copy_variation_axes_json(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let fontPtr else {
         return jsonCString([FontVariationAxisPayload]())
     }
@@ -64,7 +64,7 @@ func ct_font_copy_variation_axes_json(_ fontPtr: UnsafeMutableRawPointer?) -> Un
 }
 
 @_cdecl("ct_font_copy_variation_json")
-func ct_font_copy_variation_json(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_copy_variation_json(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let fontPtr else {
         return jsonCString([FontVariationCoordinatePayload]())
     }
@@ -73,7 +73,7 @@ func ct_font_copy_variation_json(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeM
 }
 
 @_cdecl("ct_font_descriptor_copy_variation_axes_json")
-func ct_font_descriptor_copy_variation_axes_json(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_descriptor_copy_variation_axes_json(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let descriptorPtr else {
         return jsonCString([FontVariationAxisPayload]())
     }
@@ -83,7 +83,7 @@ func ct_font_descriptor_copy_variation_axes_json(_ descriptorPtr: UnsafeMutableR
 }
 
 @_cdecl("ct_font_descriptor_copy_variation_json")
-func ct_font_descriptor_copy_variation_json(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_descriptor_copy_variation_json(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let descriptorPtr else {
         return jsonCString([FontVariationCoordinatePayload]())
     }

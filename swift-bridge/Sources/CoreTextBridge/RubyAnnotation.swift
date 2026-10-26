@@ -58,7 +58,7 @@ private func rubyText(_ value: UnsafePointer<CChar>?) -> CFString? {
 }
 
 @_cdecl("ct_ruby_annotation_create")
-func ct_ruby_annotation_create(
+public func ct_ruby_annotation_create(
     _ alignment: UInt8,
     _ overhang: UInt8,
     _ sizeFactor: Double,
@@ -90,35 +90,35 @@ func ct_ruby_annotation_create(
 }
 
 @_cdecl("ct_ruby_annotation_copy")
-func ct_ruby_annotation_copy(_ rubyAnnotationPtr: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
+public func ct_ruby_annotation_copy(_ rubyAnnotationPtr: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
     guard let rubyAnnotationPtr else { return nil }
     let rubyAnnotation: CTRubyAnnotation = unbox(rubyAnnotationPtr, as: CTRubyAnnotation.self)
     return retainBox(CTRubyAnnotationCreateCopy(rubyAnnotation))
 }
 
 @_cdecl("ct_ruby_annotation_get_alignment")
-func ct_ruby_annotation_get_alignment(_ rubyAnnotationPtr: UnsafeMutableRawPointer?) -> UInt8 {
+public func ct_ruby_annotation_get_alignment(_ rubyAnnotationPtr: UnsafeMutableRawPointer?) -> UInt8 {
     guard let rubyAnnotationPtr else { return 0 }
     let rubyAnnotation: CTRubyAnnotation = unbox(rubyAnnotationPtr, as: CTRubyAnnotation.self)
     return rubyAlignmentRaw(CTRubyAnnotationGetAlignment(rubyAnnotation))
 }
 
 @_cdecl("ct_ruby_annotation_get_overhang")
-func ct_ruby_annotation_get_overhang(_ rubyAnnotationPtr: UnsafeMutableRawPointer?) -> UInt8 {
+public func ct_ruby_annotation_get_overhang(_ rubyAnnotationPtr: UnsafeMutableRawPointer?) -> UInt8 {
     guard let rubyAnnotationPtr else { return 0 }
     let rubyAnnotation: CTRubyAnnotation = unbox(rubyAnnotationPtr, as: CTRubyAnnotation.self)
     return rubyOverhangRaw(CTRubyAnnotationGetOverhang(rubyAnnotation))
 }
 
 @_cdecl("ct_ruby_annotation_get_size_factor")
-func ct_ruby_annotation_get_size_factor(_ rubyAnnotationPtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_ruby_annotation_get_size_factor(_ rubyAnnotationPtr: UnsafeMutableRawPointer?) -> Double {
     guard let rubyAnnotationPtr else { return 0 }
     let rubyAnnotation: CTRubyAnnotation = unbox(rubyAnnotationPtr, as: CTRubyAnnotation.self)
     return CTRubyAnnotationGetSizeFactor(rubyAnnotation)
 }
 
 @_cdecl("ct_ruby_annotation_copy_text_for_position")
-func ct_ruby_annotation_copy_text_for_position(
+public func ct_ruby_annotation_copy_text_for_position(
     _ rubyAnnotationPtr: UnsafeMutableRawPointer?,
     _ position: UInt8
 ) -> UnsafeMutablePointer<CChar>? {
@@ -135,7 +135,7 @@ private struct RubyAnnotationAttributesPayload: Decodable {
 }
 
 @_cdecl("ct_ruby_annotation_create_with_attributes_json")
-func ct_ruby_annotation_create_with_attributes_json(
+public func ct_ruby_annotation_create_with_attributes_json(
     _ attrsJSON: UnsafePointer<CChar>?
 ) -> UnsafeMutableRawPointer? {
     guard let payload = decodeJSON(attrsJSON, as: RubyAnnotationAttributesPayload.self) else {
@@ -184,6 +184,6 @@ func ct_ruby_annotation_create_with_attributes_json(
 }
 
 @_cdecl("ct_ruby_annotation_get_type_id")
-func ct_ruby_annotation_get_type_id() -> UInt64 {
+public func ct_ruby_annotation_get_type_id() -> UInt64 {
     UInt64(CTRubyAnnotationGetTypeID())
 }

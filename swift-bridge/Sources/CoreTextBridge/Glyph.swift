@@ -13,7 +13,7 @@ private func characterCollection(_ raw: UInt16) -> CTCharacterCollection {
 }
 
 @_cdecl("ct_glyph_info_create_with_glyph_name")
-func ct_glyph_info_create_with_glyph_name(
+public func ct_glyph_info_create_with_glyph_name(
     _ glyphName: UnsafePointer<CChar>?,
     _ fontPtr: UnsafeMutableRawPointer?,
     _ baseString: UnsafePointer<CChar>?
@@ -32,7 +32,7 @@ func ct_glyph_info_create_with_glyph_name(
 }
 
 @_cdecl("ct_glyph_info_create_with_glyph")
-func ct_glyph_info_create_with_glyph(
+public func ct_glyph_info_create_with_glyph(
     _ glyph: CGGlyph,
     _ fontPtr: UnsafeMutableRawPointer?,
     _ baseString: UnsafePointer<CChar>?
@@ -48,7 +48,7 @@ func ct_glyph_info_create_with_glyph(
 }
 
 @_cdecl("ct_glyph_info_create_with_character_identifier")
-func ct_glyph_info_create_with_character_identifier(
+public func ct_glyph_info_create_with_character_identifier(
     _ characterIdentifier: UInt16,
     _ collection: UInt16,
     _ baseString: UnsafePointer<CChar>?
@@ -67,34 +67,34 @@ func ct_glyph_info_create_with_character_identifier(
 }
 
 @_cdecl("ct_glyph_info_copy_glyph_name")
-func ct_glyph_info_copy_glyph_name(_ glyphInfoPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_glyph_info_copy_glyph_name(_ glyphInfoPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let glyphInfoPtr else { return nil }
     let glyphInfo: CTGlyphInfo = unbox(glyphInfoPtr, as: CTGlyphInfo.self)
     return duplicateCString(CTGlyphInfoGetGlyphName(glyphInfo) as String?)
 }
 
 @_cdecl("ct_glyph_info_get_glyph")
-func ct_glyph_info_get_glyph(_ glyphInfoPtr: UnsafeMutableRawPointer?) -> CGGlyph {
+public func ct_glyph_info_get_glyph(_ glyphInfoPtr: UnsafeMutableRawPointer?) -> CGGlyph {
     guard let glyphInfoPtr else { return 0 }
     let glyphInfo: CTGlyphInfo = unbox(glyphInfoPtr, as: CTGlyphInfo.self)
     return CTGlyphInfoGetGlyph(glyphInfo)
 }
 
 @_cdecl("ct_glyph_info_get_character_identifier")
-func ct_glyph_info_get_character_identifier(_ glyphInfoPtr: UnsafeMutableRawPointer?) -> UInt16 {
+public func ct_glyph_info_get_character_identifier(_ glyphInfoPtr: UnsafeMutableRawPointer?) -> UInt16 {
     guard let glyphInfoPtr else { return 0 }
     let glyphInfo: CTGlyphInfo = unbox(glyphInfoPtr, as: CTGlyphInfo.self)
     return UInt16(CTGlyphInfoGetCharacterIdentifier(glyphInfo))
 }
 
 @_cdecl("ct_glyph_info_get_character_collection")
-func ct_glyph_info_get_character_collection(_ glyphInfoPtr: UnsafeMutableRawPointer?) -> UInt16 {
+public func ct_glyph_info_get_character_collection(_ glyphInfoPtr: UnsafeMutableRawPointer?) -> UInt16 {
     guard let glyphInfoPtr else { return 0 }
     let glyphInfo: CTGlyphInfo = unbox(glyphInfoPtr, as: CTGlyphInfo.self)
     return CTGlyphInfoGetCharacterCollection(glyphInfo).rawValue
 }
 
 @_cdecl("ct_glyph_info_get_type_id")
-func ct_glyph_info_get_type_id() -> UInt64 {
+public func ct_glyph_info_get_type_id() -> UInt64 {
     UInt64(CTGlyphInfoGetTypeID())
 }

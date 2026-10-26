@@ -3,7 +3,7 @@ import CoreText
 import Foundation
 
 @_cdecl("ct_attributed_string_create_with_runs")
-func ct_attributed_string_create_with_runs(
+public func ct_attributed_string_create_with_runs(
     _ texts: UnsafePointer<UnsafePointer<UInt8>?>?,
     _ lengths: UnsafePointer<Int>?,
     _ fonts: UnsafePointer<UnsafeMutableRawPointer?>?,
@@ -48,7 +48,7 @@ func ct_attributed_string_create_with_runs(
 }
 
 @_cdecl("ct_attributed_string_create")
-func ct_attributed_string_create(
+public func ct_attributed_string_create(
     _ text: UnsafePointer<CChar>?,
     _ fontPtr: UnsafeMutableRawPointer?,
     _ paragraphStylePtr: UnsafeMutableRawPointer?
@@ -71,7 +71,7 @@ func ct_attributed_string_create(
 }
 
 @_cdecl("ct_attributed_string_get_length")
-func ct_attributed_string_get_length(_ attributedStringPtr: UnsafeMutableRawPointer?) -> Int {
+public func ct_attributed_string_get_length(_ attributedStringPtr: UnsafeMutableRawPointer?) -> Int {
     guard let attributedStringPtr else { return 0 }
     let attributed: NSAttributedString = unbox(attributedStringPtr, as: NSAttributedString.self)
     return attributed.length

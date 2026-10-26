@@ -426,7 +426,7 @@ func cfToJSONCString(_ value: CFTypeRef?) -> UnsafeMutablePointer<CChar>? {
 }
 
 @_cdecl("ct_retain")
-func ct_retain(_ handle: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
+public func ct_retain(_ handle: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
     guard let handle else {
         return nil
     }
@@ -435,7 +435,7 @@ func ct_retain(_ handle: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
 }
 
 @_cdecl("ct_release")
-func ct_release(_ handle: UnsafeMutableRawPointer?) {
+public func ct_release(_ handle: UnsafeMutableRawPointer?) {
     guard let handle else {
         return
     }
@@ -444,6 +444,6 @@ func ct_release(_ handle: UnsafeMutableRawPointer?) {
 }
 
 @_cdecl("ct_string_release")
-func ct_string_release(_ value: UnsafeMutablePointer<CChar>?) {
+public func ct_string_release(_ value: UnsafeMutablePointer<CChar>?) {
     free(value)
 }

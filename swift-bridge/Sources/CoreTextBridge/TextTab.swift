@@ -22,26 +22,26 @@ private func textAlignmentRaw(_ alignment: CTTextAlignment) -> UInt8 {
 }
 
 @_cdecl("ct_text_tab_create")
-func ct_text_tab_create(_ alignment: UInt8, _ location: Double) -> UnsafeMutableRawPointer? {
+public func ct_text_tab_create(_ alignment: UInt8, _ location: Double) -> UnsafeMutableRawPointer? {
     retainBox(CTTextTabCreate(textAlignment(alignment), location, nil))
 }
 
 @_cdecl("ct_text_tab_get_alignment")
-func ct_text_tab_get_alignment(_ textTabPtr: UnsafeMutableRawPointer?) -> UInt8 {
+public func ct_text_tab_get_alignment(_ textTabPtr: UnsafeMutableRawPointer?) -> UInt8 {
     guard let textTabPtr else { return 4 }
     let textTab: CTTextTab = unbox(textTabPtr, as: CTTextTab.self)
     return textAlignmentRaw(CTTextTabGetAlignment(textTab))
 }
 
 @_cdecl("ct_text_tab_get_location")
-func ct_text_tab_get_location(_ textTabPtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_text_tab_get_location(_ textTabPtr: UnsafeMutableRawPointer?) -> Double {
     guard let textTabPtr else { return 0 }
     let textTab: CTTextTab = unbox(textTabPtr, as: CTTextTab.self)
     return CTTextTabGetLocation(textTab)
 }
 
 @_cdecl("ct_text_tab_get_options_json")
-func ct_text_tab_get_options_json(_ textTabPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_text_tab_get_options_json(_ textTabPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let textTabPtr else {
         return duplicateCString("null")
     }
@@ -50,6 +50,6 @@ func ct_text_tab_get_options_json(_ textTabPtr: UnsafeMutableRawPointer?) -> Uns
 }
 
 @_cdecl("ct_text_tab_get_type_id")
-func ct_text_tab_get_type_id() -> UInt64 {
+public func ct_text_tab_get_type_id() -> UInt64 {
     UInt64(CTTextTabGetTypeID())
 }

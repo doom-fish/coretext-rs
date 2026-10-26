@@ -137,7 +137,7 @@ private func paragraphStyleTextTabs(_ paragraphStyle: CTParagraphStyle) -> [CTTe
 }
 
 @_cdecl("ct_paragraph_style_create")
-func ct_paragraph_style_create(
+public func ct_paragraph_style_create(
     _ optionsJSON: UnsafePointer<CChar>?,
     _ textTabHandles: UnsafePointer<UnsafeMutableRawPointer?>?,
     _ tabCount: Int
@@ -306,119 +306,119 @@ func ct_paragraph_style_create(
 }
 
 @_cdecl("ct_paragraph_style_copy")
-func ct_paragraph_style_copy(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
+public func ct_paragraph_style_copy(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
     guard let paragraphStylePtr else { return nil }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
     return retainBox(CTParagraphStyleCreateCopy(paragraphStyle))
 }
 
 @_cdecl("ct_paragraph_style_get_alignment")
-func ct_paragraph_style_get_alignment(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> UInt8 {
+public func ct_paragraph_style_get_alignment(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> UInt8 {
     guard let paragraphStylePtr else { return 4 }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
     return textAlignmentRaw(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierAlignment, default: kCTTextAlignmentNatural))
 }
 
 @_cdecl("ct_paragraph_style_get_first_line_head_indent")
-func ct_paragraph_style_get_first_line_head_indent(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_paragraph_style_get_first_line_head_indent(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
     guard let paragraphStylePtr else { return 0 }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
     return paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierFirstLineHeadIndent, default: CGFloat(0))
 }
 
 @_cdecl("ct_paragraph_style_get_head_indent")
-func ct_paragraph_style_get_head_indent(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_paragraph_style_get_head_indent(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
     guard let paragraphStylePtr else { return 0 }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
     return paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierHeadIndent, default: CGFloat(0))
 }
 
 @_cdecl("ct_paragraph_style_get_tail_indent")
-func ct_paragraph_style_get_tail_indent(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_paragraph_style_get_tail_indent(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
     guard let paragraphStylePtr else { return 0 }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
     return paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierTailIndent, default: CGFloat(0))
 }
 
 @_cdecl("ct_paragraph_style_get_default_tab_interval")
-func ct_paragraph_style_get_default_tab_interval(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_paragraph_style_get_default_tab_interval(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
     guard let paragraphStylePtr else { return 0 }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
     return paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierDefaultTabInterval, default: CGFloat(0))
 }
 
 @_cdecl("ct_paragraph_style_get_line_break_mode")
-func ct_paragraph_style_get_line_break_mode(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> UInt8 {
+public func ct_paragraph_style_get_line_break_mode(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> UInt8 {
     guard let paragraphStylePtr else { return 0 }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
     return lineBreakModeRaw(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierLineBreakMode, default: kCTLineBreakByWordWrapping))
 }
 
 @_cdecl("ct_paragraph_style_get_line_height_multiple")
-func ct_paragraph_style_get_line_height_multiple(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_paragraph_style_get_line_height_multiple(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
     guard let paragraphStylePtr else { return 0 }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
     return paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierLineHeightMultiple, default: CGFloat(0))
 }
 
 @_cdecl("ct_paragraph_style_get_maximum_line_height")
-func ct_paragraph_style_get_maximum_line_height(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_paragraph_style_get_maximum_line_height(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
     guard let paragraphStylePtr else { return 0 }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
     return paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierMaximumLineHeight, default: CGFloat(0))
 }
 
 @_cdecl("ct_paragraph_style_get_minimum_line_height")
-func ct_paragraph_style_get_minimum_line_height(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_paragraph_style_get_minimum_line_height(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
     guard let paragraphStylePtr else { return 0 }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
     return paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierMinimumLineHeight, default: CGFloat(0))
 }
 
 @_cdecl("ct_paragraph_style_get_paragraph_spacing")
-func ct_paragraph_style_get_paragraph_spacing(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_paragraph_style_get_paragraph_spacing(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
     guard let paragraphStylePtr else { return 0 }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
     return paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierParagraphSpacing, default: CGFloat(0))
 }
 
 @_cdecl("ct_paragraph_style_get_paragraph_spacing_before")
-func ct_paragraph_style_get_paragraph_spacing_before(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_paragraph_style_get_paragraph_spacing_before(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
     guard let paragraphStylePtr else { return 0 }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
     return paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierParagraphSpacingBefore, default: CGFloat(0))
 }
 
 @_cdecl("ct_paragraph_style_get_base_writing_direction")
-func ct_paragraph_style_get_base_writing_direction(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Int8 {
+public func ct_paragraph_style_get_base_writing_direction(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Int8 {
     guard let paragraphStylePtr else { return -1 }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
     return writingDirectionRaw(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierBaseWritingDirection, default: kCTWritingDirectionNatural))
 }
 
 @_cdecl("ct_paragraph_style_get_maximum_line_spacing")
-func ct_paragraph_style_get_maximum_line_spacing(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_paragraph_style_get_maximum_line_spacing(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
     guard let paragraphStylePtr else { return 0 }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
     return paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierMaximumLineSpacing, default: CGFloat(0))
 }
 
 @_cdecl("ct_paragraph_style_get_minimum_line_spacing")
-func ct_paragraph_style_get_minimum_line_spacing(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_paragraph_style_get_minimum_line_spacing(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
     guard let paragraphStylePtr else { return 0 }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
     return paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierMinimumLineSpacing, default: CGFloat(0))
 }
 
 @_cdecl("ct_paragraph_style_get_line_spacing_adjustment")
-func ct_paragraph_style_get_line_spacing_adjustment(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_paragraph_style_get_line_spacing_adjustment(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Double {
     guard let paragraphStylePtr else { return 0 }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
     return paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierLineSpacingAdjustment, default: CGFloat(0))
 }
 
 @_cdecl("ct_paragraph_style_get_line_bounds_options")
-func ct_paragraph_style_get_line_bounds_options(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> UInt64 {
+public func ct_paragraph_style_get_line_bounds_options(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> UInt64 {
     guard let paragraphStylePtr else { return 0 }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
     let value: CTLineBoundsOptions = paragraphStyleValue(
@@ -430,14 +430,14 @@ func ct_paragraph_style_get_line_bounds_options(_ paragraphStylePtr: UnsafeMutab
 }
 
 @_cdecl("ct_paragraph_style_get_text_tab_count")
-func ct_paragraph_style_get_text_tab_count(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Int {
+public func ct_paragraph_style_get_text_tab_count(_ paragraphStylePtr: UnsafeMutableRawPointer?) -> Int {
     guard let paragraphStylePtr else { return 0 }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
     return paragraphStyleTextTabs(paragraphStyle).count
 }
 
 @_cdecl("ct_paragraph_style_copy_text_tabs")
-func ct_paragraph_style_copy_text_tabs(
+public func ct_paragraph_style_copy_text_tabs(
     _ paragraphStylePtr: UnsafeMutableRawPointer?,
     _ buffer: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
     _ capacity: Int
@@ -452,12 +452,12 @@ func ct_paragraph_style_copy_text_tabs(
 }
 
 @_cdecl("ct_paragraph_style_get_type_id")
-func ct_paragraph_style_get_type_id() -> UInt64 {
+public func ct_paragraph_style_get_type_id() -> UInt64 {
     UInt64(CTParagraphStyleGetTypeID())
 }
 
 @_cdecl("ct_paragraph_style_get_value_for_specifier_json")
-func ct_paragraph_style_get_value_for_specifier_json(
+public func ct_paragraph_style_get_value_for_specifier_json(
     _ paragraphStylePtr: UnsafeMutableRawPointer?,
     _ specifier: UInt32
 ) -> UnsafeMutablePointer<CChar>? {

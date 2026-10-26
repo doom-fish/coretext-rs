@@ -61,7 +61,7 @@ private struct AnyCodable: Encodable {
 }
 
 @_cdecl("ct_font_descriptor_create")
-func ct_font_descriptor_create(_ name: UnsafePointer<CChar>?, _ size: Double) -> UnsafeMutableRawPointer? {
+public func ct_font_descriptor_create(_ name: UnsafePointer<CChar>?, _ size: Double) -> UnsafeMutableRawPointer? {
     guard let name = stringFromCString(name) else {
         return nil
     }
@@ -69,7 +69,7 @@ func ct_font_descriptor_create(_ name: UnsafePointer<CChar>?, _ size: Double) ->
 }
 
 @_cdecl("ct_font_descriptor_copy_with_family")
-func ct_font_descriptor_copy_with_family(
+public func ct_font_descriptor_copy_with_family(
     _ descriptorPtr: UnsafeMutableRawPointer?,
     _ family: UnsafePointer<CChar>?
 ) -> UnsafeMutableRawPointer? {
@@ -84,7 +84,7 @@ func ct_font_descriptor_copy_with_family(
 }
 
 @_cdecl("ct_font_descriptor_copy_with_symbolic_traits")
-func ct_font_descriptor_copy_with_symbolic_traits(
+public func ct_font_descriptor_copy_with_symbolic_traits(
     _ descriptorPtr: UnsafeMutableRawPointer?,
     _ traitValue: UInt32,
     _ traitMask: UInt32
@@ -102,7 +102,7 @@ func ct_font_descriptor_copy_with_symbolic_traits(
 }
 
 @_cdecl("ct_font_descriptor_copy_with_variation")
-func ct_font_descriptor_copy_with_variation(
+public func ct_font_descriptor_copy_with_variation(
     _ descriptorPtr: UnsafeMutableRawPointer?,
     _ variationIdentifier: UInt32,
     _ variationValue: Double
@@ -118,7 +118,7 @@ func ct_font_descriptor_copy_with_variation(
 }
 
 @_cdecl("ct_font_descriptor_copy_with_feature")
-func ct_font_descriptor_copy_with_feature(
+public func ct_font_descriptor_copy_with_feature(
     _ descriptorPtr: UnsafeMutableRawPointer?,
     _ featureTypeIdentifier: Int64,
     _ featureSelectorIdentifier: Int64
@@ -134,7 +134,7 @@ func ct_font_descriptor_copy_with_feature(
 }
 
 @_cdecl("ct_font_descriptor_create_matching_descriptor")
-func ct_font_descriptor_create_matching_descriptor(
+public func ct_font_descriptor_create_matching_descriptor(
     _ descriptorPtr: UnsafeMutableRawPointer?
 ) -> UnsafeMutableRawPointer? {
     guard let descriptorPtr else { return nil }
@@ -146,7 +146,7 @@ func ct_font_descriptor_create_matching_descriptor(
 }
 
 @_cdecl("ct_font_descriptor_get_matching_descriptor_count")
-func ct_font_descriptor_get_matching_descriptor_count(_ descriptorPtr: UnsafeMutableRawPointer?) -> Int {
+public func ct_font_descriptor_get_matching_descriptor_count(_ descriptorPtr: UnsafeMutableRawPointer?) -> Int {
     guard let descriptorPtr else { return 0 }
     let descriptor: CTFontDescriptor = unbox(descriptorPtr, as: CTFontDescriptor.self)
     let descriptors: [CTFontDescriptor] = typedArray(
@@ -156,7 +156,7 @@ func ct_font_descriptor_get_matching_descriptor_count(_ descriptorPtr: UnsafeMut
 }
 
 @_cdecl("ct_font_descriptor_copy_matching_descriptors")
-func ct_font_descriptor_copy_matching_descriptors(
+public func ct_font_descriptor_copy_matching_descriptors(
     _ descriptorPtr: UnsafeMutableRawPointer?,
     _ buffer: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
     _ capacity: Int
@@ -170,35 +170,35 @@ func ct_font_descriptor_copy_matching_descriptors(
 }
 
 @_cdecl("ct_font_descriptor_copy_postscript_name")
-func ct_font_descriptor_copy_postscript_name(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_descriptor_copy_postscript_name(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let descriptorPtr else { return nil }
     let descriptor: CTFontDescriptor = unbox(descriptorPtr, as: CTFontDescriptor.self)
     return duplicateCString(CTFontDescriptorCopyAttribute(descriptor, kCTFontNameAttribute) as? String)
 }
 
 @_cdecl("ct_font_descriptor_copy_display_name")
-func ct_font_descriptor_copy_display_name(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_descriptor_copy_display_name(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let descriptorPtr else { return nil }
     let descriptor: CTFontDescriptor = unbox(descriptorPtr, as: CTFontDescriptor.self)
     return duplicateCString(CTFontDescriptorCopyAttribute(descriptor, kCTFontDisplayNameAttribute) as? String)
 }
 
 @_cdecl("ct_font_descriptor_copy_family_name")
-func ct_font_descriptor_copy_family_name(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_descriptor_copy_family_name(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let descriptorPtr else { return nil }
     let descriptor: CTFontDescriptor = unbox(descriptorPtr, as: CTFontDescriptor.self)
     return duplicateCString(CTFontDescriptorCopyAttribute(descriptor, kCTFontFamilyNameAttribute) as? String)
 }
 
 @_cdecl("ct_font_descriptor_copy_style_name")
-func ct_font_descriptor_copy_style_name(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_descriptor_copy_style_name(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let descriptorPtr else { return nil }
     let descriptor: CTFontDescriptor = unbox(descriptorPtr, as: CTFontDescriptor.self)
     return duplicateCString(CTFontDescriptorCopyAttribute(descriptor, kCTFontStyleNameAttribute) as? String)
 }
 
 @_cdecl("ct_font_descriptor_copy_url_path")
-func ct_font_descriptor_copy_url_path(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_descriptor_copy_url_path(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let descriptorPtr else { return nil }
     let descriptor: CTFontDescriptor = unbox(descriptorPtr, as: CTFontDescriptor.self)
     let url = CTFontDescriptorCopyAttribute(descriptor, kCTFontURLAttribute) as? URL
@@ -206,42 +206,42 @@ func ct_font_descriptor_copy_url_path(_ descriptorPtr: UnsafeMutableRawPointer?)
 }
 
 @_cdecl("ct_font_descriptor_get_size")
-func ct_font_descriptor_get_size(_ descriptorPtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_font_descriptor_get_size(_ descriptorPtr: UnsafeMutableRawPointer?) -> Double {
     guard let descriptorPtr else { return 0 }
     let descriptor: CTFontDescriptor = unbox(descriptorPtr, as: CTFontDescriptor.self)
     return (CTFontDescriptorCopyAttribute(descriptor, kCTFontSizeAttribute) as? NSNumber)?.doubleValue ?? 0
 }
 
 @_cdecl("ct_font_descriptor_get_orientation")
-func ct_font_descriptor_get_orientation(_ descriptorPtr: UnsafeMutableRawPointer?) -> UInt32 {
+public func ct_font_descriptor_get_orientation(_ descriptorPtr: UnsafeMutableRawPointer?) -> UInt32 {
     guard let descriptorPtr else { return 0 }
     let descriptor: CTFontDescriptor = unbox(descriptorPtr, as: CTFontDescriptor.self)
     return (CTFontDescriptorCopyAttribute(descriptor, kCTFontOrientationAttribute) as? NSNumber)?.uint32Value ?? 0
 }
 
 @_cdecl("ct_font_descriptor_get_format")
-func ct_font_descriptor_get_format(_ descriptorPtr: UnsafeMutableRawPointer?) -> UInt32 {
+public func ct_font_descriptor_get_format(_ descriptorPtr: UnsafeMutableRawPointer?) -> UInt32 {
     guard let descriptorPtr else { return 0 }
     let descriptor: CTFontDescriptor = unbox(descriptorPtr, as: CTFontDescriptor.self)
     return (CTFontDescriptorCopyAttribute(descriptor, kCTFontFormatAttribute) as? NSNumber)?.uint32Value ?? 0
 }
 
 @_cdecl("ct_font_descriptor_is_enabled")
-func ct_font_descriptor_is_enabled(_ descriptorPtr: UnsafeMutableRawPointer?) -> Bool {
+public func ct_font_descriptor_is_enabled(_ descriptorPtr: UnsafeMutableRawPointer?) -> Bool {
     guard let descriptorPtr else { return false }
     let descriptor: CTFontDescriptor = unbox(descriptorPtr, as: CTFontDescriptor.self)
     return (CTFontDescriptorCopyAttribute(descriptor, kCTFontEnabledAttribute) as? NSNumber)?.boolValue ?? false
 }
 
 @_cdecl("ct_font_descriptor_is_downloadable")
-func ct_font_descriptor_is_downloadable(_ descriptorPtr: UnsafeMutableRawPointer?) -> Bool {
+public func ct_font_descriptor_is_downloadable(_ descriptorPtr: UnsafeMutableRawPointer?) -> Bool {
     guard let descriptorPtr else { return false }
     let descriptor: CTFontDescriptor = unbox(descriptorPtr, as: CTFontDescriptor.self)
     return (CTFontDescriptorCopyAttribute(descriptor, kCTFontDownloadableAttribute) as? NSNumber)?.boolValue ?? false
 }
 
 @_cdecl("ct_font_descriptor_copy_attributes_json")
-func ct_font_descriptor_copy_attributes_json(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+public func ct_font_descriptor_copy_attributes_json(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let descriptorPtr else {
         return jsonCString([String: AnyCodable]())
     }
@@ -250,7 +250,7 @@ func ct_font_descriptor_copy_attributes_json(_ descriptorPtr: UnsafeMutableRawPo
 }
 
 @_cdecl("ct_font_descriptor_copy_attribute_json")
-func ct_font_descriptor_copy_attribute_json(
+public func ct_font_descriptor_copy_attribute_json(
     _ descriptorPtr: UnsafeMutableRawPointer?,
     _ attributeName: UnsafePointer<CChar>?
 ) -> UnsafeMutablePointer<CChar>? {
@@ -262,7 +262,7 @@ func ct_font_descriptor_copy_attribute_json(
 }
 
 @_cdecl("ct_font_descriptor_copy_localized_attribute_json")
-func ct_font_descriptor_copy_localized_attribute_json(
+public func ct_font_descriptor_copy_localized_attribute_json(
     _ descriptorPtr: UnsafeMutableRawPointer?,
     _ attributeName: UnsafePointer<CChar>?
 ) -> UnsafeMutablePointer<CChar>? {
@@ -276,7 +276,7 @@ func ct_font_descriptor_copy_localized_attribute_json(
 }
 
 @_cdecl("ct_font_descriptor_create_copy_with_attributes_json")
-func ct_font_descriptor_create_copy_with_attributes_json(
+public func ct_font_descriptor_create_copy_with_attributes_json(
     _ descriptorPtr: UnsafeMutableRawPointer?,
     _ attrsJSON: UnsafePointer<CChar>?
 ) -> UnsafeMutableRawPointer? {
@@ -290,7 +290,7 @@ func ct_font_descriptor_create_copy_with_attributes_json(
 }
 
 @_cdecl("ct_font_descriptor_create_with_attributes_json")
-func ct_font_descriptor_create_with_attributes_json(
+public func ct_font_descriptor_create_with_attributes_json(
     _ attrsJSON: UnsafePointer<CChar>?
 ) -> UnsafeMutableRawPointer? {
     guard let attributes = dictionaryFromJSON(attrsJSON, keyTransform: fontAttributeName) else {
@@ -300,6 +300,6 @@ func ct_font_descriptor_create_with_attributes_json(
 }
 
 @_cdecl("ct_font_descriptor_get_type_id")
-func ct_font_descriptor_get_type_id() -> UInt64 {
+public func ct_font_descriptor_get_type_id() -> UInt64 {
     UInt64(CTFontDescriptorGetTypeID())
 }

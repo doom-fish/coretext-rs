@@ -24,7 +24,7 @@ private func typesetterOptions(_ json: UnsafePointer<CChar>?) -> CFDictionary? {
 }
 
 @_cdecl("ct_typesetter_create_with_attributed_string")
-func ct_typesetter_create_with_attributed_string(
+public func ct_typesetter_create_with_attributed_string(
     _ attributedStringPtr: UnsafeMutableRawPointer?,
     _ optionsJSON: UnsafePointer<CChar>?
 ) -> UnsafeMutableRawPointer? {
@@ -37,7 +37,7 @@ func ct_typesetter_create_with_attributed_string(
 }
 
 @_cdecl("ct_typesetter_create_line")
-func ct_typesetter_create_line(
+public func ct_typesetter_create_line(
     _ typesetterPtr: UnsafeMutableRawPointer?,
     _ stringRange: CFRange
 ) -> UnsafeMutableRawPointer? {
@@ -47,7 +47,7 @@ func ct_typesetter_create_line(
 }
 
 @_cdecl("ct_typesetter_create_line_with_offset")
-func ct_typesetter_create_line_with_offset(
+public func ct_typesetter_create_line_with_offset(
     _ typesetterPtr: UnsafeMutableRawPointer?,
     _ stringRange: CFRange,
     _ offset: Double
@@ -58,7 +58,7 @@ func ct_typesetter_create_line_with_offset(
 }
 
 @_cdecl("ct_typesetter_suggest_line_break")
-func ct_typesetter_suggest_line_break(
+public func ct_typesetter_suggest_line_break(
     _ typesetterPtr: UnsafeMutableRawPointer?,
     _ startIndex: Int,
     _ width: Double
@@ -69,7 +69,7 @@ func ct_typesetter_suggest_line_break(
 }
 
 @_cdecl("ct_typesetter_suggest_line_break_with_offset")
-func ct_typesetter_suggest_line_break_with_offset(
+public func ct_typesetter_suggest_line_break_with_offset(
     _ typesetterPtr: UnsafeMutableRawPointer?,
     _ startIndex: Int,
     _ width: Double,
@@ -81,7 +81,7 @@ func ct_typesetter_suggest_line_break_with_offset(
 }
 
 @_cdecl("ct_typesetter_suggest_cluster_break")
-func ct_typesetter_suggest_cluster_break(
+public func ct_typesetter_suggest_cluster_break(
     _ typesetterPtr: UnsafeMutableRawPointer?,
     _ startIndex: Int,
     _ width: Double
@@ -92,7 +92,7 @@ func ct_typesetter_suggest_cluster_break(
 }
 
 @_cdecl("ct_typesetter_suggest_cluster_break_with_offset")
-func ct_typesetter_suggest_cluster_break_with_offset(
+public func ct_typesetter_suggest_cluster_break_with_offset(
     _ typesetterPtr: UnsafeMutableRawPointer?,
     _ startIndex: Int,
     _ width: Double,
@@ -104,6 +104,6 @@ func ct_typesetter_suggest_cluster_break_with_offset(
 }
 
 @_cdecl("ct_typesetter_get_type_id")
-func ct_typesetter_get_type_id() -> UInt64 {
+public func ct_typesetter_get_type_id() -> UInt64 {
     UInt64(CTTypesetterGetTypeID())
 }

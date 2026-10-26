@@ -11,7 +11,7 @@ private func truncationType(_ raw: UInt32) -> CTLineTruncationType {
 }
 
 @_cdecl("ct_line_create_with_attributed_string")
-func ct_line_create_with_attributed_string(
+public func ct_line_create_with_attributed_string(
     _ attributedStringPtr: UnsafeMutableRawPointer?
 ) -> UnsafeMutableRawPointer? {
     guard let attributedStringPtr else { return nil }
@@ -20,7 +20,7 @@ func ct_line_create_with_attributed_string(
 }
 
 @_cdecl("ct_line_create_truncated_line")
-func ct_line_create_truncated_line(
+public func ct_line_create_truncated_line(
     _ linePtr: UnsafeMutableRawPointer?,
     _ width: Double,
     _ truncationTypeRaw: UInt32,
@@ -36,7 +36,7 @@ func ct_line_create_truncated_line(
 }
 
 @_cdecl("ct_line_create_justified_line")
-func ct_line_create_justified_line(
+public func ct_line_create_justified_line(
     _ linePtr: UnsafeMutableRawPointer?,
     _ justificationFactor: Double,
     _ justificationWidth: Double
@@ -50,21 +50,21 @@ func ct_line_create_justified_line(
 }
 
 @_cdecl("ct_line_get_glyph_count")
-func ct_line_get_glyph_count(_ linePtr: UnsafeMutableRawPointer?) -> Int {
+public func ct_line_get_glyph_count(_ linePtr: UnsafeMutableRawPointer?) -> Int {
     guard let linePtr else { return 0 }
     let line: CTLine = unbox(linePtr, as: CTLine.self)
     return CTLineGetGlyphCount(line)
 }
 
 @_cdecl("ct_line_get_string_range")
-func ct_line_get_string_range(_ linePtr: UnsafeMutableRawPointer?) -> CFRange {
+public func ct_line_get_string_range(_ linePtr: UnsafeMutableRawPointer?) -> CFRange {
     guard let linePtr else { return CFRange(location: 0, length: 0) }
     let line: CTLine = unbox(linePtr, as: CTLine.self)
     return CTLineGetStringRange(line)
 }
 
 @_cdecl("ct_line_get_pen_offset_for_flush")
-func ct_line_get_pen_offset_for_flush(
+public func ct_line_get_pen_offset_for_flush(
     _ linePtr: UnsafeMutableRawPointer?,
     _ flushFactor: Double,
     _ flushWidth: Double
@@ -75,7 +75,7 @@ func ct_line_get_pen_offset_for_flush(
 }
 
 @_cdecl("ct_line_get_typographic_bounds")
-func ct_line_get_typographic_bounds(
+public func ct_line_get_typographic_bounds(
     _ linePtr: UnsafeMutableRawPointer?,
     _ ascent: UnsafeMutablePointer<CGFloat>?,
     _ descent: UnsafeMutablePointer<CGFloat>?,
@@ -87,28 +87,28 @@ func ct_line_get_typographic_bounds(
 }
 
 @_cdecl("ct_line_get_bounds_with_options")
-func ct_line_get_bounds_with_options(_ linePtr: UnsafeMutableRawPointer?, _ options: UInt64) -> CGRect {
+public func ct_line_get_bounds_with_options(_ linePtr: UnsafeMutableRawPointer?, _ options: UInt64) -> CGRect {
     guard let linePtr else { return .null }
     let line: CTLine = unbox(linePtr, as: CTLine.self)
     return CTLineGetBoundsWithOptions(line, CTLineBoundsOptions(rawValue: UInt(options)))
 }
 
 @_cdecl("ct_line_get_trailing_whitespace_width")
-func ct_line_get_trailing_whitespace_width(_ linePtr: UnsafeMutableRawPointer?) -> Double {
+public func ct_line_get_trailing_whitespace_width(_ linePtr: UnsafeMutableRawPointer?) -> Double {
     guard let linePtr else { return 0 }
     let line: CTLine = unbox(linePtr, as: CTLine.self)
     return CTLineGetTrailingWhitespaceWidth(line)
 }
 
 @_cdecl("ct_line_get_image_bounds")
-func ct_line_get_image_bounds(_ linePtr: UnsafeMutableRawPointer?) -> CGRect {
+public func ct_line_get_image_bounds(_ linePtr: UnsafeMutableRawPointer?) -> CGRect {
     guard let linePtr else { return .null }
     let line: CTLine = unbox(linePtr, as: CTLine.self)
     return CTLineGetImageBounds(line, nil)
 }
 
 @_cdecl("ct_line_get_string_index_for_position")
-func ct_line_get_string_index_for_position(
+public func ct_line_get_string_index_for_position(
     _ linePtr: UnsafeMutableRawPointer?,
     _ position: CGPoint
 ) -> Int {
@@ -118,7 +118,7 @@ func ct_line_get_string_index_for_position(
 }
 
 @_cdecl("ct_line_get_offset_for_string_index")
-func ct_line_get_offset_for_string_index(
+public func ct_line_get_offset_for_string_index(
     _ linePtr: UnsafeMutableRawPointer?,
     _ charIndex: Int,
     _ secondaryOffset: UnsafeMutablePointer<CGFloat>?
@@ -129,7 +129,7 @@ func ct_line_get_offset_for_string_index(
 }
 
 @_cdecl("ct_line_get_run_count")
-func ct_line_get_run_count(_ linePtr: UnsafeMutableRawPointer?) -> Int {
+public func ct_line_get_run_count(_ linePtr: UnsafeMutableRawPointer?) -> Int {
     guard let linePtr else { return 0 }
     let line: CTLine = unbox(linePtr, as: CTLine.self)
     let runs: [CTRun] = typedArray(CTLineGetGlyphRuns(line))
@@ -137,7 +137,7 @@ func ct_line_get_run_count(_ linePtr: UnsafeMutableRawPointer?) -> Int {
 }
 
 @_cdecl("ct_line_copy_runs")
-func ct_line_copy_runs(
+public func ct_line_copy_runs(
     _ linePtr: UnsafeMutableRawPointer?,
     _ buffer: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
     _ capacity: Int
@@ -149,12 +149,12 @@ func ct_line_copy_runs(
 }
 
 @_cdecl("ct_line_get_type_id")
-func ct_line_get_type_id() -> UInt64 {
+public func ct_line_get_type_id() -> UInt64 {
     UInt64(CTLineGetTypeID())
 }
 
 @_cdecl("ct_line_draw")
-func ct_line_draw(
+public func ct_line_draw(
     _ linePtr: UnsafeMutableRawPointer?,
     _ contextPtr: UnsafeMutableRawPointer?,
     _ textPosition: CGPoint
@@ -167,7 +167,7 @@ func ct_line_draw(
 }
 
 @_cdecl("ct_line_copy_caret_offsets")
-func ct_line_copy_caret_offsets(
+public func ct_line_copy_caret_offsets(
     _ linePtr: UnsafeMutableRawPointer?,
     _ offsets: UnsafeMutablePointer<Double>?,
     _ stringIndices: UnsafeMutablePointer<Int>?,
