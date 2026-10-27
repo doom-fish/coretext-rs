@@ -1,21 +1,17 @@
 import CoreText
+import CoreTextABI
 import Foundation
 
-private struct TypesetterOptionsPayload: Decodable {
-    let allowUnboundedLayout: Bool
-    let forcedEmbeddingLevel: Int64?
-}
-
-private func typesetterOptions(_ json: UnsafePointer<CChar>?) -> CFDictionary? {
-    guard let payload = decodeJSON(json, as: TypesetterOptionsPayload.self) else {
+private func typesetterOptions(_ value: UnsafePointer<CoreTextTypesetterOptions>?) -> CFDictionary? {
+    guard let payload = value?.pointee else {
         return nil
     }
     var options: [CFString: Any] = [:]
-    if payload.allowUnboundedLayout {
+    if payload.allow_unbounded_layout {
         options[kCTTypesetterOptionAllowUnboundedLayout] = true
     }
-    if let forcedEmbeddingLevel = payload.forcedEmbeddingLevel {
-        options[kCTTypesetterOptionForcedEmbeddingLevel] = NSNumber(value: forcedEmbeddingLevel)
+    if payload.has_forced_embedding_level {
+        options[kCTTypesetterOptionForcedEmbeddingLevel] = NSNumber(value: payload.forced_embedding_level)
     }
     if options.isEmpty {
         return nil
@@ -26,11 +22,11 @@ private func typesetterOptions(_ json: UnsafePointer<CChar>?) -> CFDictionary? {
 @_cdecl("ct_typesetter_create_with_attributed_string")
 public func ct_typesetter_create_with_attributed_string(
     _ attributedStringPtr: UnsafeMutableRawPointer?,
-    _ optionsJSON: UnsafePointer<CChar>?
+    _ options: UnsafePointer<CoreTextTypesetterOptions>?
 ) -> UnsafeMutableRawPointer? {
     guard let attributedStringPtr else { return nil }
     let attributedString: NSAttributedString = unbox(attributedStringPtr, as: NSAttributedString.self)
-    guard let typesetter = CTTypesetterCreateWithAttributedStringAndOptions(attributedString, typesetterOptions(optionsJSON)) else {
+    guard let typesetter = CTTypesetterCreateWithAttributedStringAndOptions(attributedString, typesetterOptions(options)) else {
         return nil
     }
     return retainBox(typesetter)

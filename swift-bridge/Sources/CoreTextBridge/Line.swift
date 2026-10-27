@@ -132,8 +132,7 @@ public func ct_line_get_offset_for_string_index(
 public func ct_line_get_run_count(_ linePtr: UnsafeMutableRawPointer?) -> Int {
     guard let linePtr else { return 0 }
     let line: CTLine = unbox(linePtr, as: CTLine.self)
-    let runs: [CTRun] = typedArray(CTLineGetGlyphRuns(line))
-    return runs.count
+    return CFArrayGetCount(CTLineGetGlyphRuns(line))
 }
 
 @_cdecl("ct_line_copy_runs")
@@ -144,8 +143,17 @@ public func ct_line_copy_runs(
 ) -> Int {
     guard let linePtr else { return 0 }
     let line: CTLine = unbox(linePtr, as: CTLine.self)
-    let runs: [CTRun] = typedArray(CTLineGetGlyphRuns(line))
-    return fillBoxedArray(runs, buffer: buffer, capacity: capacity)
+    let runs = CTLineGetGlyphRuns(line)
+    let total = CFArrayGetCount(runs)
+    guard let buffer else {
+        return total
+    }
+    let count = min(total, max(capacity, 0))
+    for index in 0..<count {
+        let run = unsafeBitCast(CFArrayGetValueAtIndex(runs, index), to: CTRun.self)
+        buffer[index] = retainBox(run)
+    }
+    return count
 }
 
 @_cdecl("ct_line_get_type_id")

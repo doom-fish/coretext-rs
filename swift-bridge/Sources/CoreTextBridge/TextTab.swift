@@ -1,4 +1,5 @@
 import CoreText
+import CoreTextABI
 import Foundation
 
 private func textAlignment(_ raw: UInt8) -> CTTextAlignment {
@@ -40,13 +41,13 @@ public func ct_text_tab_get_location(_ textTabPtr: UnsafeMutableRawPointer?) -> 
     return CTTextTabGetLocation(textTab)
 }
 
-@_cdecl("ct_text_tab_get_options_json")
-public func ct_text_tab_get_options_json(_ textTabPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+@_cdecl("ct_text_tab_get_options")
+public func ct_text_tab_get_options(_ textTabPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CoreTextValue>? {
     guard let textTabPtr else {
-        return duplicateCString("null")
+        return binaryResult(nil)
     }
     let textTab: CTTextTab = unbox(textTabPtr, as: CTTextTab.self)
-    return cfToJSONCString(CTTextTabGetOptions(textTab))
+    return binaryResult(CTTextTabGetOptions(textTab))
 }
 
 @_cdecl("ct_text_tab_get_type_id")

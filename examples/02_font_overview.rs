@@ -17,7 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!(
         "descriptor family={:?} attrs={}",
         descriptor.family_name(),
-        descriptor.attributes_json()?.is_object()
+        descriptor.attributes()?.is_object()
     );
     println!(
         "traits={:?} features={} variation-axes={} tables={}",

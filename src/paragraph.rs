@@ -1,7 +1,3 @@
-use std::ffi::CString;
-
-use serde::Serialize;
-
 use crate::bridge;
 use crate::common::{expect_handle, impl_handle, impl_thread_safe};
 use crate::error::CoreTextResult;
@@ -130,52 +126,71 @@ pub struct ParagraphStyleOptions {
     pub line_bounds_options: Option<u64>,
 }
 
-#[derive(Debug, Clone, Copy, Default, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct EncodedParagraphStyleOptions {
-    alignment: Option<u8>,
-    first_line_head_indent: Option<f64>,
-    head_indent: Option<f64>,
-    tail_indent: Option<f64>,
-    default_tab_interval: Option<f64>,
-    line_break_mode: Option<u8>,
-    line_height_multiple: Option<f64>,
-    maximum_line_height: Option<f64>,
-    minimum_line_height: Option<f64>,
-    paragraph_spacing: Option<f64>,
-    paragraph_spacing_before: Option<f64>,
-    base_writing_direction: Option<i8>,
-    maximum_line_spacing: Option<f64>,
-    minimum_line_spacing: Option<f64>,
-    line_spacing_adjustment: Option<f64>,
-    line_bounds_options: Option<u64>,
+#[derive(Debug, Clone, Copy, Default)]
+#[repr(C)]
+pub(crate) struct EncodedParagraphStyleOptions {
+    present: u64,
+    alignment: u8,
+    first_line_head_indent: f64,
+    head_indent: f64,
+    tail_indent: f64,
+    default_tab_interval: f64,
+    line_break_mode: u8,
+    line_height_multiple: f64,
+    maximum_line_height: f64,
+    minimum_line_height: f64,
+    paragraph_spacing: f64,
+    paragraph_spacing_before: f64,
+    base_writing_direction: i8,
+    maximum_line_spacing: f64,
+    minimum_line_spacing: f64,
+    line_spacing_adjustment: f64,
+    line_bounds_options: u64,
 }
 
 impl ParagraphStyleOptions {
     fn encoded(&self) -> EncodedParagraphStyleOptions {
         EncodedParagraphStyleOptions {
-            alignment: self.alignment.map(|value| value as u8),
-            first_line_head_indent: self.first_line_head_indent,
-            head_indent: self.head_indent,
-            tail_indent: self.tail_indent,
-            default_tab_interval: self.default_tab_interval,
-            line_break_mode: self.line_break_mode.map(|value| value as u8),
-            line_height_multiple: self.line_height_multiple,
-            maximum_line_height: self.maximum_line_height,
-            minimum_line_height: self.minimum_line_height,
-            paragraph_spacing: self.paragraph_spacing,
-            paragraph_spacing_before: self.paragraph_spacing_before,
-            base_writing_direction: self.base_writing_direction.map(|value| value as i8),
-            maximum_line_spacing: self.maximum_line_spacing,
-            minimum_line_spacing: self.minimum_line_spacing,
-            line_spacing_adjustment: self.line_spacing_adjustment,
-            line_bounds_options: self.line_bounds_options,
+            present: [
+                self.alignment.is_some(),
+                self.first_line_head_indent.is_some(),
+                self.head_indent.is_some(),
+                self.tail_indent.is_some(),
+                self.default_tab_interval.is_some(),
+                self.line_break_mode.is_some(),
+                self.line_height_multiple.is_some(),
+                self.maximum_line_height.is_some(),
+                self.minimum_line_height.is_some(),
+                self.paragraph_spacing.is_some(),
+                self.paragraph_spacing_before.is_some(),
+                self.base_writing_direction.is_some(),
+                self.maximum_line_spacing.is_some(),
+                self.minimum_line_spacing.is_some(),
+                self.line_spacing_adjustment.is_some(),
+                self.line_bounds_options.is_some(),
+            ]
+            .into_iter()
+            .enumerate()
+            .fold(0, |mask, (index, present)| {
+                mask | (u64::from(present) << index)
+            }),
+            alignment: self.alignment.unwrap_or_default() as u8,
+            first_line_head_indent: self.first_line_head_indent.unwrap_or_default(),
+            head_indent: self.head_indent.unwrap_or_default(),
+            tail_indent: self.tail_indent.unwrap_or_default(),
+            default_tab_interval: self.default_tab_interval.unwrap_or_default(),
+            line_break_mode: self.line_break_mode.unwrap_or_default() as u8,
+            line_height_multiple: self.line_height_multiple.unwrap_or_default(),
+            maximum_line_height: self.maximum_line_height.unwrap_or_default(),
+            minimum_line_height: self.minimum_line_height.unwrap_or_default(),
+            paragraph_spacing: self.paragraph_spacing.unwrap_or_default(),
+            paragraph_spacing_before: self.paragraph_spacing_before.unwrap_or_default(),
+            base_writing_direction: self.base_writing_direction.unwrap_or_default() as i8,
+            maximum_line_spacing: self.maximum_line_spacing.unwrap_or_default(),
+            minimum_line_spacing: self.minimum_line_spacing.unwrap_or_default(),
+            line_spacing_adjustment: self.line_spacing_adjustment.unwrap_or_default(),
+            line_bounds_options: self.line_bounds_options.unwrap_or_default(),
         }
-    }
-
-    fn json(&self) -> CoreTextResult<CString> {
-        let json = serde_json::to_string(&self.encoded())?;
-        Ok(CString::new(json).expect("serialized paragraph style json cannot contain NUL"))
     }
 }
 
@@ -190,11 +205,11 @@ impl_thread_safe!(ParagraphStyle);
 impl ParagraphStyle {
     /// Wraps `CTParagraphStyleCreate`.
     pub fn new(options: &ParagraphStyleOptions) -> CoreTextResult<Self> {
-        let json = options.json()?;
+        let encoded = options.encoded();
         let tabs: Vec<_> = options.text_tabs.iter().map(TextTab::as_raw).collect();
         let raw = unsafe {
             bridge::ct_paragraph_style_create(
-                json.as_ptr(),
+                &raw const encoded,
                 tabs.as_ptr(),
                 isize::try_from(tabs.len()).unwrap_or(isize::MAX),
             )
@@ -336,9 +351,9 @@ impl ParagraphStyle {
     }
 
     /// Wraps `CTParagraphStyleGetValueForSpecifier`.
-    pub fn value_for_specifier_json(&self, specifier: u32) -> CoreTextResult<serde_json::Value> {
+    pub fn value_for_specifier(&self, specifier: u32) -> CoreTextResult<crate::AttributeValue> {
         unsafe {
-            crate::common::json_from_owned(bridge::ct_paragraph_style_get_value_for_specifier_json(
+            crate::abi::from_owned(bridge::ct_paragraph_style_get_value_for_specifier(
                 self.raw, specifier,
             ))
         }
@@ -353,14 +368,13 @@ pub fn paragraph_style_type_id() -> u64 {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
-
-    use super::{
-        LineBreakMode, ParagraphStyleOptions, TextAlignment, WritingDirection,
-    };
+    use super::{LineBreakMode, ParagraphStyleOptions, TextAlignment, WritingDirection};
 
     fn assert_close(left: f64, right: f64) {
-        assert!((left - right).abs() < f64::EPSILON, "expected {left} to match {right}");
+        assert!(
+            (left - right).abs() < f64::EPSILON,
+            "expected {left} to match {right}"
+        );
     }
 
     #[test]
@@ -404,25 +418,27 @@ mod tests {
         };
         let encoded = options.encoded();
 
-        assert_eq!(encoded.alignment, Some(2));
-        assert_close(encoded.first_line_head_indent.expect("indent should be present"), 12.0);
-        assert_eq!(encoded.line_break_mode, Some(5));
-        assert_eq!(encoded.base_writing_direction, Some(1));
-        assert_eq!(encoded.line_bounds_options, Some(0b101));
+        assert_eq!(encoded.alignment, 2);
+        assert_close(encoded.first_line_head_indent, 12.0);
+        assert_eq!(encoded.line_break_mode, 5);
+        assert_eq!(encoded.base_writing_direction, 1);
+        assert_eq!(encoded.line_bounds_options, 0b101);
+        assert_eq!(
+            encoded.present,
+            1 | (1 << 1) | (1 << 5) | (1 << 11) | (1 << 15)
+        );
     }
 
     #[test]
-    fn paragraph_style_json_uses_camel_case_keys() {
+    fn paragraph_style_binary_marks_present_fields() {
         let options = ParagraphStyleOptions {
             first_line_head_indent: Some(12.0),
             maximum_line_spacing: Some(18.0),
             ..ParagraphStyleOptions::default()
         };
-        let json = options.json().expect("json serialization should succeed");
-        let value: serde_json::Value =
-            serde_json::from_slice(json.as_bytes()).expect("json should parse");
-
-        assert_eq!(value["firstLineHeadIndent"], json!(12.0));
-        assert_eq!(value["maximumLineSpacing"], json!(18.0));
+        let encoded = options.encoded();
+        assert_eq!(encoded.present, (1 << 1) | (1 << 12));
+        assert_close(encoded.first_line_head_indent, 12.0);
+        assert_close(encoded.maximum_line_spacing, 18.0);
     }
 }

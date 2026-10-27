@@ -1,6 +1,7 @@
 import CoreFoundation
 import CoreGraphics
 import CoreText
+import CoreTextABI
 import Foundation
 
 private func fontNameKey(_ raw: UInt32) -> CFString {
@@ -158,26 +159,25 @@ public func ct_font_copy_with_graphics_font(
     return retainBox(CTFontCreateWithGraphicsFont(graphicsFont, CGFloat(size), nil, nil))
 }
 
-private struct OpenTypeSetting: Decodable {
-    let tag: String
-    let value: UInt32
-}
-
 @_cdecl("ct_font_copy_with_feature_settings")
 public func ct_font_copy_with_feature_settings(
     _ fontPtr: UnsafeMutableRawPointer?,
-    _ featuresJSON: UnsafePointer<CChar>?,
-    _ fallbacksJSON: UnsafePointer<CChar>?
+    _ featureValues: CoreTextFeatures,
+    _ fallbackValues: CoreTextStrings
 ) -> UnsafeMutableRawPointer? {
     guard let fontPtr,
-          let features = decodeJSON(featuresJSON, as: [OpenTypeSetting].self),
-          let fallbacks = decodeJSON(fallbacksJSON, as: [String].self) else {
+          featureValues.len == 0 || featureValues.data != nil,
+          fallbackValues.len == 0 || fallbackValues.data != nil else {
         return nil
     }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
+    let features = featureValues.data.map {
+        Array(UnsafeBufferPointer(start: $0, count: featureValues.len))
+    } ?? []
+    let fallbacks = stringArray(fallbackValues)
     let featureSettings: [[CFString: Any]] = features.map { setting in
         [
-            kCTFontOpenTypeFeatureTag: setting.tag as CFString,
+            kCTFontOpenTypeFeatureTag: (stringFromBytes(setting.tag) ?? "") as CFString,
             kCTFontOpenTypeFeatureValue: NSNumber(value: Int32(bitPattern: setting.value))
         ]
     }
@@ -432,14 +432,14 @@ public func ct_font_get_x_height(_ fontPtr: UnsafeMutableRawPointer?) -> Double 
     return CTFontGetXHeight(font)
 }
 
-@_cdecl("ct_font_copy_supported_languages_json")
-public func ct_font_copy_supported_languages_json(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+@_cdecl("ct_font_copy_supported_languages")
+public func ct_font_copy_supported_languages(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CoreTextValue>? {
     guard let fontPtr else {
-        return jsonCString([String]())
+        return binaryResult([] as CFArray)
     }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
     let languages = (CTFontCopySupportedLanguages(font) as NSArray) as? [String] ?? []
-    return jsonCString(languages)
+    return binaryResult(languages as CFArray)
 }
 
 @_cdecl("ct_font_get_glyphs_for_characters")
@@ -534,13 +534,13 @@ public func ct_font_get_vertical_translations_for_glyphs(
     CTFontGetVerticalTranslationsForGlyphs(font, glyphs, translations, count)
 }
 
-@_cdecl("ct_font_copy_available_tables_json")
-public func ct_font_copy_available_tables_json(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+@_cdecl("ct_font_copy_available_tables")
+public func ct_font_copy_available_tables(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CoreTextValue>? {
     guard let fontPtr else {
-        return jsonCString([UInt32]())
+        return binaryResult([] as CFArray)
     }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
-    return jsonCString(availableTableTags(for: font))
+    return binaryResult(availableTableTags(for: font) as CFArray)
 }
 
 @_cdecl("ct_font_has_table")
@@ -550,26 +550,26 @@ public func ct_font_has_table(_ fontPtr: UnsafeMutableRawPointer?, _ tag: UInt32
     return CTFontHasTable(font, CTFontTableTag(tag))
 }
 
-@_cdecl("ct_font_copy_attribute_json")
-public func ct_font_copy_attribute_json(
+@_cdecl("ct_font_copy_attribute")
+public func ct_font_copy_attribute(
     _ fontPtr: UnsafeMutableRawPointer?,
     _ attributeName: UnsafePointer<CChar>?
-) -> UnsafeMutablePointer<CChar>? {
+) -> UnsafeMutablePointer<CoreTextValue>? {
     guard let fontPtr, let attributeName = stringFromCString(attributeName) else {
-        return duplicateCString("null")
+        return binaryResult(nil)
     }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
-    return cfToJSONCString(CTFontCopyAttribute(font, fontAttributeName(attributeName)))
+    return binaryResult(CTFontCopyAttribute(font, fontAttributeName(attributeName)))
 }
 
 @_cdecl("ct_font_copy_default_cascade_list_count")
 public func ct_font_copy_default_cascade_list_count(
     _ fontPtr: UnsafeMutableRawPointer?,
-    _ languagesJSON: UnsafePointer<CChar>?
+    _ languageValues: CoreTextStrings
 ) -> Int {
     guard let fontPtr else { return 0 }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
-    let languages = stringArrayFromJSON(languagesJSON)
+    let languages = stringArray(languageValues)
     let cascade: [CTFontDescriptor] = typedArray(
         CTFontCopyDefaultCascadeListForLanguages(font, languages.isEmpty ? nil : languages as CFArray)
     )
@@ -579,13 +579,13 @@ public func ct_font_copy_default_cascade_list_count(
 @_cdecl("ct_font_copy_default_cascade_list")
 public func ct_font_copy_default_cascade_list(
     _ fontPtr: UnsafeMutableRawPointer?,
-    _ languagesJSON: UnsafePointer<CChar>?,
+    _ languageValues: CoreTextStrings,
     _ buffer: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
     _ capacity: Int
 ) -> Int {
     guard let fontPtr else { return 0 }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
-    let languages = stringArrayFromJSON(languagesJSON)
+    let languages = stringArray(languageValues)
     let cascade: [CTFontDescriptor] = typedArray(
         CTFontCopyDefaultCascadeListForLanguages(font, languages.isEmpty ? nil : languages as CFArray)
     )

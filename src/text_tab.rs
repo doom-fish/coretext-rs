@@ -35,8 +35,8 @@ impl TextTab {
     }
 
     /// Wraps `CTTextTabGetOptions`.
-    pub fn options_json(&self) -> crate::error::CoreTextResult<serde_json::Value> {
-        unsafe { crate::common::json_from_owned(bridge::ct_text_tab_get_options_json(self.raw)) }
+    pub fn options(&self) -> crate::error::CoreTextResult<crate::AttributeValue> {
+        unsafe { crate::abi::from_owned(bridge::ct_text_tab_get_options(self.raw)) }
     }
 }
 

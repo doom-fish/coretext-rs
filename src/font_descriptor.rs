@@ -1,9 +1,9 @@
-use serde_json::Value;
+use crate::abi::{from_owned, InputValue};
+use crate::AttributeValue;
 
 use crate::bridge;
 use crate::common::{
-    cstring, expect_handle, impl_handle, impl_thread_safe, json_from_owned,
-    option_string_from_owned,
+    cstring, expect_handle, impl_handle, impl_thread_safe, option_string_from_owned,
 };
 use crate::error::CoreTextResult;
 use crate::font_feature::{FontFeature, FontFeatureSetting};
@@ -236,47 +236,39 @@ impl FontDescriptor {
 
     /// Wraps `CTFontDescriptorCopyAttribute` for the traits attribute.
     pub fn traits(&self) -> CoreTextResult<FontTraits> {
-        unsafe { json_from_owned(bridge::ct_font_descriptor_copy_traits_json(self.raw)) }
+        Ok(unsafe { bridge::ct_font_descriptor_copy_traits(self.raw) })
     }
 
     /// Wraps `CTFontDescriptorCopyAttribute` for variation axes.
     pub fn variation_axes(&self) -> CoreTextResult<Vec<FontVariationAxis>> {
-        unsafe {
-            json_from_owned(bridge::ct_font_descriptor_copy_variation_axes_json(
-                self.raw,
-            ))
-        }
+        unsafe { from_owned(bridge::ct_font_descriptor_copy_variation_axes(self.raw)) }
     }
 
     /// Wraps `CTFontDescriptorCopyAttribute` for variation coordinates.
     pub fn variation_coordinates(&self) -> CoreTextResult<Vec<FontVariationCoordinate>> {
-        unsafe { json_from_owned(bridge::ct_font_descriptor_copy_variation_json(self.raw)) }
+        unsafe { from_owned(bridge::ct_font_descriptor_copy_variation(self.raw)) }
     }
 
     /// Wraps `CTFontDescriptorCopyAttribute` for font features.
     pub fn features(&self) -> CoreTextResult<Vec<FontFeature>> {
-        unsafe { json_from_owned(bridge::ct_font_descriptor_copy_features_json(self.raw)) }
+        unsafe { from_owned(bridge::ct_font_descriptor_copy_features(self.raw)) }
     }
 
     /// Wraps `CTFontDescriptorCopyAttribute` for feature settings.
     pub fn feature_settings(&self) -> CoreTextResult<Vec<FontFeatureSetting>> {
-        unsafe {
-            json_from_owned(bridge::ct_font_descriptor_copy_feature_settings_json(
-                self.raw,
-            ))
-        }
+        unsafe { from_owned(bridge::ct_font_descriptor_copy_feature_settings(self.raw)) }
     }
 
     /// Wraps `CTFontDescriptorCopyAttributes`.
-    pub fn attributes_json(&self) -> CoreTextResult<Value> {
-        unsafe { json_from_owned(bridge::ct_font_descriptor_copy_attributes_json(self.raw)) }
+    pub fn attributes(&self) -> CoreTextResult<AttributeValue> {
+        unsafe { from_owned(bridge::ct_font_descriptor_copy_attributes(self.raw)) }
     }
 
     /// Wraps `CTFontDescriptorCopyAttribute`.
-    pub fn attribute_json(&self, attr: &str) -> CoreTextResult<Value> {
+    pub fn attribute(&self, attr: &str) -> CoreTextResult<AttributeValue> {
         let attr = cstring(attr)?;
         unsafe {
-            json_from_owned(bridge::ct_font_descriptor_copy_attribute_json(
+            from_owned(bridge::ct_font_descriptor_copy_attribute(
                 self.raw,
                 attr.as_ptr(),
             ))
@@ -284,10 +276,10 @@ impl FontDescriptor {
     }
 
     /// Wraps `CTFontDescriptorCopyLocalizedAttribute`.
-    pub fn localized_attribute_json(&self, attr: &str) -> CoreTextResult<Value> {
+    pub fn localized_attribute(&self, attr: &str) -> CoreTextResult<AttributeValue> {
         let attr = cstring(attr)?;
         unsafe {
-            json_from_owned(bridge::ct_font_descriptor_copy_localized_attribute_json(
+            from_owned(bridge::ct_font_descriptor_copy_localized_attribute(
                 self.raw,
                 attr.as_ptr(),
             ))
@@ -295,28 +287,24 @@ impl FontDescriptor {
     }
 
     /// Wraps `CTFontDescriptorCreateCopyWithAttributes`.
-    pub fn copy_with_attributes_json(&self, attrs_json: &str) -> CoreTextResult<Self> {
-        let attrs_json = cstring(attrs_json)?;
+    pub fn copy_with_attributes(&self, attributes: &AttributeValue) -> CoreTextResult<Self> {
+        let attributes = InputValue::new(attributes)?;
         let raw = unsafe {
-            bridge::ct_font_descriptor_create_copy_with_attributes_json(
-                self.raw,
-                attrs_json.as_ptr(),
-            )
+            bridge::ct_font_descriptor_create_copy_with_attributes(self.raw, attributes.as_ptr())
         };
         Ok(Self::from_raw(expect_handle(
             raw,
-            "ct_font_descriptor_create_copy_with_attributes_json returned NULL",
+            "ct_font_descriptor_create_copy_with_attributes returned NULL",
         )?))
     }
 
     /// Wraps `CTFontDescriptorCreateWithAttributes`.
-    pub fn with_attributes_json(attrs_json: &str) -> CoreTextResult<Self> {
-        let attrs_json = cstring(attrs_json)?;
-        let raw =
-            unsafe { bridge::ct_font_descriptor_create_with_attributes_json(attrs_json.as_ptr()) };
+    pub fn with_attributes(attributes: &AttributeValue) -> CoreTextResult<Self> {
+        let attributes = InputValue::new(attributes)?;
+        let raw = unsafe { bridge::ct_font_descriptor_create_with_attributes(attributes.as_ptr()) };
         Ok(Self::from_raw(expect_handle(
             raw,
-            "ct_font_descriptor_create_with_attributes_json returned NULL",
+            "ct_font_descriptor_create_with_attributes returned NULL",
         )?))
     }
 }

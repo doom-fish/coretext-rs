@@ -1,13 +1,12 @@
-use serde::Serialize;
-
+use crate::abi::{from_owned, Strings};
 use crate::bridge;
 use crate::common::{cstring, expect_handle, impl_handle, impl_thread_safe};
 use crate::error::CoreTextResult;
 use crate::font_descriptor::FontDescriptor;
 
 /// Options that influence how CoreText resolves a font collection query.
-#[derive(Debug, Clone, Copy, Default, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, Copy, Default)]
+#[repr(C)]
 pub struct FontCollectionOptions {
     /// Configures the `remove_duplicates` option used by `CTFontCollection` matching APIs.
     pub remove_duplicates: bool,
@@ -15,12 +14,6 @@ pub struct FontCollectionOptions {
     pub include_disabled_fonts: bool,
     /// Configures the `disallow_auto_activation` option used by `CTFontCollection` matching APIs.
     pub disallow_auto_activation: bool,
-}
-
-impl FontCollectionOptions {
-    fn json(self) -> CoreTextResult<String> {
-        Ok(serde_json::to_string(&self)?)
-    }
 }
 
 /// An immutable `CTFontCollection` wrapper.
@@ -48,8 +41,7 @@ impl FontCollection {
 
     /// Wraps `CTFontCollectionCreateFromAvailableFonts`.
     pub fn available_with_options(options: FontCollectionOptions) -> CoreTextResult<Self> {
-        let json = cstring(&options.json()?)?;
-        let raw = unsafe { bridge::ct_font_collection_create_available(json.as_ptr()) };
+        let raw = unsafe { bridge::ct_font_collection_create_available(&raw const options) };
         Ok(Self::from_raw(expect_handle(
             raw,
             "ct_font_collection_create_available returned NULL",
@@ -62,12 +54,11 @@ impl FontCollection {
         options: FontCollectionOptions,
     ) -> CoreTextResult<Self> {
         let descriptor_handles: Vec<_> = descriptors.iter().map(FontDescriptor::as_raw).collect();
-        let json = cstring(&options.json()?)?;
         let raw = unsafe {
             bridge::ct_font_collection_create_with_descriptors(
                 descriptor_handles.as_ptr(),
                 isize::try_from(descriptor_handles.len()).unwrap_or(isize::MAX),
-                json.as_ptr(),
+                &raw const options,
             )
         };
         Ok(Self::from_raw(expect_handle(
@@ -83,13 +74,12 @@ impl FontCollection {
         options: FontCollectionOptions,
     ) -> CoreTextResult<Self> {
         let descriptor_handles: Vec<_> = descriptors.iter().map(FontDescriptor::as_raw).collect();
-        let json = cstring(&options.json()?)?;
         let raw = unsafe {
             bridge::ct_font_collection_copy_with_descriptors(
                 self.raw,
                 descriptor_handles.as_ptr(),
                 isize::try_from(descriptor_handles.len()).unwrap_or(isize::MAX),
-                json.as_ptr(),
+                &raw const options,
             )
         };
         Ok(Self::from_raw(expect_handle(
@@ -180,10 +170,10 @@ impl FontCollection {
     }
 
     /// Wraps `CTFontCollectionCopyFontAttribute`.
-    pub fn font_attribute_json(&self, attr: &str) -> CoreTextResult<serde_json::Value> {
+    pub fn font_attribute(&self, attr: &str) -> CoreTextResult<crate::AttributeValue> {
         let attr = cstring(attr)?;
         unsafe {
-            crate::common::json_from_owned(bridge::ct_font_collection_copy_font_attribute_json(
+            from_owned(bridge::ct_font_collection_copy_font_attribute(
                 self.raw,
                 attr.as_ptr(),
             ))
@@ -191,12 +181,12 @@ impl FontCollection {
     }
 
     /// Wraps `CTFontCollectionCopyFontAttributes`.
-    pub fn font_attributes_json(&self, attrs: &[&str]) -> CoreTextResult<serde_json::Value> {
-        let json = cstring(&serde_json::to_string(attrs)?)?;
+    pub fn font_attributes(&self, attrs: &[&str]) -> CoreTextResult<crate::AttributeValue> {
+        let attrs = Strings::new(attrs.iter().copied());
         unsafe {
-            crate::common::json_from_owned(bridge::ct_font_collection_copy_font_attributes_json(
+            from_owned(bridge::ct_font_collection_copy_font_attributes(
                 self.raw,
-                json.as_ptr(),
+                attrs.as_raw(),
             ))
         }
     }
@@ -207,14 +197,8 @@ impl FontCollection {
         &self,
         options: FontCollectionOptions,
     ) -> Vec<FontDescriptor> {
-        let Ok(json_value) = options.json() else {
-            return Vec::new();
-        };
-        let Ok(json) = cstring(&json_value) else {
-            return Vec::new();
-        };
         let count = unsafe {
-            bridge::ct_font_collection_matching_with_options_count(self.raw, json.as_ptr())
+            bridge::ct_font_collection_matching_with_options_count(self.raw, &raw const options)
         };
         if count <= 0 {
             return Vec::new();
@@ -223,7 +207,7 @@ impl FontCollection {
         let written = unsafe {
             bridge::ct_font_collection_copy_matching_with_options(
                 self.raw,
-                json.as_ptr(),
+                &raw const options,
                 handles.as_mut_ptr(),
                 count,
             )

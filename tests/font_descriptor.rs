@@ -1,6 +1,6 @@
 mod support;
 
-use coretext::{FontDescriptor, FontFormat, FontOrientation, font_descriptor_type_id};
+use coretext::{font_descriptor_type_id, FontDescriptor, FontFormat, FontOrientation};
 
 #[test]
 fn descriptor_surface_smoke() -> Result<(), Box<dyn std::error::Error>> {
@@ -11,13 +11,13 @@ fn descriptor_surface_smoke() -> Result<(), Box<dyn std::error::Error>> {
     assert!(descriptor.display_name().is_some());
     assert!(descriptor.matching_descriptor().is_some());
     assert!(!descriptor.matching_descriptors().is_empty());
-    let attributes = descriptor.attributes_json()?;
+    let attributes = descriptor.attributes()?;
     assert!(attributes.is_object());
     assert_eq!(
-        descriptor.attribute_json("familyName")?.as_str(),
+        descriptor.attribute("familyName")?.as_str(),
         descriptor.family_name().as_deref()
     );
-    let localized = descriptor.localized_attribute_json("displayName")?;
+    let localized = descriptor.localized_attribute("displayName")?;
     assert_eq!(localized.as_str(), descriptor.display_name().as_deref());
     assert!(font_descriptor_type_id() > 0);
     assert_eq!(descriptor.format(), FontFormat::TrueType);
@@ -38,7 +38,7 @@ fn descriptor_copy_helpers_and_metadata() -> Result<(), Box<dyn std::error::Erro
         support::font().symbolic_traits(),
         support::font().symbolic_traits(),
     )?;
-    assert!(symbolic_copy.attributes_json()?.is_object());
+    assert!(symbolic_copy.attributes()?.is_object());
 
     let features = descriptor.features()?;
     let feature_settings = descriptor.feature_settings()?;
@@ -51,19 +51,25 @@ fn descriptor_copy_helpers_and_metadata() -> Result<(), Box<dyn std::error::Erro
         if let Some(selector) = feature.selectors.first() {
             let feature_copy =
                 descriptor.with_feature(feature.type_identifier, selector.identifier)?;
-            assert!(feature_copy.attributes_json()?.is_object());
+            assert!(feature_copy.attributes()?.is_object());
         }
     }
 
     if let Some(axis) = variation_axes.first() {
         let variation_copy = descriptor.with_variation(axis.identifier, axis.default_value)?;
-        assert!(variation_copy.attributes_json()?.is_object());
+        assert!(variation_copy.attributes()?.is_object());
     }
 
-    let copied = descriptor.copy_with_attributes_json("{\"familyName\":\"Helvetica\"}")?;
+    let copied = descriptor.copy_with_attributes(&coretext::AttributeValue::dictionary([(
+        "familyName",
+        "Helvetica".into(),
+    )]))?;
     assert_eq!(copied.family_name().as_deref(), Some("Helvetica"));
 
-    let built = FontDescriptor::with_attributes_json("{\"name\":\"Helvetica\",\"size\":12.0}")?;
+    let built = FontDescriptor::with_attributes(&coretext::AttributeValue::dictionary([
+        ("name", "Helvetica".into()),
+        ("size", 12.0.into()),
+    ]))?;
     assert!((built.size() - 12.0).abs() < f64::EPSILON);
 
     assert_eq!(feature_settings, Vec::new());

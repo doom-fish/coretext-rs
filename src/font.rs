@@ -1,10 +1,11 @@
 use apple_cf::cg::CGContext;
 
+use crate::abi::{from_owned, Bytes, Feature, Features, Strings};
 use crate::adaptive_image::AdaptiveImageProvider;
 use crate::bridge;
 use crate::common::{
-    cstring, expect_handle, impl_handle, impl_thread_safe, json_from_owned,
-    option_string_from_owned, optional_cstring, string_from_owned,
+    cstring, expect_handle, impl_handle, impl_thread_safe, option_string_from_owned,
+    optional_cstring, string_from_owned,
 };
 use crate::error::{CoreTextError, CoreTextResult};
 use crate::font_descriptor::{FontDescriptor, FontOrientation};
@@ -206,23 +207,22 @@ impl CTFont {
         features: &[(String, u32)],
         fallbacks: &[&str],
     ) -> CoreTextResult<Self> {
-        #[derive(serde::Serialize)]
-        struct Feature<'a> {
-            tag: &'a str,
-            value: u32,
-        }
-
         let features: Vec<_> = features
             .iter()
-            .map(|(tag, value)| Feature { tag, value: *value })
+            .map(|(tag, value)| Feature {
+                tag: Bytes::new(tag.as_bytes()),
+                value: *value,
+            })
             .collect();
-        let features = cstring(&serde_json::to_string(&features)?)?;
-        let fallbacks = cstring(&serde_json::to_string(fallbacks)?)?;
+        let fallbacks = Strings::new(fallbacks.iter().copied());
         let raw = unsafe {
             bridge::ct_font_copy_with_feature_settings(
                 self.raw,
-                features.as_ptr(),
-                fallbacks.as_ptr(),
+                Features {
+                    data: features.as_ptr(),
+                    len: features.len(),
+                },
+                fallbacks.as_raw(),
             )
         };
         Ok(Self::from_raw(expect_handle(
@@ -317,7 +317,7 @@ impl CTFont {
 
     /// Wraps `CTFontCopyTraits`.
     pub fn traits(&self) -> CoreTextResult<FontTraits> {
-        unsafe { json_from_owned(bridge::ct_font_copy_traits_json(self.raw)) }
+        Ok(unsafe { bridge::ct_font_copy_traits(self.raw) })
     }
 
     /// Wraps `CTFontCopyPostScriptName`.
@@ -421,7 +421,7 @@ impl CTFont {
 
     /// Wraps `CTFontCopySupportedLanguages`.
     pub fn supported_languages(&self) -> CoreTextResult<Vec<String>> {
-        unsafe { json_from_owned(bridge::ct_font_copy_supported_languages_json(self.raw)) }
+        unsafe { from_owned(bridge::ct_font_copy_supported_languages(self.raw)) }
     }
 
     /// Wraps `CTFontGetGlyphsForCharacters`.
@@ -588,27 +588,27 @@ impl CTFont {
 
     /// Wraps `CTFontCopyVariationAxes`.
     pub fn variation_axes(&self) -> CoreTextResult<Vec<FontVariationAxis>> {
-        unsafe { json_from_owned(bridge::ct_font_copy_variation_axes_json(self.raw)) }
+        unsafe { from_owned(bridge::ct_font_copy_variation_axes(self.raw)) }
     }
 
     /// Wraps `CTFontCopyVariation`.
     pub fn variation_coordinates(&self) -> CoreTextResult<Vec<FontVariationCoordinate>> {
-        unsafe { json_from_owned(bridge::ct_font_copy_variation_json(self.raw)) }
+        unsafe { from_owned(bridge::ct_font_copy_variation(self.raw)) }
     }
 
     /// Wraps `CTFontCopyFeatures`.
     pub fn features(&self) -> CoreTextResult<Vec<FontFeature>> {
-        unsafe { json_from_owned(bridge::ct_font_copy_features_json(self.raw)) }
+        unsafe { from_owned(bridge::ct_font_copy_features(self.raw)) }
     }
 
     /// Wraps `CTFontCopyFeatureSettings`.
     pub fn feature_settings(&self) -> CoreTextResult<Vec<FontFeatureSetting>> {
-        unsafe { json_from_owned(bridge::ct_font_copy_feature_settings_json(self.raw)) }
+        unsafe { from_owned(bridge::ct_font_copy_feature_settings(self.raw)) }
     }
 
     /// Wraps `CTFontCopyAvailableTables`.
     pub fn available_tables(&self) -> CoreTextResult<Vec<u32>> {
-        unsafe { json_from_owned(bridge::ct_font_copy_available_tables_json(self.raw)) }
+        unsafe { from_owned(bridge::ct_font_copy_available_tables(self.raw)) }
     }
 
     /// Checks whether `CTFontCopyAvailableTables` includes a table tag.
@@ -618,21 +618,17 @@ impl CTFont {
     }
 
     /// Wraps `CTFontCopyAttribute`.
-    pub fn attribute_json(&self, attr: &str) -> CoreTextResult<serde_json::Value> {
+    pub fn attribute(&self, attr: &str) -> CoreTextResult<crate::AttributeValue> {
         let attr = cstring(attr)?;
-        unsafe {
-            crate::common::json_from_owned(bridge::ct_font_copy_attribute_json(
-                self.raw,
-                attr.as_ptr(),
-            ))
-        }
+        unsafe { from_owned(bridge::ct_font_copy_attribute(self.raw, attr.as_ptr())) }
     }
 
     /// Wraps `CTFontCopyDefaultCascadeListForLanguages`.
     pub fn default_cascade_list(&self, languages: &[&str]) -> CoreTextResult<Vec<FontDescriptor>> {
-        let json = cstring(&serde_json::to_string(languages)?)?;
-        let count =
-            unsafe { bridge::ct_font_copy_default_cascade_list_count(self.raw, json.as_ptr()) };
+        let languages = Strings::new(languages.iter().copied());
+        let count = unsafe {
+            bridge::ct_font_copy_default_cascade_list_count(self.raw, languages.as_raw())
+        };
         if count <= 0 {
             return Ok(Vec::new());
         }
@@ -640,7 +636,7 @@ impl CTFont {
         let written = unsafe {
             bridge::ct_font_copy_default_cascade_list(
                 self.raw,
-                json.as_ptr(),
+                languages.as_raw(),
                 handles.as_mut_ptr(),
                 count,
             )

@@ -3,6 +3,10 @@
 
 use core::ffi::{c_char, c_void};
 
+use crate::abi::{Features, RubyOptions, StringList, TextRun, TypesetterOptions, Value};
+use crate::font_collection::FontCollectionOptions;
+use crate::font_traits::FontTraits;
+use crate::paragraph::EncodedParagraphStyleOptions;
 use crate::types::{CFRange, CGAffineTransform, CGPoint, CGRect, CGSize};
 
 /// Opaque retained handle type returned by the bundled Swift bridge.
@@ -19,12 +23,7 @@ unsafe extern "C" {
         font: Handle,
         paragraph_style: Handle,
     ) -> Handle;
-    pub fn ct_attributed_string_create_with_runs(
-        texts: *const *const u8,
-        lengths: *const isize,
-        fonts: *const Handle,
-        count: isize,
-    ) -> Handle;
+    pub fn ct_attributed_string_create_with_runs(runs: *const TextRun, count: isize) -> Handle;
     pub fn ct_attributed_string_get_length(attributed_string: Handle) -> isize;
 
     pub fn ct_font_create_with_name(name: *const c_char, size: f64) -> Handle;
@@ -35,8 +34,8 @@ unsafe extern "C" {
     pub fn ct_font_copy_with_graphics_font(font: Handle, size: f64) -> Handle;
     pub fn ct_font_copy_with_feature_settings(
         font: Handle,
-        features_json: *const c_char,
-        fallbacks_json: *const c_char,
+        features: Features,
+        fallbacks: StringList,
     ) -> Handle;
     pub fn ct_font_has_matching_traits(font: Handle) -> bool;
     pub fn ct_font_copy_with_family(font: Handle, size: f64, family: *const c_char) -> Handle;
@@ -56,7 +55,7 @@ unsafe extern "C" {
     pub fn ct_font_get_size(font: Handle) -> f64;
     pub fn ct_font_get_matrix(font: Handle) -> CGAffineTransform;
     pub fn ct_font_get_symbolic_traits(font: Handle) -> u32;
-    pub fn ct_font_copy_traits_json(font: Handle) -> *mut c_char;
+    pub fn ct_font_copy_traits(font: Handle) -> FontTraits;
     pub fn ct_font_copy_postscript_name(font: Handle) -> *mut c_char;
     pub fn ct_font_copy_family_name(font: Handle) -> *mut c_char;
     pub fn ct_font_copy_full_name(font: Handle) -> *mut c_char;
@@ -74,7 +73,7 @@ unsafe extern "C" {
     pub fn ct_font_get_slant_angle(font: Handle) -> f64;
     pub fn ct_font_get_cap_height(font: Handle) -> f64;
     pub fn ct_font_get_x_height(font: Handle) -> f64;
-    pub fn ct_font_copy_supported_languages_json(font: Handle) -> *mut c_char;
+    pub fn ct_font_copy_supported_languages(font: Handle) -> *mut Value;
     pub fn ct_font_get_glyphs_for_characters(
         font: Handle,
         characters: *const u16,
@@ -109,11 +108,11 @@ unsafe extern "C" {
         translations: *mut CGSize,
         count: isize,
     );
-    pub fn ct_font_copy_variation_axes_json(font: Handle) -> *mut c_char;
-    pub fn ct_font_copy_variation_json(font: Handle) -> *mut c_char;
-    pub fn ct_font_copy_features_json(font: Handle) -> *mut c_char;
-    pub fn ct_font_copy_feature_settings_json(font: Handle) -> *mut c_char;
-    pub fn ct_font_copy_available_tables_json(font: Handle) -> *mut c_char;
+    pub fn ct_font_copy_variation_axes(font: Handle) -> *mut Value;
+    pub fn ct_font_copy_variation(font: Handle) -> *mut Value;
+    pub fn ct_font_copy_features(font: Handle) -> *mut Value;
+    pub fn ct_font_copy_feature_settings(font: Handle) -> *mut Value;
+    pub fn ct_font_copy_available_tables(font: Handle) -> *mut Value;
     pub fn ct_font_has_table(font: Handle, tag: u32) -> bool;
     pub fn ct_adaptive_image_provider_create(
         refcon: *mut c_void,
@@ -139,7 +138,7 @@ unsafe extern "C" {
 
     pub fn ct_font_descriptor_create(name: *const c_char, size: f64) -> Handle;
     pub fn ct_font_descriptor_copy_with_family(descriptor: Handle, family: *const c_char)
-    -> Handle;
+        -> Handle;
     pub fn ct_font_descriptor_copy_with_symbolic_traits(
         descriptor: Handle,
         trait_value: u32,
@@ -172,25 +171,25 @@ unsafe extern "C" {
     pub fn ct_font_descriptor_get_format(descriptor: Handle) -> u32;
     pub fn ct_font_descriptor_is_enabled(descriptor: Handle) -> bool;
     pub fn ct_font_descriptor_is_downloadable(descriptor: Handle) -> bool;
-    pub fn ct_font_descriptor_copy_traits_json(descriptor: Handle) -> *mut c_char;
-    pub fn ct_font_descriptor_copy_variation_axes_json(descriptor: Handle) -> *mut c_char;
-    pub fn ct_font_descriptor_copy_variation_json(descriptor: Handle) -> *mut c_char;
-    pub fn ct_font_descriptor_copy_features_json(descriptor: Handle) -> *mut c_char;
-    pub fn ct_font_descriptor_copy_feature_settings_json(descriptor: Handle) -> *mut c_char;
-    pub fn ct_font_descriptor_copy_attributes_json(descriptor: Handle) -> *mut c_char;
+    pub fn ct_font_descriptor_copy_traits(descriptor: Handle) -> FontTraits;
+    pub fn ct_font_descriptor_copy_variation_axes(descriptor: Handle) -> *mut Value;
+    pub fn ct_font_descriptor_copy_variation(descriptor: Handle) -> *mut Value;
+    pub fn ct_font_descriptor_copy_features(descriptor: Handle) -> *mut Value;
+    pub fn ct_font_descriptor_copy_feature_settings(descriptor: Handle) -> *mut Value;
+    pub fn ct_font_descriptor_copy_attributes(descriptor: Handle) -> *mut Value;
 
-    pub fn ct_font_collection_create_available(options_json: *const c_char) -> Handle;
+    pub fn ct_font_collection_create_available(options: *const FontCollectionOptions) -> Handle;
     pub fn ct_font_collection_create_for_family(name: *const c_char) -> Handle;
     pub fn ct_font_collection_create_with_descriptors(
         descriptors: *const Handle,
         descriptor_count: isize,
-        options_json: *const c_char,
+        options: *const FontCollectionOptions,
     ) -> Handle;
     pub fn ct_font_collection_copy_with_descriptors(
         collection: Handle,
         descriptors: *const Handle,
         descriptor_count: isize,
-        options_json: *const c_char,
+        options: *const FontCollectionOptions,
     ) -> Handle;
     pub fn ct_font_collection_get_query_descriptor_count(collection: Handle) -> isize;
     pub fn ct_font_collection_copy_query_descriptors(
@@ -215,9 +214,9 @@ unsafe extern "C" {
         capacity: isize,
     ) -> isize;
 
-    pub fn ct_font_manager_copy_available_postscript_names_json() -> *mut c_char;
-    pub fn ct_font_manager_copy_available_font_family_names_json() -> *mut c_char;
-    pub fn ct_font_manager_copy_available_font_urls_json() -> *mut c_char;
+    pub fn ct_font_manager_copy_available_postscript_names() -> *mut Value;
+    pub fn ct_font_manager_copy_available_font_family_names() -> *mut Value;
+    pub fn ct_font_manager_copy_available_font_urls() -> *mut Value;
     pub fn ct_font_manager_get_descriptor_count_for_url(url_path: *const c_char) -> isize;
     pub fn ct_font_manager_copy_descriptors_from_url(
         url_path: *const c_char,
@@ -357,7 +356,7 @@ unsafe extern "C" {
     ) -> isize;
 
     pub fn ct_paragraph_style_create(
-        options_json: *const c_char,
+        options: *const EncodedParagraphStyleOptions,
         text_tabs: *const Handle,
         tab_count: isize,
     ) -> Handle;
@@ -387,7 +386,7 @@ unsafe extern "C" {
 
     pub fn ct_run_get_glyph_count(run: Handle) -> isize;
     pub fn ct_run_get_status(run: Handle) -> u32;
-    pub fn ct_run_copy_attributes_json(run: Handle) -> *mut c_char;
+    pub fn ct_run_copy_attributes(run: Handle) -> *mut Value;
     pub fn ct_run_copy_font(run: Handle) -> Handle;
     pub fn ct_run_copy_glyphs(run: Handle, buffer: *mut u16, capacity: isize) -> isize;
     pub fn ct_run_copy_positions(run: Handle, buffer: *mut CGPoint, capacity: isize) -> isize;
@@ -415,7 +414,7 @@ unsafe extern "C" {
 
     pub fn ct_typesetter_create_with_attributed_string(
         attributed_string: Handle,
-        options_json: *const c_char,
+        options: *const TypesetterOptions,
     ) -> Handle;
     pub fn ct_typesetter_create_line(typesetter: Handle, string_range: CFRange) -> Handle;
     pub fn ct_typesetter_create_line_with_offset(
@@ -472,21 +471,21 @@ unsafe extern "C" {
         buffer: *mut Handle,
         capacity: isize,
     ) -> isize;
-    pub fn ct_font_collection_copy_font_attribute_json(
+    pub fn ct_font_collection_copy_font_attribute(
         collection: Handle,
         attribute_name: *const c_char,
-    ) -> *mut c_char;
-    pub fn ct_font_collection_copy_font_attributes_json(
+    ) -> *mut Value;
+    pub fn ct_font_collection_copy_font_attributes(
         collection: Handle,
-        attribute_names_json: *const c_char,
-    ) -> *mut c_char;
+        attribute_names: StringList,
+    ) -> *mut Value;
     pub fn ct_font_collection_matching_with_options_count(
         collection: Handle,
-        options_json: *const c_char,
+        options: *const FontCollectionOptions,
     ) -> isize;
     pub fn ct_font_collection_copy_matching_with_options(
         collection: Handle,
-        options_json: *const c_char,
+        options: *const FontCollectionOptions,
         buffer: *mut Handle,
         capacity: isize,
     ) -> isize;
@@ -503,14 +502,11 @@ unsafe extern "C" {
         count: isize,
     );
 
-    pub fn ct_font_copy_attribute_json(font: Handle, attribute_name: *const c_char) -> *mut c_char;
-    pub fn ct_font_copy_default_cascade_list_count(
-        font: Handle,
-        languages_json: *const c_char,
-    ) -> isize;
+    pub fn ct_font_copy_attribute(font: Handle, attribute_name: *const c_char) -> *mut Value;
+    pub fn ct_font_copy_default_cascade_list_count(font: Handle, languages: StringList) -> isize;
     pub fn ct_font_copy_default_cascade_list(
         font: Handle,
-        languages_json: *const c_char,
+        languages: StringList,
         buffer: *mut Handle,
         capacity: isize,
     ) -> isize;
@@ -534,19 +530,19 @@ unsafe extern "C" {
     pub fn ct_font_get_string_encoding(font: Handle) -> u32;
     pub fn ct_font_get_type_id() -> u64;
 
-    pub fn ct_font_descriptor_copy_attribute_json(
+    pub fn ct_font_descriptor_copy_attribute(
         descriptor: Handle,
         attribute_name: *const c_char,
-    ) -> *mut c_char;
-    pub fn ct_font_descriptor_copy_localized_attribute_json(
+    ) -> *mut Value;
+    pub fn ct_font_descriptor_copy_localized_attribute(
         descriptor: Handle,
         attribute_name: *const c_char,
-    ) -> *mut c_char;
-    pub fn ct_font_descriptor_create_copy_with_attributes_json(
+    ) -> *mut Value;
+    pub fn ct_font_descriptor_create_copy_with_attributes(
         descriptor: Handle,
-        attrs_json: *const c_char,
+        attrs: *const Value,
     ) -> Handle;
-    pub fn ct_font_descriptor_create_with_attributes_json(attrs_json: *const c_char) -> Handle;
+    pub fn ct_font_descriptor_create_with_attributes(attrs: *const Value) -> Handle;
     pub fn ct_font_descriptor_get_type_id() -> u64;
 
     pub fn ct_font_manager_copy_registered_descriptor_count(scope: u32, enabled: bool) -> isize;
@@ -579,23 +575,23 @@ unsafe extern "C" {
         enabled: bool,
         timeout_nanoseconds: u64,
         timed_out: *mut bool,
-    ) -> *mut c_char;
+    ) -> *mut Value;
     pub fn ct_font_manager_register_font_urls(
-        url_paths_json: *const c_char,
+        url_paths: StringList,
         scope: u32,
         enabled: bool,
         timeout_nanoseconds: u64,
         timed_out: *mut bool,
-    ) -> *mut c_char;
+    ) -> *mut Value;
     pub fn ct_font_manager_register_fonts_for_urls(
-        url_paths_json: *const c_char,
+        url_paths: StringList,
         scope: u32,
         timeout_nanoseconds: u64,
         timed_out: *mut bool,
-        error_out: *mut *mut c_char,
+        error_out: *mut *mut Value,
     ) -> bool;
     pub fn ct_font_manager_register_fonts_with_asset_names(
-        asset_names_json: *const c_char,
+        asset_names: StringList,
         scope: u32,
         enabled: bool,
     ) -> bool;
@@ -605,36 +601,36 @@ unsafe extern "C" {
         scope: u32,
         timeout_nanoseconds: u64,
         timed_out: *mut bool,
-    ) -> *mut c_char;
+    ) -> *mut Value;
     pub fn ct_font_manager_unregister_font_urls(
-        url_paths_json: *const c_char,
+        url_paths: StringList,
         scope: u32,
         timeout_nanoseconds: u64,
         timed_out: *mut bool,
-    ) -> *mut c_char;
+    ) -> *mut Value;
     pub fn ct_font_manager_unregister_fonts_for_urls(
-        url_paths_json: *const c_char,
+        url_paths: StringList,
         scope: u32,
         timeout_nanoseconds: u64,
         timed_out: *mut bool,
-        error_out: *mut *mut c_char,
+        error_out: *mut *mut Value,
     ) -> bool;
 
-    pub fn ct_frame_copy_frame_attributes_json(frame: Handle) -> *mut c_char;
+    pub fn ct_frame_copy_frame_attributes(frame: Handle) -> *mut Value;
     pub fn ct_frame_get_type_id() -> u64;
 
     pub fn ct_framesetter_get_type_id() -> u64;
     pub fn ct_glyph_info_get_type_id() -> u64;
     pub fn ct_line_get_type_id() -> u64;
     pub fn ct_paragraph_style_get_type_id() -> u64;
-    pub fn ct_paragraph_style_get_value_for_specifier_json(
+    pub fn ct_paragraph_style_get_value_for_specifier(
         paragraph_style: Handle,
         specifier: u32,
-    ) -> *mut c_char;
-    pub fn ct_ruby_annotation_create_with_attributes_json(attrs_json: *const c_char) -> Handle;
+    ) -> *mut Value;
+    pub fn ct_ruby_annotation_create_with_attributes(options: *const RubyOptions) -> Handle;
     pub fn ct_ruby_annotation_get_type_id() -> u64;
     pub fn ct_run_get_type_id() -> u64;
-    pub fn ct_text_tab_get_options_json(text_tab: Handle) -> *mut c_char;
+    pub fn ct_text_tab_get_options(text_tab: Handle) -> *mut Value;
     pub fn ct_text_tab_get_type_id() -> u64;
     pub fn ct_typesetter_get_type_id() -> u64;
 }

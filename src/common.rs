@@ -2,8 +2,6 @@
 
 use std::ffi::{CStr, CString};
 
-use serde::de::DeserializeOwned;
-
 use crate::bridge::{self, Handle};
 use crate::error::{CoreTextError, CoreTextResult};
 
@@ -51,15 +49,6 @@ pub unsafe fn option_string_from_owned(ptr: *mut core::ffi::c_char) -> Option<St
     let value = CStr::from_ptr(ptr).to_string_lossy().into_owned();
     bridge::ct_string_release(ptr);
     Some(value)
-}
-
-/// Deserializes owned bridge JSON into the requested Rust type.
-pub unsafe fn json_from_owned<T>(ptr: *mut core::ffi::c_char) -> CoreTextResult<T>
-where
-    T: DeserializeOwned,
-{
-    let json = string_from_owned(ptr)?;
-    Ok(serde_json::from_str(&json)?)
 }
 
 macro_rules! impl_handle {

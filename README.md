@@ -4,7 +4,7 @@ Safe Rust bindings for Apple's [CoreText](https://developer.apple.com/documentat
 
 ```toml
 [dependencies]
-coretext-rs = "0.8.3"
+coretext-rs = "0.9.0"
 ```
 
 ## Highlights
@@ -12,6 +12,7 @@ coretext-rs = "0.8.3"
 The crate calls the system allocator through local C declarations and uses `core::ffi` types.
 It does not require the `libc` crate.
 
+- The bridge uses C records, UTF-8 byte spans, arrays and opaque object handles. It does not use a serialization crate.
 - Safe wrappers for `CTFont`, `CTFontDescriptor`, `CTFontCollection`, and `CTFontManager`
 - Layout pipeline coverage for `AttributedString`, `ParagraphStyle`, `TextTab`, `CTTypesetter`, `CTLine`, `CTRun`, `CTFramesetter`, and `CTFrame`
 - Font metadata helpers for traits, features, feature settings, variation axes, variation coordinates, and table tags
@@ -26,6 +27,34 @@ It does not require the `libc` crate.
 - Rust 1.82+
 
 `build.rs` compiles the bundled Swift package and links it statically against CoreText, CoreFoundation, CoreGraphics, and Foundation.
+
+## Binary bridge
+
+The Swift bridge imports `swift-bridge/Sources/CoreTextABI/include/CoreTextABI.h`.
+Rust uses matching `#[repr(C)]` records.
+Input strings and arrays remain valid until the bridge call returns.
+The bridge copies data that CoreText retains.
+Rust copies each returned value and releases its complete allocation with `ct_value_release`.
+Object handles retain their existing ownership rules.
+
+`AttributeValue` replaces the external value type for font, collection, run, frame, paragraph and text-tab attributes.
+It preserves null values, booleans, signed integers, unsigned integers, floating-point values, strings, data, arrays and dictionaries.
+Attribute method names no longer have the `_json` suffix.
+Descriptor attribute builders accept `&AttributeValue`, not text.
+Font traits, collection options, paragraph options, typesetter options and OpenType settings use direct C records.
+Attributed text runs share one record array. Glyph-run copies read the CoreText array without an intermediate Swift array.
+The other typed Rust APIs do not change.
+
+```rust,no_run
+use coretext::{AttributeValue, FontDescriptor};
+
+let descriptor = FontDescriptor::with_attributes(&AttributeValue::dictionary([
+    ("name", "Helvetica".into()),
+    ("size", 16.0.into()),
+]))?;
+assert_eq!(descriptor.attribute("familyName")?.as_str(), Some("Helvetica"));
+# Ok::<(), coretext::CoreTextError>(())
+```
 
 ## Quick start
 
@@ -100,7 +129,7 @@ The safe Swift-backed wrappers are enabled by default. If you also need the lega
 
 ```toml
 [dependencies]
-coretext-rs = { version = "0.8", features = ["raw-ffi"] }
+coretext-rs = { version = "0.9", features = ["raw-ffi"] }
 ```
 
 ## License

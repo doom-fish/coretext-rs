@@ -1,7 +1,7 @@
 mod support;
 
 use coretext::{
-    CTFont, FontNameKey, FontOrientation, TextRange, UIFontType, font_type_id, symbolic_traits,
+    font_type_id, symbolic_traits, CTFont, FontNameKey, FontOrientation, TextRange, UIFontType,
 };
 
 #[test]
@@ -27,7 +27,7 @@ fn font_surface_smoke() -> Result<(), Box<dyn std::error::Error>> {
     assert!(font.x_height() > 0.0 && font.x_height() < font.cap_height());
     assert_ne!(font.supported_languages()?, Vec::<String>::new());
     assert_eq!(
-        font.attribute_json("familyName")?.as_str(),
+        font.attribute("familyName")?.as_str(),
         Some(font.family_name()?.as_str())
     );
     assert_eq!(
@@ -153,11 +153,11 @@ fn graphics_font_features_and_traits() -> Result<(), Box<dyn std::error::Error>>
     assert_eq!(featured.postscript_name()?, font.postscript_name()?);
     assert_eq!(
         featured
-            .attribute_json("featureSettings")?
+            .attribute("featureSettings")?
             .as_array()
-            .map(Vec::len),
+            .map(<[_]>::len),
         Some(1)
     );
-    assert!(featured.attribute_json("cascadeList")?.as_array().is_some());
+    assert!(featured.attribute("cascadeList")?.as_array().is_some());
     Ok(())
 }

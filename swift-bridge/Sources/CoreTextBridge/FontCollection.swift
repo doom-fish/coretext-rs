@@ -1,25 +1,20 @@
 import CoreText
+import CoreTextABI
 import Foundation
 
-private struct FontCollectionOptionsPayload: Decodable {
-    let removeDuplicates: Bool
-    let includeDisabledFonts: Bool
-    let disallowAutoActivation: Bool
-}
-
-private func fontCollectionOptions(_ json: UnsafePointer<CChar>?) -> CFDictionary? {
-    guard let payload = decodeJSON(json, as: FontCollectionOptionsPayload.self) else {
+private func fontCollectionOptions(_ value: UnsafePointer<CoreTextCollectionOptions>?) -> CFDictionary? {
+    guard let payload = value?.pointee else {
         return nil
     }
 
     var options: [CFString: Any] = [:]
-    if payload.removeDuplicates {
+    if payload.remove_duplicates {
         options[kCTFontCollectionRemoveDuplicatesOption] = true
     }
-    if payload.includeDisabledFonts {
+    if payload.include_disabled_fonts {
         options[kCTFontCollectionIncludeDisabledFontsOption] = true
     }
-    if payload.disallowAutoActivation {
+    if payload.disallow_auto_activation {
         options[kCTFontCollectionDisallowAutoActivationOption] = true
     }
     if options.isEmpty {
@@ -29,8 +24,8 @@ private func fontCollectionOptions(_ json: UnsafePointer<CChar>?) -> CFDictionar
 }
 
 @_cdecl("ct_font_collection_create_available")
-public func ct_font_collection_create_available(_ optionsJSON: UnsafePointer<CChar>?) -> UnsafeMutableRawPointer? {
-    retainBox(CTFontCollectionCreateFromAvailableFonts(fontCollectionOptions(optionsJSON)))
+public func ct_font_collection_create_available(_ options: UnsafePointer<CoreTextCollectionOptions>?) -> UnsafeMutableRawPointer? {
+    retainBox(CTFontCollectionCreateFromAvailableFonts(fontCollectionOptions(options)))
 }
 
 @_cdecl("ct_font_collection_create_for_family")
@@ -53,12 +48,12 @@ public func ct_font_collection_create_for_family(_ familyName: UnsafePointer<CCh
 public func ct_font_collection_create_with_descriptors(
     _ descriptorHandles: UnsafePointer<UnsafeMutableRawPointer?>?,
     _ descriptorCount: Int,
-    _ optionsJSON: UnsafePointer<CChar>?
+    _ options: UnsafePointer<CoreTextCollectionOptions>?
 ) -> UnsafeMutableRawPointer? {
     let descriptors: [CTFontDescriptor] = handlesToValues(descriptorHandles, count: descriptorCount)
     let collection = CTFontCollectionCreateWithFontDescriptors(
         descriptors as CFArray,
-        fontCollectionOptions(optionsJSON)
+        fontCollectionOptions(options)
     )
     return retainBox(collection)
 }
@@ -68,7 +63,7 @@ public func ct_font_collection_copy_with_descriptors(
     _ collectionPtr: UnsafeMutableRawPointer?,
     _ descriptorHandles: UnsafePointer<UnsafeMutableRawPointer?>?,
     _ descriptorCount: Int,
-    _ optionsJSON: UnsafePointer<CChar>?
+    _ options: UnsafePointer<CoreTextCollectionOptions>?
 ) -> UnsafeMutableRawPointer? {
     guard let collectionPtr else { return nil }
     let collection: CTFontCollection = unbox(collectionPtr, as: CTFontCollection.self)
@@ -76,7 +71,7 @@ public func ct_font_collection_copy_with_descriptors(
     let copy = CTFontCollectionCreateCopyWithFontDescriptors(
         collection,
         descriptors as CFArray,
-        fontCollectionOptions(optionsJSON)
+        fontCollectionOptions(options)
     )
     return retainBox(copy)
 }
@@ -169,31 +164,31 @@ public func ct_font_collection_copy_exclusion_descriptors(
     return fillBoxedArray(descriptors, buffer: buffer, capacity: capacity)
 }
 
-@_cdecl("ct_font_collection_copy_font_attribute_json")
-public func ct_font_collection_copy_font_attribute_json(
+@_cdecl("ct_font_collection_copy_font_attribute")
+public func ct_font_collection_copy_font_attribute(
     _ collectionPtr: UnsafeMutableRawPointer?,
     _ attributeName: UnsafePointer<CChar>?
-) -> UnsafeMutablePointer<CChar>? {
+) -> UnsafeMutablePointer<CoreTextValue>? {
     guard let collectionPtr, let attributeName = stringFromCString(attributeName) else {
-        return duplicateCString("null")
+        return binaryResult(nil)
     }
     let collection: CTFontCollection = unbox(collectionPtr, as: CTFontCollection.self)
-    return cfToJSONCString(
+    return binaryResult(
         CTFontCollectionCopyFontAttribute(collection, fontAttributeName(attributeName), [])
     )
 }
 
-@_cdecl("ct_font_collection_copy_font_attributes_json")
-public func ct_font_collection_copy_font_attributes_json(
+@_cdecl("ct_font_collection_copy_font_attributes")
+public func ct_font_collection_copy_font_attributes(
     _ collectionPtr: UnsafeMutableRawPointer?,
-    _ attributeNamesJSON: UnsafePointer<CChar>?
-) -> UnsafeMutablePointer<CChar>? {
+    _ names: CoreTextStrings
+) -> UnsafeMutablePointer<CoreTextValue>? {
     guard let collectionPtr else {
-        return duplicateCString("[]")
+        return binaryResult([] as CFArray)
     }
     let collection: CTFontCollection = unbox(collectionPtr, as: CTFontCollection.self)
-    let attributeNames = stringArrayFromJSON(attributeNamesJSON).map(fontAttributeName)
-    return cfToJSONCString(
+    let attributeNames = stringArray(names).map(fontAttributeName)
+    return binaryResult(
         CTFontCollectionCopyFontAttributes(collection, NSSet(array: attributeNames), [])
     )
 }
@@ -201,12 +196,12 @@ public func ct_font_collection_copy_font_attributes_json(
 @_cdecl("ct_font_collection_matching_with_options_count")
 public func ct_font_collection_matching_with_options_count(
     _ collectionPtr: UnsafeMutableRawPointer?,
-    _ optionsJSON: UnsafePointer<CChar>?
+    _ options: UnsafePointer<CoreTextCollectionOptions>?
 ) -> Int {
     guard let collectionPtr else { return 0 }
     let collection: CTFontCollection = unbox(collectionPtr, as: CTFontCollection.self)
     let descriptors: [CTFontDescriptor] = typedArray(
-        CTFontCollectionCreateMatchingFontDescriptorsWithOptions(collection, fontCollectionOptions(optionsJSON))
+        CTFontCollectionCreateMatchingFontDescriptorsWithOptions(collection, fontCollectionOptions(options))
     )
     return descriptors.count
 }
@@ -214,14 +209,14 @@ public func ct_font_collection_matching_with_options_count(
 @_cdecl("ct_font_collection_copy_matching_with_options")
 public func ct_font_collection_copy_matching_with_options(
     _ collectionPtr: UnsafeMutableRawPointer?,
-    _ optionsJSON: UnsafePointer<CChar>?,
+    _ options: UnsafePointer<CoreTextCollectionOptions>?,
     _ buffer: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
     _ capacity: Int
 ) -> Int {
     guard let collectionPtr else { return 0 }
     let collection: CTFontCollection = unbox(collectionPtr, as: CTFontCollection.self)
     let descriptors: [CTFontDescriptor] = typedArray(
-        CTFontCollectionCreateMatchingFontDescriptorsWithOptions(collection, fontCollectionOptions(optionsJSON))
+        CTFontCollectionCreateMatchingFontDescriptorsWithOptions(collection, fontCollectionOptions(options))
     )
     return fillBoxedArray(descriptors, buffer: buffer, capacity: capacity)
 }

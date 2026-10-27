@@ -12,6 +12,7 @@
     clippy::too_many_lines
 )]
 
+mod abi;
 mod bridge;
 mod common;
 mod system;
@@ -60,6 +61,7 @@ pub mod text_tab;
 pub mod types;
 /// Safe wrappers around the `CTTypesetter` API family.
 pub mod typesetter;
+pub mod value;
 
 pub use adaptive_image::{AdaptiveImageProvider, AdaptiveImageProviding, AdaptiveImageResponse};
 pub use apple_cf::cg::{CGContext, CGImage};
@@ -90,3 +92,4 @@ pub use run::{run_status, run_type_id, CTRun};
 pub use text_tab::{text_tab_type_id, TextTab};
 pub use types::{CGAffineTransform, CGPoint, CGRect, CGSize, TextRange, TypographicBounds};
 pub use typesetter::{typesetter_type_id, CTTypesetter, TypesetterOptions};
+pub use value::AttributeValue;

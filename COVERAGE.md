@@ -1,14 +1,24 @@
 # CoreText coverage
 
-Version 0.8.3 replaces the `libc` dependency with direct system C declarations.
+Version 0.9.0 replaces the structured text bridge with binary C records.
 The framework coverage does not change.
 
-This document tracks the safe-wrapper coverage of `coretext-rs` 0.8.0.
+This document tracks the safe-wrapper coverage of `coretext-rs` 0.9.0.
 
 - Architecture: safe Rust wrappers over a bundled Swift bridge, plus an opt-in legacy `raw-ffi` module.
 - Validation: `tests/api_coverage.rs`, per-area integration tests under `tests/`, and the numbered runtime examples under `examples/`.
 - SDK audit baseline: Xcode macOS SDK `MacOSX26.2.sdk`; the audit tables have not been regenerated for newer SDKs.
 - `COVERAGE_AUDIT.md` counts a symbol as verified when it is reachable from Rust at all. 240 of its 468 verified rows are only declared in the unsafe `raw-ffi` module; 228 have a safe wrapper. `COVERAGE_AUDIT_V2.md` counts safe wrappers for the 204 functions in the wrapped headers (177 wrapped).
+
+## Bridge representation
+
+- The Swift bridge imports the C records from `CoreTextABI.h`.
+- Matching Rust `#[repr(C)]` records carry traits, options, OpenType settings and pointer-length spans.
+- `AttributeValue` represents arbitrary CoreText attributes without an external value type.
+- Binary value tags distinguish signed and unsigned integers. Integer values retain all 64 bits. Data crosses the bridge as bytes.
+- Rust releases returned value trees with `ct_value_release`. Input records remain valid for the duration of each call.
+- The existing tests and examples cover the same framework calls with the binary bridge.
+- The historical audit tables use the former `_json` method names. The current methods omit that suffix.
 
 ## Requested area matrix
 

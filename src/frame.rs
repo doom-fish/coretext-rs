@@ -69,10 +69,8 @@ impl CTFrame {
     }
 
     /// Wraps `CTFrameGetFrameAttributes`.
-    pub fn frame_attributes_json(&self) -> crate::error::CoreTextResult<serde_json::Value> {
-        unsafe {
-            crate::common::json_from_owned(bridge::ct_frame_copy_frame_attributes_json(self.raw))
-        }
+    pub fn frame_attributes(&self) -> crate::error::CoreTextResult<crate::AttributeValue> {
+        unsafe { crate::abi::from_owned(bridge::ct_frame_copy_frame_attributes(self.raw)) }
     }
 }
 

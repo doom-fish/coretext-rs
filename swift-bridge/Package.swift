@@ -15,7 +15,13 @@ let package = Package(
     ],
     targets: [
         .target(
+            name: "CoreTextABI",
+            path: "Sources/CoreTextABI",
+            publicHeadersPath: "include"
+        ),
+        .target(
             name: "CoreTextBridge",
+            dependencies: ["CoreTextABI"],
             path: "Sources/CoreTextBridge"
         )
     ]

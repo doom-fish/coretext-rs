@@ -1,5 +1,6 @@
 import CoreFoundation
 import CoreText
+import CoreTextABI
 import Foundation
 
 private final class PointerOwner {
@@ -20,7 +21,7 @@ private final class PointerOwner {
     }
 }
 
-private struct ParagraphStyleOptionsPayload: Decodable {
+private struct ParagraphStyleOptionsPayload {
     let alignment: UInt8?
     let firstLineHeadIndent: Double?
     let headIndent: Double?
@@ -37,6 +38,25 @@ private struct ParagraphStyleOptionsPayload: Decodable {
     let minimumLineSpacing: Double?
     let lineSpacingAdjustment: Double?
     let lineBoundsOptions: UInt64?
+
+    init(_ value: CoreTextParagraphOptions) {
+        alignment = value.present & (1 << 0) != 0 ? value.alignment : nil
+        firstLineHeadIndent = value.present & (1 << 1) != 0 ? value.first_line_head_indent : nil
+        headIndent = value.present & (1 << 2) != 0 ? value.head_indent : nil
+        tailIndent = value.present & (1 << 3) != 0 ? value.tail_indent : nil
+        defaultTabInterval = value.present & (1 << 4) != 0 ? value.default_tab_interval : nil
+        lineBreakMode = value.present & (1 << 5) != 0 ? value.line_break_mode : nil
+        lineHeightMultiple = value.present & (1 << 6) != 0 ? value.line_height_multiple : nil
+        maximumLineHeight = value.present & (1 << 7) != 0 ? value.maximum_line_height : nil
+        minimumLineHeight = value.present & (1 << 8) != 0 ? value.minimum_line_height : nil
+        paragraphSpacing = value.present & (1 << 9) != 0 ? value.paragraph_spacing : nil
+        paragraphSpacingBefore = value.present & (1 << 10) != 0 ? value.paragraph_spacing_before : nil
+        baseWritingDirection = value.present & (1 << 11) != 0 ? value.base_writing_direction : nil
+        maximumLineSpacing = value.present & (1 << 12) != 0 ? value.maximum_line_spacing : nil
+        minimumLineSpacing = value.present & (1 << 13) != 0 ? value.minimum_line_spacing : nil
+        lineSpacingAdjustment = value.present & (1 << 14) != 0 ? value.line_spacing_adjustment : nil
+        lineBoundsOptions = value.present & (1 << 15) != 0 ? value.line_bounds_options : nil
+    }
 }
 
 private func textAlignment(_ raw: UInt8) -> CTTextAlignment {
@@ -138,11 +158,11 @@ private func paragraphStyleTextTabs(_ paragraphStyle: CTParagraphStyle) -> [CTTe
 
 @_cdecl("ct_paragraph_style_create")
 public func ct_paragraph_style_create(
-    _ optionsJSON: UnsafePointer<CChar>?,
+    _ options: UnsafePointer<CoreTextParagraphOptions>?,
     _ textTabHandles: UnsafePointer<UnsafeMutableRawPointer?>?,
     _ tabCount: Int
 ) -> UnsafeMutableRawPointer? {
-    let payload = decodeJSON(optionsJSON, as: ParagraphStyleOptionsPayload.self)
+    let payload = options.map { ParagraphStyleOptionsPayload($0.pointee) }
     let textTabs: [CTTextTab] = handlesToValues(textTabHandles, count: tabCount)
     let owner = PointerOwner()
     var settings: [CTParagraphStyleSetting] = []
@@ -456,57 +476,57 @@ public func ct_paragraph_style_get_type_id() -> UInt64 {
     UInt64(CTParagraphStyleGetTypeID())
 }
 
-@_cdecl("ct_paragraph_style_get_value_for_specifier_json")
-public func ct_paragraph_style_get_value_for_specifier_json(
+@_cdecl("ct_paragraph_style_get_value_for_specifier")
+public func ct_paragraph_style_get_value_for_specifier(
     _ paragraphStylePtr: UnsafeMutableRawPointer?,
     _ specifier: UInt32
-) -> UnsafeMutablePointer<CChar>? {
+) -> UnsafeMutablePointer<CoreTextValue>? {
     guard let paragraphStylePtr else {
-        return duplicateCString("null")
+        return binaryResult(nil)
     }
     let paragraphStyle: CTParagraphStyle = unbox(paragraphStylePtr, as: CTParagraphStyle.self)
 
     switch specifier {
     case UInt32(kCTParagraphStyleSpecifierAlignment.rawValue):
-        return jsonCString(textAlignmentRaw(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierAlignment, default: kCTTextAlignmentNatural)))
+        return binaryResult(textAlignmentRaw(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierAlignment, default: kCTTextAlignmentNatural)))
     case UInt32(kCTParagraphStyleSpecifierFirstLineHeadIndent.rawValue):
-        return jsonCString(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierFirstLineHeadIndent, default: CGFloat(0))))
+        return binaryResult(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierFirstLineHeadIndent, default: CGFloat(0))))
     case UInt32(kCTParagraphStyleSpecifierHeadIndent.rawValue):
-        return jsonCString(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierHeadIndent, default: CGFloat(0))))
+        return binaryResult(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierHeadIndent, default: CGFloat(0))))
     case UInt32(kCTParagraphStyleSpecifierTailIndent.rawValue):
-        return jsonCString(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierTailIndent, default: CGFloat(0))))
+        return binaryResult(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierTailIndent, default: CGFloat(0))))
     case UInt32(kCTParagraphStyleSpecifierTabStops.rawValue):
-        return cfToJSONCString(paragraphStyleTextTabs(paragraphStyle) as CFArray)
+        return binaryResult(paragraphStyleTextTabs(paragraphStyle) as CFArray)
     case UInt32(kCTParagraphStyleSpecifierDefaultTabInterval.rawValue):
-        return jsonCString(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierDefaultTabInterval, default: CGFloat(0))))
+        return binaryResult(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierDefaultTabInterval, default: CGFloat(0))))
     case UInt32(kCTParagraphStyleSpecifierLineBreakMode.rawValue):
-        return jsonCString(lineBreakModeRaw(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierLineBreakMode, default: kCTLineBreakByWordWrapping)))
+        return binaryResult(lineBreakModeRaw(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierLineBreakMode, default: kCTLineBreakByWordWrapping)))
     case UInt32(kCTParagraphStyleSpecifierLineHeightMultiple.rawValue):
-        return jsonCString(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierLineHeightMultiple, default: CGFloat(0))))
+        return binaryResult(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierLineHeightMultiple, default: CGFloat(0))))
     case UInt32(kCTParagraphStyleSpecifierMaximumLineHeight.rawValue):
-        return jsonCString(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierMaximumLineHeight, default: CGFloat(0))))
+        return binaryResult(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierMaximumLineHeight, default: CGFloat(0))))
     case UInt32(kCTParagraphStyleSpecifierMinimumLineHeight.rawValue):
-        return jsonCString(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierMinimumLineHeight, default: CGFloat(0))))
+        return binaryResult(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierMinimumLineHeight, default: CGFloat(0))))
     case UInt32(kCTParagraphStyleSpecifierParagraphSpacing.rawValue):
-        return jsonCString(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierParagraphSpacing, default: CGFloat(0))))
+        return binaryResult(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierParagraphSpacing, default: CGFloat(0))))
     case UInt32(kCTParagraphStyleSpecifierParagraphSpacingBefore.rawValue):
-        return jsonCString(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierParagraphSpacingBefore, default: CGFloat(0))))
+        return binaryResult(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierParagraphSpacingBefore, default: CGFloat(0))))
     case UInt32(kCTParagraphStyleSpecifierBaseWritingDirection.rawValue):
-        return jsonCString(writingDirectionRaw(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierBaseWritingDirection, default: kCTWritingDirectionNatural)))
+        return binaryResult(writingDirectionRaw(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierBaseWritingDirection, default: kCTWritingDirectionNatural)))
     case UInt32(kCTParagraphStyleSpecifierMaximumLineSpacing.rawValue):
-        return jsonCString(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierMaximumLineSpacing, default: CGFloat(0))))
+        return binaryResult(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierMaximumLineSpacing, default: CGFloat(0))))
     case UInt32(kCTParagraphStyleSpecifierMinimumLineSpacing.rawValue):
-        return jsonCString(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierMinimumLineSpacing, default: CGFloat(0))))
+        return binaryResult(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierMinimumLineSpacing, default: CGFloat(0))))
     case UInt32(kCTParagraphStyleSpecifierLineSpacingAdjustment.rawValue):
-        return jsonCString(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierLineSpacingAdjustment, default: CGFloat(0))))
+        return binaryResult(Double(paragraphStyleValue(paragraphStyle, spec: kCTParagraphStyleSpecifierLineSpacingAdjustment, default: CGFloat(0))))
     case UInt32(kCTParagraphStyleSpecifierLineBoundsOptions.rawValue):
         let value: CTLineBoundsOptions = paragraphStyleValue(
             paragraphStyle,
             spec: kCTParagraphStyleSpecifierLineBoundsOptions,
             default: CTLineBoundsOptions(rawValue: 0)
         )
-        return jsonCString(UInt64(value.rawValue))
+        return binaryResult(UInt64(value.rawValue))
     default:
-        return duplicateCString("null")
+        return binaryResult(nil)
     }
 }

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-27
+
+### Changed
+
+- Replace all structured text transport with C records that match the shared `CoreTextABI.h` header.
+- Remove the serialization dependencies and derives.
+- Replace external attribute values with `AttributeValue`. Attribute method names omit `_json`, and descriptor builders accept typed values.
+- Replace `CoreTextError::Json` with `CoreTextError::InvalidBridgeValue`.
+- Use direct records for font traits, options and OpenType settings. Pass strings and arrays as pointer-length spans.
+- Pass attributed text runs in one record array. Copy glyph-run handles without an intermediate Swift array.
+- Require `apple-cf` 0.11.7 or later within the 0.11 release line.
+
 ## [0.8.3] - 2026-10-27
 
 ### Changed

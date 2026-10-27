@@ -14,23 +14,16 @@ impl_thread_safe!(AttributedString);
 
 impl AttributedString {
     pub fn from_runs(runs: &[(&str, &CTFont)]) -> CoreTextResult<Self> {
-        let texts: Vec<_> = runs.iter().map(|(text, _)| text.as_ptr()).collect();
-        let lengths: Vec<_> = runs
+        let runs: Vec<_> = runs
             .iter()
-            .map(|(text, _)| isize::try_from(text.len()))
-            .collect::<Result<_, _>>()
-            .map_err(|_| crate::CoreTextError::Bridge("text run exceeds supported size".into()))?;
-        let fonts: Vec<_> = runs.iter().map(|(_, font)| font.as_raw()).collect();
+            .map(|(text, font)| crate::abi::TextRun {
+                text: crate::abi::Bytes::new(text.as_bytes()),
+                font: font.as_raw(),
+            })
+            .collect();
         let count = isize::try_from(runs.len())
             .map_err(|_| crate::CoreTextError::Bridge("too many text runs".into()))?;
-        let raw = unsafe {
-            bridge::ct_attributed_string_create_with_runs(
-                texts.as_ptr(),
-                lengths.as_ptr(),
-                fonts.as_ptr(),
-                count,
-            )
-        };
+        let raw = unsafe { bridge::ct_attributed_string_create_with_runs(runs.as_ptr(), count) };
         Ok(Self::from_raw(expect_handle(
             raw,
             "could not create an attributed string from runs",

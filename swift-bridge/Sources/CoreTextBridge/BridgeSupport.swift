@@ -140,24 +140,6 @@ func stringFromCString(_ value: UnsafePointer<CChar>?) -> String? {
 }
 
 @inline(__always)
-func decodeJSON<T: Decodable>(_ value: UnsafePointer<CChar>?, as type: T.Type) -> T? {
-    guard let string = stringFromCString(value) else {
-        return nil
-    }
-    return try? JSONDecoder().decode(type, from: Data(string.utf8))
-}
-
-@inline(__always)
-func jsonCString<T: Encodable>(_ value: T) -> UnsafeMutablePointer<CChar>? {
-    guard let data = try? JSONEncoder().encode(value),
-          let string = String(data: data, encoding: .utf8)
-    else {
-        return nil
-    }
-    return duplicateCString(string)
-}
-
-@inline(__always)
 func typedArray<T>(_ value: CFArray?) -> [T] {
     guard let value else {
         return []
@@ -202,14 +184,6 @@ func handlesToValues<T>(
         }
         return unbox(handle, as: T.self)
     }
-}
-
-@inline(__always)
-func jsonObjectFromCString(_ value: UnsafePointer<CChar>?) -> Any? {
-    guard let string = stringFromCString(value) else {
-        return nil
-    }
-    return try? JSONSerialization.jsonObject(with: Data(string.utf8))
 }
 
 private let fontAttributeAliases: [String: CFString] = [
@@ -312,117 +286,6 @@ private let stringAttributeAliases: [String: CFString] = [
 
 func stringAttributeName(_ name: String) -> CFString {
     stringAttributeAliases[name] ?? (name as CFString)
-}
-
-func cfFromJSON(
-    _ value: Any,
-    keyTransform: (String) -> CFString = { $0 as CFString }
-) -> CFTypeRef? {
-    switch value {
-    case let string as String:
-        return string as CFTypeRef
-    case let number as NSNumber:
-        return number as CFTypeRef
-    case _ as NSNull:
-        return NSNull()
-    case let array as [Any]:
-        return array.compactMap { cfFromJSON($0, keyTransform: keyTransform) } as CFArray
-    case let dictionary as [String: Any]:
-        var result: [CFString: Any] = [:]
-        for (key, entry) in dictionary {
-            if let converted = cfFromJSON(entry, keyTransform: keyTransform) {
-                result[keyTransform(key)] = converted
-            }
-        }
-        return result as CFDictionary
-    default:
-        return nil
-    }
-}
-
-func dictionaryFromJSON(
-    _ json: UnsafePointer<CChar>?,
-    keyTransform: (String) -> CFString = { $0 as CFString }
-) -> CFDictionary? {
-    guard let object = jsonObjectFromCString(json) as? [String: Any],
-          let converted = cfFromJSON(object, keyTransform: keyTransform)
-    else {
-        return nil
-    }
-    return unsafeBitCast(converted, to: CFDictionary.self)
-}
-
-func stringArrayFromJSON(_ json: UnsafePointer<CChar>?) -> [String] {
-    decodeJSON(json, as: [String].self) ?? []
-}
-
-func urlArrayFromJSONPaths(_ json: UnsafePointer<CChar>?) -> [URL] {
-    stringArrayFromJSON(json).map(URL.init(fileURLWithPath:))
-}
-
-func cfToJSON(_ value: CFTypeRef?) -> Any {
-    guard let value else {
-        return NSNull()
-    }
-
-    let typeID = CFGetTypeID(value)
-    if typeID == CFNullGetTypeID() {
-        return NSNull()
-    }
-    if typeID == CFBooleanGetTypeID() {
-        return (value as! NSNumber).boolValue
-    }
-    if typeID == CFNumberGetTypeID() {
-        return (value as! NSNumber).doubleValue
-    }
-    if typeID == CFStringGetTypeID() {
-        return value as! String
-    }
-    if typeID == CFArrayGetTypeID() {
-        return (value as! NSArray).map { cfToJSON($0 as CFTypeRef) }
-    }
-    if typeID == CFDictionaryGetTypeID() {
-        var result: [String: Any] = [:]
-        (value as! NSDictionary).forEach { key, entry in
-            let mappedKey = (key as? String) ?? String(describing: key)
-            result[mappedKey] = cfToJSON(entry as CFTypeRef)
-        }
-        return result
-    }
-    if typeID == CFSetGetTypeID() {
-        return (value as! NSSet).allObjects.map { cfToJSON($0 as CFTypeRef) }
-    }
-    if typeID == CFURLGetTypeID() {
-        let url = value as! URL
-        return url.isFileURL ? url.path : url.absoluteString
-    }
-    if typeID == CFDataGetTypeID() {
-        return (value as! Data).base64EncodedString()
-    }
-    if typeID == CTFontDescriptorGetTypeID() {
-        return cfToJSON(CTFontDescriptorCopyAttributes(value as! CTFontDescriptor))
-    }
-    if typeID == CTFontGetTypeID() {
-        return cfToJSON(CTFontDescriptorCopyAttributes(CTFontCopyFontDescriptor(value as! CTFont)))
-    }
-    if typeID == CTTextTabGetTypeID() {
-        let tab = value as! CTTextTab
-        return [
-            "alignment": Int(CTTextTabGetAlignment(tab).rawValue),
-            "location": CTTextTabGetLocation(tab),
-            "options": cfToJSON(CTTextTabGetOptions(tab))
-        ]
-    }
-    return NSNull()
-}
-
-func cfToJSONCString(_ value: CFTypeRef?) -> UnsafeMutablePointer<CChar>? {
-    guard let data = try? JSONSerialization.data(withJSONObject: cfToJSON(value), options: [.fragmentsAllowed]),
-          let string = String(data: data, encoding: .utf8)
-    else {
-        return nil
-    }
-    return duplicateCString(string)
 }
 
 @_cdecl("ct_retain")

@@ -49,7 +49,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "run[{index}] glyphs={} width={:.2} attrs={}",
             run.glyph_count(),
             run.typographic_bounds().width,
-            run.attributes_json()?.is_object()
+            run.attributes()?.is_object()
         );
     }
 

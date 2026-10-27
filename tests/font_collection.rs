@@ -1,6 +1,6 @@
 mod support;
 
-use coretext::{FontCollection, FontCollectionOptions, FontDescriptor, font_collection_type_id};
+use coretext::{font_collection_type_id, FontCollection, FontCollectionOptions, FontDescriptor};
 
 #[test]
 fn font_collection_queries() -> Result<(), Box<dyn std::error::Error>> {
@@ -15,18 +15,16 @@ fn font_collection_queries() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(collection.query_descriptors().len(), 1);
     assert!(!collection.matching_descriptors().is_empty());
     assert!(collection.exclusion_descriptors().is_empty());
-    assert!(!collection.font_attribute_json("familyName")?.is_null());
-    let attrs = collection.font_attributes_json(&["familyName", "name"])?;
+    assert!(!collection.font_attribute("familyName")?.is_null());
+    let attrs = collection.font_attributes(&["familyName", "name"])?;
     let attrs = attrs
         .as_array()
         .expect("one attribute dictionary per matching font");
     assert_ne!(attrs.len(), 0);
-    assert!(attrs.iter().all(serde_json::Value::is_object));
-    assert!(
-        !collection
-            .matching_descriptors_with_options(options)
-            .is_empty()
-    );
+    assert!(attrs.iter().all(coretext::AttributeValue::is_object));
+    assert!(!collection
+        .matching_descriptors_with_options(options)
+        .is_empty());
     assert!(font_collection_type_id() > 0);
 
     let available = FontCollection::available()?;
@@ -36,11 +34,9 @@ fn font_collection_queries() -> Result<(), Box<dyn std::error::Error>> {
     assert!(!copy.matching_descriptors().is_empty());
 
     let family_name = descriptor.family_name().expect("family name");
-    assert!(
-        !available
-            .matching_descriptors_for_family(&family_name)?
-            .is_empty()
-    );
+    assert!(!available
+        .matching_descriptors_for_family(&family_name)?
+        .is_empty());
 
     let mut mutable = available.mutable_copy()?;
     mutable.set_query_descriptors(std::slice::from_ref(&descriptor));
@@ -54,12 +50,13 @@ fn exact_font_family_query_matches_all_faces() -> Result<(), Box<dyn std::error:
     let collection = FontCollection::for_family("Helvetica")?;
     let descriptors = collection.matching_descriptors();
     assert!(!descriptors.is_empty());
-    assert!(
-        descriptors
-            .iter()
-            .all(|descriptor| descriptor.family_name().as_deref() == Some("Helvetica"))
-    );
-    let wildcard = FontDescriptor::with_attributes_json(r#"{"familyName":"Helvetica"}"#)?;
+    assert!(descriptors
+        .iter()
+        .all(|descriptor| descriptor.family_name().as_deref() == Some("Helvetica")));
+    let wildcard = FontDescriptor::with_attributes(&coretext::AttributeValue::dictionary([(
+        "familyName",
+        "Helvetica".into(),
+    )]))?;
     let legacy = FontCollection::with_descriptors(
         &[wildcard],
         FontCollectionOptions {

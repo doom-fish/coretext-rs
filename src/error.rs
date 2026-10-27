@@ -15,8 +15,7 @@ pub enum CoreTextError {
     StringConversion,
     /// The provided Rust string contains an interior NUL byte.
     NulByte,
-    /// JSON returned from the Swift bridge could not be parsed.
-    Json(String),
+    InvalidBridgeValue,
     RangeOutOfBounds {
         range: TextRange,
         string_length: usize,
@@ -39,7 +38,7 @@ impl fmt::Display for CoreTextError {
             Self::Bridge(message) => write!(f, "bridge error: {message}"),
             Self::StringConversion => write!(f, "C string conversion failed"),
             Self::NulByte => write!(f, "string contains an interior NUL byte"),
-            Self::Json(message) => write!(f, "json decode failed: {message}"),
+            Self::InvalidBridgeValue => write!(f, "invalid binary bridge value"),
             Self::RangeOutOfBounds {
                 range,
                 string_length,
@@ -64,12 +63,6 @@ impl fmt::Display for CoreTextError {
 }
 
 impl std::error::Error for CoreTextError {}
-
-impl From<serde_json::Error> for CoreTextError {
-    fn from(value: serde_json::Error) -> Self {
-        Self::Json(value.to_string())
-    }
-}
 
 /// Result type returned by CoreText wrapper calls.
 pub type CoreTextResult<T> = Result<T, CoreTextError>;
@@ -100,8 +93,8 @@ mod tests {
             "string contains an interior NUL byte"
         );
         assert_eq!(
-            CoreTextError::Json("oops".to_string()).to_string(),
-            "json decode failed: oops"
+            CoreTextError::InvalidBridgeValue.to_string(),
+            "invalid binary bridge value"
         );
     }
 
@@ -138,15 +131,13 @@ mod tests {
     }
 
     #[test]
-    fn serde_json_errors_convert_into_json_variants() {
-        let parse_error =
-            serde_json::from_str::<serde_json::Value>("{").expect_err("invalid json should fail");
-        let converted: CoreTextError = parse_error.into();
+    fn invalid_bridge_values_implement_std_error() {
+        let converted = CoreTextError::InvalidBridgeValue;
         let as_std_error: &dyn std::error::Error = &converted;
 
         match &converted {
-            CoreTextError::Json(message) => assert_ne!(message, ""),
-            other => panic!("expected Json error, got {other:?}"),
+            CoreTextError::InvalidBridgeValue => {}
+            other => panic!("expected invalid bridge value error, got {other:?}"),
         }
         assert!(as_std_error.source().is_none());
     }

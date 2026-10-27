@@ -1,4 +1,5 @@
 import CoreText
+import CoreTextABI
 import Dispatch
 import Foundation
 
@@ -16,23 +17,23 @@ private func fontDescriptors(from urlPath: String) -> [CTFontDescriptor] {
     return typedArray(CTFontManagerCreateFontDescriptorsFromURL(url))
 }
 
-@_cdecl("ct_font_manager_copy_available_postscript_names_json")
-public func ct_font_manager_copy_available_postscript_names_json() -> UnsafeMutablePointer<CChar>? {
+@_cdecl("ct_font_manager_copy_available_postscript_names")
+public func ct_font_manager_copy_available_postscript_names() -> UnsafeMutablePointer<CoreTextValue>? {
     let names = (CTFontManagerCopyAvailablePostScriptNames() as NSArray) as? [String] ?? []
-    return jsonCString(names)
+    return binaryResult(names as CFArray)
 }
 
-@_cdecl("ct_font_manager_copy_available_font_family_names_json")
-public func ct_font_manager_copy_available_font_family_names_json() -> UnsafeMutablePointer<CChar>? {
+@_cdecl("ct_font_manager_copy_available_font_family_names")
+public func ct_font_manager_copy_available_font_family_names() -> UnsafeMutablePointer<CoreTextValue>? {
     let names = (CTFontManagerCopyAvailableFontFamilyNames() as NSArray) as? [String] ?? []
-    return jsonCString(names)
+    return binaryResult(names as CFArray)
 }
 
-@_cdecl("ct_font_manager_copy_available_font_urls_json")
-public func ct_font_manager_copy_available_font_urls_json() -> UnsafeMutablePointer<CChar>? {
+@_cdecl("ct_font_manager_copy_available_font_urls")
+public func ct_font_manager_copy_available_font_urls() -> UnsafeMutablePointer<CoreTextValue>? {
     let urls = ((CTFontManagerCopyAvailableFontURLs() as NSArray?) ?? [])
         .compactMap { ($0 as? URL)?.path }
-    return jsonCString(urls)
+    return binaryResult(urls as CFArray)
 }
 
 @_cdecl("ct_font_manager_get_descriptor_count_for_url")
@@ -168,14 +169,14 @@ public func ct_font_manager_test_registration_wait(
     _ handlerDelayNanoseconds: UInt64,
     _ timeoutNanoseconds: UInt64,
     _ timedOut: UnsafeMutablePointer<Bool>?
-) -> UnsafeMutablePointer<CChar>? {
+) -> UnsafeMutablePointer<CoreTextValue>? {
     let errors = collectFontManagerErrors(timeoutNanoseconds: timeoutNanoseconds, timedOut: timedOut) { handler in
         DispatchQueue.global().asyncAfter(deadline: .now() + .nanoseconds(Int(clamping: handlerDelayNanoseconds))) {
             _ = handler([NSError(domain: "CoreTextBridgeTest", code: 1)] as CFArray, false)
             _ = handler([] as CFArray, true)
         }
     }
-    return jsonCString(errors)
+    return binaryResult(errors as CFArray)
 }
 
 @_cdecl("ct_font_manager_set_auto_activation_setting")
@@ -284,58 +285,60 @@ public func ct_font_manager_register_font_descriptors(
     _ enabled: Bool,
     _ timeoutNanoseconds: UInt64,
     _ timedOut: UnsafeMutablePointer<Bool>?
-) -> UnsafeMutablePointer<CChar>? {
+) -> UnsafeMutablePointer<CoreTextValue>? {
     let descriptors: [CTFontDescriptor] = handlesToValues(descriptorHandles, count: descriptorCount)
     let errors = collectFontManagerErrors(timeoutNanoseconds: timeoutNanoseconds, timedOut: timedOut) { handler in
         CTFontManagerRegisterFontDescriptors(descriptors as CFArray, fontManagerScope(scope), enabled, handler)
     }
-    return jsonCString(errors)
+    return binaryResult(errors as CFArray)
 }
 
 @_cdecl("ct_font_manager_register_font_urls")
 public func ct_font_manager_register_font_urls(
-    _ urlPathsJSON: UnsafePointer<CChar>?,
+    _ urlPaths: CoreTextStrings,
     _ scope: UInt32,
     _ enabled: Bool,
     _ timeoutNanoseconds: UInt64,
     _ timedOut: UnsafeMutablePointer<Bool>?
-) -> UnsafeMutablePointer<CChar>? {
-    let urls = urlArrayFromJSONPaths(urlPathsJSON)
+) -> UnsafeMutablePointer<CoreTextValue>? {
+    let urls = urlArray(urlPaths)
     let errors = collectFontManagerErrors(timeoutNanoseconds: timeoutNanoseconds, timedOut: timedOut) { handler in
         CTFontManagerRegisterFontURLs(urls as CFArray, fontManagerScope(scope), enabled, handler)
     }
-    return jsonCString(errors)
+    return binaryResult(errors as CFArray)
 }
 
 @_cdecl("ct_font_manager_register_fonts_for_urls")
 public func ct_font_manager_register_fonts_for_urls(
-    _ urlPathsJSON: UnsafePointer<CChar>?,
+    _ urlPaths: CoreTextStrings,
     _ scope: UInt32,
     _ timeoutNanoseconds: UInt64,
     _ timedOut: UnsafeMutablePointer<Bool>?,
-    _ errorOut: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+    _ errorOut: UnsafeMutablePointer<UnsafeMutablePointer<CoreTextValue>?>?
 ) -> Bool {
-    let urls = urlArrayFromJSONPaths(urlPathsJSON)
+    let urls = urlArray(urlPaths)
     let errors = collectFontManagerErrors(timeoutNanoseconds: timeoutNanoseconds, timedOut: timedOut) { handler in
         CTFontManagerRegisterFontURLs(urls as CFArray, fontManagerScope(scope), true, handler)
     }
-    errorOut?.pointee = jsonCString(errors)
+    if let errorOut {
+        errorOut.pointee = binaryResult(errors as CFArray)
+    }
     return errors.isEmpty && timedOut?.pointee != true
 }
 
 @_cdecl("ct_font_manager_register_fonts_with_asset_names")
 public func ct_font_manager_register_fonts_with_asset_names(
-    _ assetNamesJSON: UnsafePointer<CChar>?,
+    _ assetNames: CoreTextStrings,
     _ scope: UInt32,
     _ enabled: Bool
 ) -> Bool {
     #if os(macOS)
-    let _ = assetNamesJSON
+    let _ = assetNames
     let _ = scope
     let _ = enabled
     return false
     #else
-    let names = stringArrayFromJSON(assetNamesJSON)
+    let names = stringArray(assetNames)
     let errors = collectFontManagerErrors(timeoutNanoseconds: UInt64.max, timedOut: nil) { handler in
         CTFontManagerRegisterFontsWithAssetNames(names as CFArray, nil, fontManagerScope(scope), enabled, handler)
     }
@@ -350,40 +353,42 @@ public func ct_font_manager_unregister_font_descriptors(
     _ scope: UInt32,
     _ timeoutNanoseconds: UInt64,
     _ timedOut: UnsafeMutablePointer<Bool>?
-) -> UnsafeMutablePointer<CChar>? {
+) -> UnsafeMutablePointer<CoreTextValue>? {
     let descriptors: [CTFontDescriptor] = handlesToValues(descriptorHandles, count: descriptorCount)
     let errors = collectFontManagerErrors(timeoutNanoseconds: timeoutNanoseconds, timedOut: timedOut) { handler in
         CTFontManagerUnregisterFontDescriptors(descriptors as CFArray, fontManagerScope(scope), handler)
     }
-    return jsonCString(errors)
+    return binaryResult(errors as CFArray)
 }
 
 @_cdecl("ct_font_manager_unregister_font_urls")
 public func ct_font_manager_unregister_font_urls(
-    _ urlPathsJSON: UnsafePointer<CChar>?,
+    _ urlPaths: CoreTextStrings,
     _ scope: UInt32,
     _ timeoutNanoseconds: UInt64,
     _ timedOut: UnsafeMutablePointer<Bool>?
-) -> UnsafeMutablePointer<CChar>? {
-    let urls = urlArrayFromJSONPaths(urlPathsJSON)
+) -> UnsafeMutablePointer<CoreTextValue>? {
+    let urls = urlArray(urlPaths)
     let errors = collectFontManagerErrors(timeoutNanoseconds: timeoutNanoseconds, timedOut: timedOut) { handler in
         CTFontManagerUnregisterFontURLs(urls as CFArray, fontManagerScope(scope), handler)
     }
-    return jsonCString(errors)
+    return binaryResult(errors as CFArray)
 }
 
 @_cdecl("ct_font_manager_unregister_fonts_for_urls")
 public func ct_font_manager_unregister_fonts_for_urls(
-    _ urlPathsJSON: UnsafePointer<CChar>?,
+    _ urlPaths: CoreTextStrings,
     _ scope: UInt32,
     _ timeoutNanoseconds: UInt64,
     _ timedOut: UnsafeMutablePointer<Bool>?,
-    _ errorOut: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+    _ errorOut: UnsafeMutablePointer<UnsafeMutablePointer<CoreTextValue>?>?
 ) -> Bool {
-    let urls = urlArrayFromJSONPaths(urlPathsJSON)
+    let urls = urlArray(urlPaths)
     let errors = collectFontManagerErrors(timeoutNanoseconds: timeoutNanoseconds, timedOut: timedOut) { handler in
         CTFontManagerUnregisterFontURLs(urls as CFArray, fontManagerScope(scope), handler)
     }
-    errorOut?.pointee = jsonCString(errors)
+    if let errorOut {
+        errorOut.pointee = binaryResult(errors as CFArray)
+    }
     return errors.isEmpty && timedOut?.pointee != true
 }

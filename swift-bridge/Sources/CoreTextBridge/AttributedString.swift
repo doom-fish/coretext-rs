@@ -1,27 +1,29 @@
 import CoreFoundation
 import CoreText
+import CoreTextABI
 import Foundation
 
 @_cdecl("ct_attributed_string_create_with_runs")
 public func ct_attributed_string_create_with_runs(
-    _ texts: UnsafePointer<UnsafePointer<UInt8>?>?,
-    _ lengths: UnsafePointer<Int>?,
-    _ fonts: UnsafePointer<UnsafeMutableRawPointer?>?,
+    _ runs: UnsafePointer<CoreTextTextRun>?,
     _ count: Int
 ) -> UnsafeMutableRawPointer? {
     guard count >= 0 else { return nil }
     guard let attributed = CFAttributedStringCreateMutable(nil, 0) else { return nil }
+    CFAttributedStringBeginEditing(attributed)
+    defer { CFAttributedStringEndEditing(attributed) }
     if count > 0 {
-        guard let texts, let lengths, let fonts else { return nil }
+        guard let runs else { return nil }
         for index in 0..<count {
-            guard let text = texts[index], lengths[index] >= 0, let fontPtr = fonts[index] else {
+            let run = runs[index]
+            guard let text = run.text.data, run.text.len >= 0, let fontPtr = run.font else {
                 return nil
             }
             let font: CTFont = unbox(fontPtr, as: CTFont.self)
             guard let substring = CFStringCreateWithBytes(
                 nil,
                 text,
-                lengths[index],
+                run.text.len,
                 CFStringBuiltInEncodings.UTF8.rawValue,
                 false
             ) else {

@@ -1,5 +1,6 @@
 import CoreGraphics
 import CoreText
+import CoreTextABI
 import Foundation
 
 @_cdecl("ct_frame_get_string_range")
@@ -65,13 +66,13 @@ public func ct_frame_copy_line_origins(
     return count
 }
 
-@_cdecl("ct_frame_copy_frame_attributes_json")
-public func ct_frame_copy_frame_attributes_json(_ framePtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+@_cdecl("ct_frame_copy_frame_attributes")
+public func ct_frame_copy_frame_attributes(_ framePtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CoreTextValue>? {
     guard let framePtr else {
-        return duplicateCString("null")
+        return binaryResult(nil)
     }
     let frame: CTFrame = unbox(framePtr, as: CTFrame.self)
-    return cfToJSONCString(CTFrameGetFrameAttributes(frame))
+    return binaryResult(CTFrameGetFrameAttributes(frame))
 }
 
 @_cdecl("ct_frame_get_type_id")

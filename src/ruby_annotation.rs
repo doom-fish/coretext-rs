@@ -185,17 +185,28 @@ impl RubyAnnotation {
         size_factor: f64,
         texts: [Option<&str>; 4],
     ) -> CoreTextResult<Self> {
-        let payload = serde_json::json!({
-            "alignment": alignment as u8,
-            "overhang": overhang as u8,
-            "sizeFactor": size_factor,
-            "texts": texts,
+        let texts = texts.map(|text| {
+            text.map_or(
+                crate::abi::Bytes {
+                    data: std::ptr::null(),
+                    len: 0,
+                },
+                |text| crate::abi::Bytes::new(text.as_bytes()),
+            )
         });
-        let json = cstring(&payload.to_string())?;
-        let raw = unsafe { bridge::ct_ruby_annotation_create_with_attributes_json(json.as_ptr()) };
+        let options = crate::abi::RubyOptions {
+            alignment: alignment as u8,
+            overhang: overhang as u8,
+            size_factor,
+            texts: crate::abi::StringList {
+                data: texts.as_ptr(),
+                len: texts.len(),
+            },
+        };
+        let raw = unsafe { bridge::ct_ruby_annotation_create_with_attributes(&raw const options) };
         Ok(Self::from_raw(expect_handle(
             raw,
-            "ct_ruby_annotation_create_with_attributes_json returned NULL",
+            "ct_ruby_annotation_create_with_attributes returned NULL",
         )?))
     }
 }

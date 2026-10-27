@@ -1,4 +1,5 @@
 import CoreText
+import CoreTextABI
 import Foundation
 
 private func rubyAlignment(_ raw: UInt8) -> CTRubyAlignment {
@@ -127,22 +128,17 @@ public func ct_ruby_annotation_copy_text_for_position(
     return duplicateCString(CTRubyAnnotationGetTextForPosition(rubyAnnotation, rubyPosition(position)) as String?)
 }
 
-private struct RubyAnnotationAttributesPayload: Decodable {
-    let alignment: UInt8
-    let overhang: UInt8
-    let sizeFactor: Double
-    let texts: [String?]
-}
-
-@_cdecl("ct_ruby_annotation_create_with_attributes_json")
-public func ct_ruby_annotation_create_with_attributes_json(
-    _ attrsJSON: UnsafePointer<CChar>?
+@_cdecl("ct_ruby_annotation_create_with_attributes")
+public func ct_ruby_annotation_create_with_attributes(
+    _ options: UnsafePointer<CoreTextRubyOptions>?
 ) -> UnsafeMutableRawPointer? {
-    guard let payload = decodeJSON(attrsJSON, as: RubyAnnotationAttributesPayload.self) else {
+    guard let payload = options?.pointee else {
         return nil
     }
 
-    var texts = Array(payload.texts.prefix(4))
+    var texts: [String?] = payload.texts.data.map {
+        UnsafeBufferPointer(start: $0, count: min(payload.texts.len, 4)).map(stringFromBytes)
+    } ?? []
     while texts.count < 4 {
         texts.append(nil)
     }
@@ -152,7 +148,7 @@ public func ct_ruby_annotation_create_with_attributes_json(
     }
     if populated.count == 1, let (index, text) = populated.first {
         let attributes: [CFString: Any] = [
-            kCTRubyAnnotationSizeFactorAttributeName: NSNumber(value: payload.sizeFactor)
+            kCTRubyAnnotationSizeFactorAttributeName: NSNumber(value: payload.size_factor)
         ]
         let annotation = CTRubyAnnotationCreateWithAttributes(
             rubyAlignment(payload.alignment),
@@ -176,7 +172,7 @@ public func ct_ruby_annotation_create_with_attributes_json(
         CTRubyAnnotationCreate(
             rubyAlignment(payload.alignment),
             rubyOverhang(payload.overhang),
-            CGFloat(payload.sizeFactor),
+            CGFloat(payload.size_factor),
             buffer.baseAddress!
         )
     }

@@ -1,11 +1,11 @@
 mod support;
 
 use coretext::{
-    AttributedString, CGPoint, CGRect, CGSize, CTFramesetter, CTLine, CTTypesetter, CoreTextError,
-    CoreTextResult, LineBreakMode, LineTruncationType, ParagraphStyle, ParagraphStyleOptions,
-    TextAlignment, TextRange, TextTab, TypesetterOptions, WritingDirection, bounds_options,
-    frame_type_id, framesetter_type_id, line_type_id, paragraph_style_type_id, run_type_id,
-    text_tab_type_id, typesetter_type_id,
+    bounds_options, frame_type_id, framesetter_type_id, line_type_id, paragraph_style_type_id,
+    run_type_id, text_tab_type_id, typesetter_type_id, AttributedString, CGPoint, CGRect, CGSize,
+    CTFramesetter, CTLine, CTTypesetter, CoreTextError, CoreTextResult, LineBreakMode,
+    LineTruncationType, ParagraphStyle, ParagraphStyleOptions, TextAlignment, TextRange, TextTab,
+    TypesetterOptions, WritingDirection,
 };
 
 #[test]
@@ -34,9 +34,9 @@ fn paragraph_style_and_text_tabs_round_trip() -> Result<(), Box<dyn std::error::
     );
     assert_eq!(style.tab_stops().len(), 1);
     assert!((style.tab_stops()[0].location() - 24.0).abs() < f64::EPSILON);
-    let tab_options = style.tab_stops()[0].options_json()?;
+    let tab_options = style.tab_stops()[0].options()?;
     assert!(tab_options.is_null());
-    let alignment = style.value_for_specifier_json(0)?;
+    let alignment = style.value_for_specifier(0)?;
     assert_eq!(alignment.as_u64(), Some(2));
     assert_eq!(style.copy()?.alignment(), TextAlignment::Center);
     assert!(text_tab_type_id() > 0);
@@ -98,10 +98,9 @@ fn line_run_typesetter_framesetter_and_frame() -> Result<(), Box<dyn std::error:
 
     let token_attr = AttributedString::new("…", &support::font(), None)?;
     let token = CTLine::create_with_attributed_string(&token_attr)?;
-    assert!(
-        line.truncated(bounds.width / 2.0, LineTruncationType::End, Some(&token))
-            .is_some()
-    );
+    assert!(line
+        .truncated(bounds.width / 2.0, LineTruncationType::End, Some(&token))
+        .is_some());
 
     let runs = line.runs();
     assert!(!runs.is_empty());
@@ -113,12 +112,10 @@ fn line_run_typesetter_framesetter_and_frame() -> Result<(), Box<dyn std::error:
     assert!(run.typographic_bounds().width > 0.0);
     assert!(run.image_bounds().size.width > 0.0);
     assert_eq!(run.text_matrix(), coretext::CGAffineTransform::IDENTITY);
-    let attributes = run.attributes_json()?;
-    assert!(
-        attributes["keys"]
-            .as_array()
-            .is_some_and(|keys| keys.iter().any(|key| key == "NSFont"))
-    );
+    let attributes = run.attributes()?;
+    assert!(attributes["keys"]
+        .as_array()
+        .is_some_and(|keys| keys.iter().any(|key| key.as_str() == Some("NSFont"))));
     let (base_advances, origins) = run.base_advances_and_origins();
     assert_eq!(base_advances.len(), origins.len());
     assert_eq!(base_advances.len(), run.glyphs().len());
@@ -316,10 +313,9 @@ fn font_for_string_validates_utf16_ranges() -> Result<(), Box<dyn std::error::Er
             .glyph_count()
             > 0
     );
-    assert!(
-        font.font_for_string(text, TextRange::new(length, 0), None)
-            .is_ok()
-    );
+    assert!(font
+        .font_for_string(text, TextRange::new(length, 0), None)
+        .is_ok());
     for range in [
         TextRange::new(0, isize::try_from(text.len())?),
         TextRange::new(length + 5, 1),

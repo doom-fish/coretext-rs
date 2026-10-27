@@ -1,7 +1,7 @@
-use serde_json::Value;
+use crate::AttributeValue;
 
 use crate::bridge;
-use crate::common::{impl_handle, json_from_owned};
+use crate::common::impl_handle;
 use crate::types::{CGAffineTransform, CGPoint, CGRect, CGSize, TextRange, TypographicBounds};
 
 /// Status flags returned by `CTRun::status()`.
@@ -31,8 +31,8 @@ impl CTRun {
     }
 
     /// Wraps `CTRunGetAttributes`.
-    pub fn attributes_json(&self) -> CoreTextResult<Value> {
-        unsafe { json_from_owned(bridge::ct_run_copy_attributes_json(self.raw)) }
+    pub fn attributes(&self) -> CoreTextResult<AttributeValue> {
+        unsafe { crate::abi::from_owned(bridge::ct_run_copy_attributes(self.raw)) }
     }
 
     #[must_use]

@@ -1,21 +1,8 @@
 import CoreText
+import CoreTextABI
 import Foundation
 
-private struct FontVariationAxisPayload: Codable {
-    let identifier: UInt32
-    let minimumValue: Double
-    let maximumValue: Double
-    let defaultValue: Double
-    let name: String
-    let hidden: Bool
-}
-
-private struct FontVariationCoordinatePayload: Codable {
-    let identifier: UInt32
-    let value: Double
-}
-
-private func variationAxisPayloads(from value: Any?) -> [FontVariationAxisPayload] {
+private func variationAxisPayloads(from value: Any?) -> [[String: Any]] {
     guard let array = value as? NSArray else {
         return []
     }
@@ -23,71 +10,66 @@ private func variationAxisPayloads(from value: Any?) -> [FontVariationAxisPayloa
         guard let dictionary = item as? NSDictionary else {
             return nil
         }
-        return FontVariationAxisPayload(
-            identifier: (dictionary[kCTFontVariationAxisIdentifierKey] as? NSNumber)?.uint32Value ?? 0,
-            minimumValue: (dictionary[kCTFontVariationAxisMinimumValueKey] as? NSNumber)?.doubleValue ?? 0,
-            maximumValue: (dictionary[kCTFontVariationAxisMaximumValueKey] as? NSNumber)?.doubleValue ?? 0,
-            defaultValue: (dictionary[kCTFontVariationAxisDefaultValueKey] as? NSNumber)?.doubleValue ?? 0,
-            name: dictionary[kCTFontVariationAxisNameKey] as? String ?? "",
-            hidden: (dictionary[kCTFontVariationAxisHiddenKey] as? NSNumber)?.boolValue ?? false
-        )
+        return [
+            "identifier": (dictionary[kCTFontVariationAxisIdentifierKey] as? NSNumber)?.uint32Value ?? 0,
+            "minimumValue": (dictionary[kCTFontVariationAxisMinimumValueKey] as? NSNumber)?.doubleValue ?? 0,
+            "maximumValue": (dictionary[kCTFontVariationAxisMaximumValueKey] as? NSNumber)?.doubleValue ?? 0,
+            "defaultValue": (dictionary[kCTFontVariationAxisDefaultValueKey] as? NSNumber)?.doubleValue ?? 0,
+            "name": dictionary[kCTFontVariationAxisNameKey] as? String ?? "",
+            "hidden": (dictionary[kCTFontVariationAxisHiddenKey] as? NSNumber)?.boolValue ?? false
+        ]
     }
 }
 
-private func variationCoordinatePayloads(from value: Any?) -> [FontVariationCoordinatePayload] {
+private func variationCoordinatePayloads(from value: Any?) -> [[String: Any]] {
     guard let dictionary = value as? NSDictionary else {
         return []
     }
 
-    var payloads: [FontVariationCoordinatePayload] = []
+    var payloads: [(UInt32, Double)] = []
     for case let key as NSNumber in dictionary.allKeys {
         guard let number = dictionary[key] as? NSNumber else {
             continue
         }
-        payloads.append(
-            FontVariationCoordinatePayload(
-                identifier: key.uint32Value,
-                value: number.doubleValue
-            )
-        )
+        payloads.append((key.uint32Value, number.doubleValue))
     }
-    return payloads.sorted { $0.identifier < $1.identifier }
+    return payloads.sorted { $0.0 < $1.0 }.map { ["identifier": $0.0, "value": $0.1] }
 }
 
-@_cdecl("ct_font_copy_variation_axes_json")
-public func ct_font_copy_variation_axes_json(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+@_cdecl("ct_font_copy_variation_axes")
+public func ct_font_copy_variation_axes(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CoreTextValue>? {
     guard let fontPtr else {
-        return jsonCString([FontVariationAxisPayload]())
+        return binaryResult([] as CFArray)
     }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
-    return jsonCString(variationAxisPayloads(from: CTFontCopyVariationAxes(font)))
+    return binaryResult(variationAxisPayloads(from: CTFontCopyVariationAxes(font)) as CFArray)
 }
 
-@_cdecl("ct_font_copy_variation_json")
-public func ct_font_copy_variation_json(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+@_cdecl("ct_font_copy_variation")
+public func ct_font_copy_variation(_ fontPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CoreTextValue>? {
     guard let fontPtr else {
-        return jsonCString([FontVariationCoordinatePayload]())
+        return binaryResult([] as CFArray)
     }
     let font: CTFont = unbox(fontPtr, as: CTFont.self)
-    return jsonCString(variationCoordinatePayloads(from: CTFontCopyVariation(font)))
+    return binaryResult(variationCoordinatePayloads(from: CTFontCopyVariation(font)) as CFArray)
 }
 
-@_cdecl("ct_font_descriptor_copy_variation_axes_json")
-public func ct_font_descriptor_copy_variation_axes_json(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+@_cdecl("ct_font_descriptor_copy_variation_axes")
+public func ct_font_descriptor_copy_variation_axes(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CoreTextValue>? {
     guard let descriptorPtr else {
-        return jsonCString([FontVariationAxisPayload]())
+        return binaryResult([] as CFArray)
     }
     let descriptor: CTFontDescriptor = unbox(descriptorPtr, as: CTFontDescriptor.self)
     let value = CTFontDescriptorCopyAttribute(descriptor, kCTFontVariationAxesAttribute)
-    return jsonCString(variationAxisPayloads(from: value))
+    return binaryResult(variationAxisPayloads(from: value) as CFArray)
 }
 
-@_cdecl("ct_font_descriptor_copy_variation_json")
-public func ct_font_descriptor_copy_variation_json(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+@_cdecl("ct_font_descriptor_copy_variation")
+public func ct_font_descriptor_copy_variation(_ descriptorPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CoreTextValue>? {
     guard let descriptorPtr else {
-        return jsonCString([FontVariationCoordinatePayload]())
+        return binaryResult([] as CFArray)
     }
     let descriptor: CTFontDescriptor = unbox(descriptorPtr, as: CTFontDescriptor.self)
     let value = CTFontDescriptorCopyAttribute(descriptor, kCTFontVariationAttribute)
-    return jsonCString(variationCoordinatePayloads(from: value))
+    return binaryResult(variationCoordinatePayloads(from: value) as CFArray)
 }

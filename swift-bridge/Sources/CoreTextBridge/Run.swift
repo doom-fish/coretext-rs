@@ -1,15 +1,11 @@
 import CoreText
+import CoreTextABI
 import Foundation
 
-private struct RunAttributesPayload: Codable {
-    let attributeCount: Int
-    let keys: [String]
-}
-
-private func runAttributesPayload(_ run: CTRun) -> RunAttributesPayload {
+private func runAttributesPayload(_ run: CTRun) -> [String: Any] {
     let attributes = CTRunGetAttributes(run) as NSDictionary
     let keys = attributes.allKeys.compactMap { $0 as? String }
-    return RunAttributesPayload(attributeCount: attributes.count, keys: keys.sorted())
+    return ["attributeCount": attributes.count, "keys": keys.sorted()]
 }
 
 @_cdecl("ct_run_get_glyph_count")
@@ -19,13 +15,13 @@ public func ct_run_get_glyph_count(_ runPtr: UnsafeMutableRawPointer?) -> Int {
     return CTRunGetGlyphCount(run)
 }
 
-@_cdecl("ct_run_copy_attributes_json")
-public func ct_run_copy_attributes_json(_ runPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+@_cdecl("ct_run_copy_attributes")
+public func ct_run_copy_attributes(_ runPtr: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CoreTextValue>? {
     guard let runPtr else {
-        return jsonCString(RunAttributesPayload(attributeCount: 0, keys: []))
+        return binaryResult(["attributeCount": 0, "keys": []] as [String: Any])
     }
     let run: CTRun = unbox(runPtr, as: CTRun.self)
-    return jsonCString(runAttributesPayload(run))
+    return binaryResult(runAttributesPayload(run) as CFDictionary)
 }
 
 @_cdecl("ct_run_copy_font")

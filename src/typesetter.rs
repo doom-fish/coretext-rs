@@ -1,26 +1,17 @@
-use serde::Serialize;
-
 use crate::attributed_string::AttributedString;
 use crate::bridge;
-use crate::common::{cstring, expect_handle, impl_handle};
+use crate::common::{expect_handle, impl_handle};
 use crate::error::CoreTextResult;
 use crate::line::CTLine;
 use crate::types::{checked_string_index, TextRange};
 
 /// Options for `CTTypesetterCreateWithAttributedStringAndOptions`.
-#[derive(Debug, Clone, Copy, Default, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct TypesetterOptions {
     /// Configures the `allow_unbounded_layout` option passed to `CTTypesetterCreateWithAttributedStringAndOptions`.
     pub allow_unbounded_layout: bool,
     /// Configures the `forced_embedding_level` option passed to `CTTypesetterCreateWithAttributedStringAndOptions`.
     pub forced_embedding_level: Option<i64>,
-}
-
-impl TypesetterOptions {
-    fn json(self) -> CoreTextResult<String> {
-        Ok(serde_json::to_string(&self)?)
-    }
 }
 
 /// An immutable `CTTypesetter` wrapper.
@@ -52,11 +43,15 @@ impl CTTypesetter {
         attributed_string: &AttributedString,
         options: TypesetterOptions,
     ) -> CoreTextResult<Self> {
-        let json = cstring(&options.json()?)?;
+        let options = crate::abi::TypesetterOptions {
+            allow_unbounded_layout: options.allow_unbounded_layout,
+            has_forced_embedding_level: options.forced_embedding_level.is_some(),
+            forced_embedding_level: options.forced_embedding_level.unwrap_or_default(),
+        };
         let raw = unsafe {
             bridge::ct_typesetter_create_with_attributed_string(
                 attributed_string.as_raw(),
-                json.as_ptr(),
+                &raw const options,
             )
         };
         Ok(Self::from_raw_with_length(

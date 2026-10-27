@@ -1,5 +1,3 @@
-use serde::Deserialize;
-
 /// Bit constants from `CTFontSymbolicTraits`.
 pub mod symbolic_traits {
     /// Wraps the `kCTFontTraitItalic` bit.
@@ -27,8 +25,8 @@ pub mod symbolic_traits {
 }
 
 /// Normalized font trait values decoded from CoreText.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+#[repr(C)]
 pub struct FontTraits {
     /// Wraps the `symbolic_traits` value returned by `CTFontCopyTraits` and `CTFontGetSymbolicTraits`.
     pub symbolic_traits: u32,
@@ -59,7 +57,10 @@ mod tests {
     use super::{symbolic_traits, FontTraits};
 
     fn assert_close(left: f64, right: f64) {
-        assert!((left - right).abs() < f64::EPSILON, "expected {left} to match {right}");
+        assert!(
+            (left - right).abs() < f64::EPSILON,
+            "expected {left} to match {right}"
+        );
     }
 
     #[test]

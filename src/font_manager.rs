@@ -2,8 +2,9 @@ use std::path::Path;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 
+use crate::abi::{from_owned, Strings, Value};
 use crate::bridge;
-use crate::common::{cstring, json_from_owned, option_string_from_owned};
+use crate::common::{cstring, option_string_from_owned};
 use crate::error::{CoreTextError, CoreTextResult};
 use crate::font_descriptor::FontDescriptor;
 
@@ -83,17 +84,17 @@ impl FontManager {
 
     /// Wraps `CTFontManagerCopyAvailablePostScriptNames`.
     pub fn available_postscript_names() -> CoreTextResult<Vec<String>> {
-        unsafe { json_from_owned(bridge::ct_font_manager_copy_available_postscript_names_json()) }
+        unsafe { from_owned(bridge::ct_font_manager_copy_available_postscript_names()) }
     }
 
     /// Wraps `CTFontManagerCopyAvailableFontFamilyNames`.
     pub fn available_font_family_names() -> CoreTextResult<Vec<String>> {
-        unsafe { json_from_owned(bridge::ct_font_manager_copy_available_font_family_names_json()) }
+        unsafe { from_owned(bridge::ct_font_manager_copy_available_font_family_names()) }
     }
 
     /// Wraps `CTFontManagerCopyAvailableFontURLs`.
     pub fn available_font_urls() -> CoreTextResult<Vec<String>> {
-        unsafe { json_from_owned(bridge::ct_font_manager_copy_available_font_urls_json()) }
+        unsafe { from_owned(bridge::ct_font_manager_copy_available_font_urls()) }
     }
 
     /// Wraps `CTFontManagerCreateFontDescriptorsFromURL`.
@@ -327,12 +328,13 @@ impl FontManager {
         if paths.is_empty() {
             return Ok(());
         }
-        let paths = paths_json(paths)?;
+        let values = path_values(paths);
+        let paths = Strings::new(values.iter().map(String::as_str));
         registration_result(
             "font URL registration failed",
             |timeout, timed_out| unsafe {
                 bridge::ct_font_manager_register_font_urls(
-                    paths.as_ptr(),
+                    paths.as_raw(),
                     scope as u32,
                     enabled,
                     timeout,
@@ -350,13 +352,14 @@ impl FontManager {
         if paths.is_empty() {
             return Ok(());
         }
-        let paths = paths_json(paths)?;
+        let values = path_values(paths);
+        let paths = Strings::new(values.iter().map(String::as_str));
         let timeout = REGISTRATION_TIMEOUT_NANOSECONDS.load(Ordering::Relaxed);
         let mut timed_out = false;
         let mut error = std::ptr::null_mut();
         let ok = unsafe {
             bridge::ct_font_manager_register_fonts_for_urls(
-                paths.as_ptr(),
+                paths.as_raw(),
                 scope as u32,
                 timeout,
                 &raw mut timed_out,
@@ -381,10 +384,10 @@ impl FontManager {
         if names.is_empty() {
             return Ok(());
         }
-        let names = cstring(&serde_json::to_string(names)?)?;
+        let names = Strings::new(names.iter().copied());
         let ok = unsafe {
             bridge::ct_font_manager_register_fonts_with_asset_names(
-                names.as_ptr(),
+                names.as_raw(),
                 scope as u32,
                 enabled,
             )
@@ -429,12 +432,13 @@ impl FontManager {
         if paths.is_empty() {
             return Ok(());
         }
-        let paths = paths_json(paths)?;
+        let values = path_values(paths);
+        let paths = Strings::new(values.iter().map(String::as_str));
         registration_result(
             "font URL unregistration failed",
             |timeout, timed_out| unsafe {
                 bridge::ct_font_manager_unregister_font_urls(
-                    paths.as_ptr(),
+                    paths.as_raw(),
                     scope as u32,
                     timeout,
                     timed_out,
@@ -451,13 +455,14 @@ impl FontManager {
         if paths.is_empty() {
             return Ok(());
         }
-        let paths = paths_json(paths)?;
+        let values = path_values(paths);
+        let paths = Strings::new(values.iter().map(String::as_str));
         let timeout = REGISTRATION_TIMEOUT_NANOSECONDS.load(Ordering::Relaxed);
         let mut timed_out = false;
         let mut error = std::ptr::null_mut();
         let ok = unsafe {
             bridge::ct_font_manager_unregister_fonts_for_urls(
-                paths.as_ptr(),
+                paths.as_raw(),
                 scope as u32,
                 timeout,
                 &raw mut timed_out,
@@ -474,21 +479,20 @@ impl FontManager {
     }
 }
 
-fn paths_json<P: AsRef<Path>>(paths: &[P]) -> CoreTextResult<std::ffi::CString> {
-    let values: Vec<String> = paths
+fn path_values<P: AsRef<Path>>(paths: &[P]) -> Vec<String> {
+    paths
         .iter()
         .map(|path| path.as_ref().to_string_lossy().into_owned())
-        .collect();
-    cstring(&serde_json::to_string(&values)?)
+        .collect()
 }
 
 fn registration_result(
     fallback: &str,
-    call: impl FnOnce(u64, *mut bool) -> *mut core::ffi::c_char,
+    call: impl FnOnce(u64, *mut bool) -> *mut Value,
 ) -> CoreTextResult<()> {
     let timeout = REGISTRATION_TIMEOUT_NANOSECONDS.load(Ordering::Relaxed);
     let mut timed_out = false;
-    let messages = unsafe { json_from_owned::<Vec<String>>(call(timeout, &raw mut timed_out)) };
+    let messages = unsafe { from_owned::<Vec<String>>(call(timeout, &raw mut timed_out)) };
     if timed_out {
         return Err(CoreTextError::TimedOut(Duration::from_nanos(timeout)));
     }
@@ -499,10 +503,10 @@ fn bool_registration_result(
     ok: bool,
     timed_out: bool,
     timeout: u64,
-    error: *mut core::ffi::c_char,
+    error: *mut Value,
     fallback: &str,
 ) -> CoreTextResult<()> {
-    let error = unsafe { error_from_json_ptr(error, fallback) };
+    let error = unsafe { error_from_value_ptr(error, fallback) };
     if timed_out {
         Err(CoreTextError::TimedOut(Duration::from_nanos(timeout)))
     } else if ok {
@@ -522,11 +526,11 @@ fn messages_to_result(messages: &[String], fallback: &str) -> CoreTextResult<()>
     }
 }
 
-unsafe fn error_from_json_ptr(ptr: *mut core::ffi::c_char, fallback: &str) -> CoreTextError {
+unsafe fn error_from_value_ptr(ptr: *mut Value, fallback: &str) -> CoreTextError {
     if ptr.is_null() {
         return CoreTextError::Bridge(fallback.to_string());
     }
-    match json_from_owned::<Vec<String>>(ptr) {
+    match from_owned::<Vec<String>>(ptr) {
         Ok(messages) if messages.is_empty() => CoreTextError::Bridge(fallback.to_string()),
         Ok(messages) => CoreTextError::Bridge(messages.join("; ")),
         Err(error) => error,
@@ -551,8 +555,8 @@ impl EmptyFallback for String {
 mod tests {
     use std::time::Duration;
 
-    use super::{registration_result, FontManager};
-    use crate::common::json_from_owned;
+    use super::{messages_to_result, registration_result, FontManager};
+    use crate::abi::{from_owned, Value};
     use crate::error::CoreTextError;
 
     unsafe extern "C" {
@@ -560,7 +564,7 @@ mod tests {
             handler_delay_nanoseconds: u64,
             timeout_nanoseconds: u64,
             timed_out: *mut bool,
-        ) -> *mut core::ffi::c_char;
+        ) -> *mut Value;
     }
 
     fn nanoseconds(duration: Duration) -> u64 {
@@ -569,14 +573,14 @@ mod tests {
 
     fn wait_for_test_handler(delay: Duration, timeout: Duration) -> (bool, Vec<String>) {
         let mut timed_out = false;
-        let json = unsafe {
+        let value = unsafe {
             ct_font_manager_test_registration_wait(
                 nanoseconds(delay),
                 nanoseconds(timeout),
                 &raw mut timed_out,
             )
         };
-        let messages = unsafe { json_from_owned::<Vec<String>>(json) }.expect("messages json");
+        let messages = unsafe { from_owned::<Vec<String>>(value) }.expect("messages");
         (timed_out, messages)
     }
 
@@ -601,22 +605,18 @@ mod tests {
     fn timed_out_registration_is_an_error() {
         let result = registration_result("fallback", |_, timed_out| {
             unsafe { timed_out.write(true) };
-            unsafe { crate::system::strdup(c"[]".as_ptr()) }
+            std::ptr::null_mut()
         });
         assert!(matches!(result, Err(CoreTextError::TimedOut(_))));
     }
 
     #[test]
     fn registration_messages_become_errors() {
-        let failed = registration_result("fallback", |_, _| unsafe {
-            crate::system::strdup(c"[\"first\",\"second\"]".as_ptr())
-        });
+        let failed = messages_to_result(&["first".to_owned(), "second".to_owned()], "fallback");
         assert!(
             matches!(failed, Err(CoreTextError::Bridge(message)) if message == "first; second")
         );
-        let succeeded = registration_result("fallback", |_, _| unsafe {
-            crate::system::strdup(c"[]".as_ptr())
-        });
+        let succeeded = messages_to_result(&[], "fallback");
         assert!(succeeded.is_ok());
     }
 
