@@ -12,7 +12,7 @@ use crate::font_feature::{FontFeature, FontFeatureSetting};
 use crate::font_traits::FontTraits;
 use crate::font_variation::{FontVariationAxis, FontVariationCoordinate};
 use crate::path::GlyphPath;
-use crate::types::{CGAffineTransform, CGPoint, CGRect, CGSize, TextRange, utf16_length};
+use crate::types::{utf16_length, CGAffineTransform, CGPoint, CGRect, CGSize, TextRange};
 
 /// Constants for `CTFontCopyName` / `CTFontCopyLocalizedName`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -667,7 +667,7 @@ impl CTFont {
         }
         let len = usize::try_from(len).unwrap_or(0);
         let data = unsafe { std::slice::from_raw_parts(bytes, len) }.to_vec();
-        unsafe { libc::free(bytes.cast()) };
+        unsafe { crate::system::free(bytes.cast()) };
         Ok(data)
     }
 

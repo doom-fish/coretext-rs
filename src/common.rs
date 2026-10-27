@@ -27,7 +27,7 @@ pub fn expect_handle(raw: Handle, context: &'static str) -> CoreTextResult<Handl
 }
 
 /// Converts an owned bridge string into a Rust `String` and releases the original buffer.
-pub unsafe fn string_from_owned(ptr: *mut libc::c_char) -> CoreTextResult<String> {
+pub unsafe fn string_from_owned(ptr: *mut core::ffi::c_char) -> CoreTextResult<String> {
     if ptr.is_null() {
         return Err(CoreTextError::StringConversion);
     }
@@ -42,7 +42,7 @@ pub unsafe fn string_from_owned(ptr: *mut libc::c_char) -> CoreTextResult<String
 }
 
 /// Converts an owned nullable bridge string into an optional Rust `String`.
-pub unsafe fn option_string_from_owned(ptr: *mut libc::c_char) -> Option<String> {
+pub unsafe fn option_string_from_owned(ptr: *mut core::ffi::c_char) -> Option<String> {
     if ptr.is_null() {
         return None;
     }
@@ -54,7 +54,7 @@ pub unsafe fn option_string_from_owned(ptr: *mut libc::c_char) -> Option<String>
 }
 
 /// Deserializes owned bridge JSON into the requested Rust type.
-pub unsafe fn json_from_owned<T>(ptr: *mut libc::c_char) -> CoreTextResult<T>
+pub unsafe fn json_from_owned<T>(ptr: *mut core::ffi::c_char) -> CoreTextResult<T>
 where
     T: DeserializeOwned,
 {

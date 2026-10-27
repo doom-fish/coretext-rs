@@ -14,6 +14,7 @@
 
 mod bridge;
 mod common;
+mod system;
 
 /// Rust-backed wrappers for CoreText adaptive-image providers.
 pub mod adaptive_image;

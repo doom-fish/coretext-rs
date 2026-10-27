@@ -4,10 +4,13 @@ Safe Rust bindings for Apple's [CoreText](https://developer.apple.com/documentat
 
 ```toml
 [dependencies]
-coretext-rs = "0.8"
+coretext-rs = "0.8.3"
 ```
 
 ## Highlights
+
+The crate calls the system allocator through local C declarations and uses `core::ffi` types.
+It does not require the `libc` crate.
 
 - Safe wrappers for `CTFont`, `CTFontDescriptor`, `CTFontCollection`, and `CTFontManager`
 - Layout pipeline coverage for `AttributedString`, `ParagraphStyle`, `TextTab`, `CTTypesetter`, `CTLine`, `CTRun`, `CTFramesetter`, and `CTFrame`

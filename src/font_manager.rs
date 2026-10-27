@@ -484,7 +484,7 @@ fn paths_json<P: AsRef<Path>>(paths: &[P]) -> CoreTextResult<std::ffi::CString> 
 
 fn registration_result(
     fallback: &str,
-    call: impl FnOnce(u64, *mut bool) -> *mut libc::c_char,
+    call: impl FnOnce(u64, *mut bool) -> *mut core::ffi::c_char,
 ) -> CoreTextResult<()> {
     let timeout = REGISTRATION_TIMEOUT_NANOSECONDS.load(Ordering::Relaxed);
     let mut timed_out = false;
@@ -499,7 +499,7 @@ fn bool_registration_result(
     ok: bool,
     timed_out: bool,
     timeout: u64,
-    error: *mut libc::c_char,
+    error: *mut core::ffi::c_char,
     fallback: &str,
 ) -> CoreTextResult<()> {
     let error = unsafe { error_from_json_ptr(error, fallback) };
@@ -522,7 +522,7 @@ fn messages_to_result(messages: &[String], fallback: &str) -> CoreTextResult<()>
     }
 }
 
-unsafe fn error_from_json_ptr(ptr: *mut libc::c_char, fallback: &str) -> CoreTextError {
+unsafe fn error_from_json_ptr(ptr: *mut core::ffi::c_char, fallback: &str) -> CoreTextError {
     if ptr.is_null() {
         return CoreTextError::Bridge(fallback.to_string());
     }
@@ -551,7 +551,7 @@ impl EmptyFallback for String {
 mod tests {
     use std::time::Duration;
 
-    use super::{FontManager, registration_result};
+    use super::{registration_result, FontManager};
     use crate::common::json_from_owned;
     use crate::error::CoreTextError;
 
@@ -560,7 +560,7 @@ mod tests {
             handler_delay_nanoseconds: u64,
             timeout_nanoseconds: u64,
             timed_out: *mut bool,
-        ) -> *mut libc::c_char;
+        ) -> *mut core::ffi::c_char;
     }
 
     fn nanoseconds(duration: Duration) -> u64 {
@@ -601,7 +601,7 @@ mod tests {
     fn timed_out_registration_is_an_error() {
         let result = registration_result("fallback", |_, timed_out| {
             unsafe { timed_out.write(true) };
-            unsafe { libc::strdup(c"[]".as_ptr()) }
+            unsafe { crate::system::strdup(c"[]".as_ptr()) }
         });
         assert!(matches!(result, Err(CoreTextError::TimedOut(_))));
     }
@@ -609,13 +609,14 @@ mod tests {
     #[test]
     fn registration_messages_become_errors() {
         let failed = registration_result("fallback", |_, _| unsafe {
-            libc::strdup(c"[\"first\",\"second\"]".as_ptr())
+            crate::system::strdup(c"[\"first\",\"second\"]".as_ptr())
         });
         assert!(
             matches!(failed, Err(CoreTextError::Bridge(message)) if message == "first; second")
         );
-        let succeeded =
-            registration_result("fallback", |_, _| unsafe { libc::strdup(c"[]".as_ptr()) });
+        let succeeded = registration_result("fallback", |_, _| unsafe {
+            crate::system::strdup(c"[]".as_ptr())
+        });
         assert!(succeeded.is_ok());
     }
 

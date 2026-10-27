@@ -1,5 +1,8 @@
 # CoreText coverage
 
+Version 0.8.3 replaces the `libc` dependency with direct system C declarations.
+The framework coverage does not change.
+
 This document tracks the safe-wrapper coverage of `coretext-rs` 0.8.0.
 
 - Architecture: safe Rust wrappers over a bundled Swift bridge, plus an opt-in legacy `raw-ffi` module.
